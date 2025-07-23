@@ -57,7 +57,6 @@ const sidebarItems: SidebarItem[] = [
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
-      { title: "SMS Config", icon: MessageSquare, href: "/config/sms" },
     ]
   },
   { title: "Settings", icon: Settings, href: "/settings" },

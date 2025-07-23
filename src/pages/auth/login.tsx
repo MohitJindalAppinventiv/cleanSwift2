@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "@/components/ui/sonner";
@@ -11,7 +11,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LogIn } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { loginUser, clearError } from "@/store/slices/authSlice";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -21,10 +22,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast: uiToast } = useToast();
-  const { login } = useAuth();
+  const dispatch = useAppDispatch();
+  const { isLoading, error } = useAppSelector((state) => state.auth);
   
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,29 +35,31 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true);
-    
-    try {
-      await login(data.email, data.password);
-      
-      // Show success toast
-      toast("Login Successful", {
-        description: "Welcome back! You have been logged in successfully.",
-      });
-      
-      // Navigate to dashboard
-      navigate("/");
-    } catch (error) {
-      console.error("Login error:", error);
-      
+  useEffect(() => {
+    if (error) {
       uiToast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        description: error,
       });
-    } finally {
-      setIsLoading(false);
+      dispatch(clearError());
+    }
+  }, [error, uiToast, dispatch]);
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      const result = await dispatch(loginUser({ email: data.email, password: data.password }));
+      
+      if (loginUser.fulfilled.match(result)) {
+        // Show success toast
+        toast("Login Successful", {
+          description: "Welcome back! You have been logged in successfully.",
+        });
+        
+        // Navigate to dashboard
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
     }
   };
 

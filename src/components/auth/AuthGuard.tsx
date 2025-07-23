@@ -1,14 +1,20 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { checkAuthStatus } from "@/store/slices/authSlice";
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export const AuthGuard = ({ children }: AuthGuardProps) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  
+  useEffect(() => {
+    dispatch(checkAuthStatus());
+  }, [dispatch]);
   
   if (isLoading) {
     // Show loading spinner while checking authentication

@@ -13,18 +13,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useAuth } from "@/hooks/use-auth";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { logout } from "@/store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
 export function TopBar() {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, logout } = useAuth();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   
   const handleLogout = () => {
-    logout();
+    dispatch(logout());
     toast("Logged out successfully", {
       description: "You have been logged out of your account.",
     });

@@ -1,10 +1,11 @@
 
+import { Provider } from 'react-redux';
+import { store } from './store';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/hooks/use-auth";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import Index from "./pages/Index";
 import OrdersPage from "./pages/orders";
@@ -26,13 +27,17 @@ import ProductCreatePage from "./pages/config/products/create";
 import CouponsConfigPage from "./pages/config/coupons";
 import CreateCouponPage from "./pages/config/coupons/create";
 import LoginPage from "./pages/auth/login";
+import PaymentsPage from "./pages/payments";
+import ReviewsPage from "./pages/reviews";
+import NotificationsPage from "./pages/notifications";
+import SettingsPage from "./pages/settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <Provider store={store}>
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -49,6 +54,10 @@ const App = () => (
             <Route path="/customers" element={<AuthGuard><CustomersPage /></AuthGuard>} />
             <Route path="/customers/create" element={<AuthGuard><CreateCustomerPage /></AuthGuard>} />
             <Route path="/customer-details/:id" element={<AuthGuard><CustomerDetailsPage /></AuthGuard>} />
+              <Route path="/payments" element={<AuthGuard><PaymentsPage /></AuthGuard>} />
+              <Route path="/reviews" element={<AuthGuard><ReviewsPage /></AuthGuard>} />
+              <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
+              <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
             <Route path="/config/services" element={<AuthGuard><ServicesConfigPage /></AuthGuard>} />
             <Route path="/config/services/edit/:id" element={<AuthGuard><ServiceEditPage /></AuthGuard>} />
             <Route path="/config/services/create" element={<AuthGuard><ServiceCreatePage /></AuthGuard>} />
@@ -67,8 +76,8 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AuthProvider>
   </QueryClientProvider>
+  </Provider>
 );
 
 export default App;
