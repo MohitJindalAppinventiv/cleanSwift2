@@ -28,14 +28,12 @@ export const loginUser = createAsyncThunk<
   { rejectValue: string }
 >("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
   try {
+    const res = await adminLogin({ email, password });
 
-
-    const res=await adminLogin({email,password});
-
-    if(!res.idToken){
-      return rejectWithValue("Invalid response from server. No token found")
+    if (!res.idToken) {
+      return rejectWithValue("Invalid response from server. No token found");
     }
-    console.log("response in slice",res);
+    console.log("response in slice", res);
 
     localStorage.setItem("authToken", res.idToken);
     return res.idToken;
@@ -66,7 +64,7 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem("user");
+      localStorage.removeItem("authToken");
     },
     clearError: (state) => {
       state.error = null;

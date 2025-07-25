@@ -1,12 +1,25 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,7 +39,7 @@ export default function LoginPage() {
   const { toast: uiToast } = useToast();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
-  
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -47,20 +60,22 @@ export default function LoginPage() {
   }, [error, uiToast, dispatch]);
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const result = await dispatch(loginUser({email:data.email,password:data.password})).unwrap();
-      console.log("resule",result)
-      
+      const result = await dispatch(
+        loginUser({ email: data.email, password: data.password })
+      ).unwrap();
+      console.log("resule", result);
+
       if (result) {
         toast("Login Successful", {
           description: "Welcome back! You have been logged in successfully.",
         });
-          navigate("/");
+        navigate("/");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast("Invalid Email or Password",{
-        description:error?.message || "Something Went wrong",
-      })
+      toast("Invalid Email or Password", {
+        description: error?.message || "Something Went wrong",
+      });
     }
   };
 
@@ -68,7 +83,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Login
+          </CardTitle>
           <CardDescription className="text-center">
             Enter your credentials to access your account
           </CardDescription>
@@ -83,9 +100,9 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="email@example.com" 
-                        {...field} 
+                      <Input
+                        placeholder="email@example.com"
+                        {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
@@ -100,10 +117,10 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="••••••••" 
-                        {...field} 
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
                         disabled={isLoading}
                       />
                     </FormControl>
@@ -111,11 +128,17 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
-              >
+              {/* 👇 Forgot Password link */}
+              <div className="text-right">
+                <a
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Forgot Password?
+                </a>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
