@@ -8,6 +8,7 @@ import { RecentCustomers } from "@/components/dashboard/RecentCustomers";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+
 const Index = () => {
   const isMobile = useIsMobile();
 

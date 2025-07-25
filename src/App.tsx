@@ -32,6 +32,7 @@ import ReviewsPage from "./pages/reviews";
 import NotificationsPage from "./pages/notifications";
 import SettingsPage from "./pages/settings";
 import NotFound from "./pages/NotFound";
+import Seed from "./pages/SeedPage";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             
             {/* Protected routes */}
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
+            <Route path="/seed" element={<Seed/>} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
             <Route path="/order-details/:id" element={<AuthGuard><OrderDetailsPage /></AuthGuard>} />
             <Route path="/order/create" element={<AuthGuard><CreateOrderPage /></AuthGuard>} />
