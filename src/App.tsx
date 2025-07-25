@@ -43,10 +43,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             
-            {/* Protected routes */}
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
             <Route path="/order-details/:id" element={<AuthGuard><OrderDetailsPage /></AuthGuard>} />
@@ -71,7 +69,6 @@ const App = () => (
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
             
-            {/* Catch-all and not found */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

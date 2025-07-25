@@ -48,6 +48,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const result = await dispatch(loginUser({ email: data.email, password: data.password }));
+      console.log("resule",result)
       
       if (loginUser.fulfilled.match(result)) {
         // Show success toast

@@ -17,7 +17,6 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
   }, [dispatch]);
   
   if (isLoading) {
-    // Show loading spinner while checking authentication
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>

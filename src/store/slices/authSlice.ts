@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 interface User {
-  id: string;
+  // id: string;
   email: string;
   name: string;
 }
@@ -25,27 +25,22 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      // Simulate API call
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (email === "admin@cleanswift.com" && password === "password") {
-            resolve(true);
-          } else {
-            reject(new Error("Invalid credentials"));
-          }
-        }, 1000);
-      });
 
-      const userData = {
-        id: "1",
-        email: email,
-        name: "Admin",
-      };
+      const res=await fetch(`https://us-central1-laundry-app-dee6a.cloudfunctions.net/adminLogin`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          email,password
+        })
+      })
+      const data=await res.json();
+      console.log("API Response",data);
 
-      // Save to localStorage
-      localStorage.setItem("user", JSON.stringify(userData));
-      
-      return userData;
+      localStorage.setItem("authToken",data.idToken)
+
+
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
     }
@@ -56,7 +51,7 @@ export const loginUser = createAsyncThunk(
 export const checkAuthStatus = createAsyncThunk(
   'auth/checkAuthStatus',
   async () => {
-    const savedUser = localStorage.getItem("user");
+    const savedUser = localStorage.getItem("authToken");
     if (savedUser) {
       return JSON.parse(savedUser);
     }
@@ -85,7 +80,7 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action: PayloadAction<User>) => {
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<string>) => {
         state.isLoading = false;
         state.user = action.payload;
         state.isAuthenticated = true;

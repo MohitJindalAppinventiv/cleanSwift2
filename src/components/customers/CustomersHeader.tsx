@@ -12,12 +12,12 @@ export const CustomersHeader = () => {
           Manage your customer database
         </p>
       </div>
-      <Button asChild>
+      {/* <Button asChild>
         <Link to="/customers/create">
           <UserPlus className="mr-2 h-4 w-4" />
           Add Customer
         </Link>
-      </Button>
+      </Button> */}
     </div>
   );
 };
