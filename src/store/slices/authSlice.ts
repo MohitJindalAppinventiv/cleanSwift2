@@ -1,3 +1,4 @@
+import { adminLogin } from "@/api/auth";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
@@ -27,26 +28,17 @@ export const loginUser = createAsyncThunk<
   { rejectValue: string }
 >("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
   try {
-    const res = await fetch(
-      `https://us-central1-laundry-app-dee6a.cloudfunctions.net/adminLogin`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      }
-    );
 
-    const data = await res.json();
-    console.log("API Response", data);
 
-    if (!res.ok || !data.idToken) {
-      throw new Error(data.message || "Login failed");
+    const res=await adminLogin({email,password});
+
+    if(!res.idToken){
+      return rejectWithValue("Invalid response from server. No token found")
     }
+    console.log("response in slice",res);
 
-    localStorage.setItem("authToken", data.idToken);
-    return data.idToken;
+    localStorage.setItem("authToken", res.idToken);
+    return res.idToken;
   } catch (error) {
     return rejectWithValue(
       error instanceof Error ? error.message : "Login failed"

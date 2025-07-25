@@ -14,7 +14,7 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
   
   useEffect(() => {
     dispatch(checkAuthStatus());
-  }, [dispatch,isAuthenticated,isLoading]);
+  }, [dispatch]);
   
   if (isLoading) {
     return (

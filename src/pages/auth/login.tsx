@@ -47,20 +47,20 @@ export default function LoginPage() {
   }, [error, uiToast, dispatch]);
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const result = await dispatch(loginUser({ email: data.email, password: data.password }));
+      const result = await dispatch(loginUser({email:data.email,password:data.password})).unwrap();
       console.log("resule",result)
       
-      if (loginUser.fulfilled.match(result)) {
-        // Show success toast
+      if (result) {
         toast("Login Successful", {
           description: "Welcome back! You have been logged in successfully.",
         });
-        
-        // Navigate to dashboard
-        navigate("/");
+          navigate("/");
       }
     } catch (error) {
       console.error("Login error:", error);
+      toast("Invalid Email or Password",{
+        description:error?.message || "Something Went wrong",
+      })
     }
   };
 
