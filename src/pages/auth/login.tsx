@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -48,16 +48,16 @@ export default function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (error) {
-      uiToast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error,
-      });
-      dispatch(clearError());
-    }
-  }, [error, uiToast, dispatch]);
+  // useEffect(() => {
+  //   if (error) {
+  //     uiToast({
+  //       variant: "destructive",
+  //       title: "Login Failed",
+  //       description: error,
+  //     });
+  //     dispatch(clearError());
+  //   }
+  // }, [error, uiToast, dispatch]);
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const result = await dispatch(
@@ -130,12 +130,12 @@ export default function LoginPage() {
               />
               {/* 👇 Forgot Password link */}
               <div className="text-right">
-                <a
-                  href="/forgot-password"
+                <Link
+                  to="/forgot-password"
                   className="text-sm text-blue-600 hover:underline"
                 >
                   Forgot Password?
-                </a>
+                </Link>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>

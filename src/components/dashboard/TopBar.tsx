@@ -27,6 +27,7 @@ export function TopBar() {
   
   const handleLogout = () => {
     dispatch(logout());
+    navigate("/login");
     toast("Logged out successfully", {
       description: "You have been logged out of your account.",
     });

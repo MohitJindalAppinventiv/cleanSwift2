@@ -1,5 +1,6 @@
-import { adminLogin } from "@/api/auth";
+import { adminLogin, logoutAPI } from "@/api/auth";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { create } from "domain";
 
 interface User {
   // id: string;
@@ -36,7 +37,27 @@ export const loginUser = createAsyncThunk<
     console.log("response in slice", res);
 
     localStorage.setItem("authToken", res.idToken);
+    localStorage.setItem("refreshToken", res.refreshToken);
     return res.idToken;
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error ? error.message : "Login failed"
+    );
+  }
+});
+
+export const logoutUser = createAsyncThunk<
+  string, // return type is token
+  { email: string; password: string },
+  { rejectValue: string }
+>("auth/logoutUser", async (_, { rejectWithValue }) => {
+  try {
+    const res = await logoutAPI();
+
+    console.log("response in slice", res);
+
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("refreshToken");
   } catch (error) {
     return rejectWithValue(
       error instanceof Error ? error.message : "Login failed"
@@ -100,7 +121,7 @@ const authSlice = createSlice({
       })
       .addCase(checkAuthStatus.rejected, (state) => {
         state.isLoading = false;
-      });
+      })
   },
 });
 

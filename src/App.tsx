@@ -33,6 +33,8 @@ import NotificationsPage from "./pages/notifications";
 import SettingsPage from "./pages/settings";
 import NotFound from "./pages/NotFound";
 import Seed from "./pages/SeedPage";
+import ForgotPassword from './pages/auth/forgot-password';
+import SuccessPage from './pages/redirect-login';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path='/forgot-password' element={<ForgotPassword/>} />
+            <Route path='/redirect-login' element={<SuccessPage/>} />
             
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/seed" element={<Seed/>} />
