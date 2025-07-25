@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
   // id: string;
@@ -21,35 +21,42 @@ const initialState: AuthState = {
 };
 
 // Async thunk for login
-export const loginUser = createAsyncThunk(
-  'auth/loginUser',
-  async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
-    try {
-
-      const res=await fetch(`https://us-central1-laundry-app-dee6a.cloudfunctions.net/adminLogin`,{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
+export const loginUser = createAsyncThunk<
+  string, // return type is token
+  { email: string; password: string },
+  { rejectValue: string }
+>("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
+  try {
+    const res = await fetch(
+      `https://us-central1-laundry-app-dee6a.cloudfunctions.net/adminLogin`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify({
-          email,password
-        })
-      })
-      const data=await res.json();
-      console.log("API Response",data);
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
-      localStorage.setItem("authToken",data.idToken)
+    const data = await res.json();
+    console.log("API Response", data);
 
-
-    } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
+    if (!res.ok || !data.idToken) {
+      throw new Error(data.message || "Login failed");
     }
+
+    localStorage.setItem("authToken", data.idToken);
+    return data.idToken;
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error ? error.message : "Login failed"
+    );
   }
-);
+});
 
 // Check for saved user on app start
 export const checkAuthStatus = createAsyncThunk(
-  'auth/checkAuthStatus',
+  "auth/checkAuthStatus",
   async () => {
     const savedUser = localStorage.getItem("authToken");
     if (savedUser) {
@@ -60,7 +67,7 @@ export const checkAuthStatus = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
@@ -82,10 +89,10 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<string>) => {
         state.isLoading = false;
-        state.user = action.payload;
         state.isAuthenticated = true;
         state.error = null;
       })
+
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
