@@ -64,7 +64,14 @@ export const forgotPassword = async ({ email }: { email: string }) => {
 
 export const logoutAPI = async ()=>{
     try {
-        const res = await axiosInstance.post(`${API.LOGOUT()}`);
+        const res = await axiosInstance.post(
+      `${API.LOGOUT()}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
         console.log(res);
         return res.data;
     } catch (error) {

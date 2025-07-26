@@ -10,10 +10,12 @@ export const axiosInstance=axios.create({
 
 axiosInstance.interceptors.request.use(
     (config)=>{
-        const accessToken = localStorage.getItem("authToken");
+        const authToken = localStorage.getItem("authToken");
+        const sessionToken = localStorage.getItem("sessionToken")
 
-        if(accessToken){
-            config.headers.Authorization = `Bearer ${accessToken}`;
+        if(authToken){
+            config.headers.Authorization = `Bearer ${authToken}`;
+            config.headers[`X-Session-Token`]= `${sessionToken}`;
         }
 
         return config;
@@ -51,16 +53,16 @@ axiosInstance.interceptors.response.use(
         const res = await axios.post(`${apiUrl}/refreshToken`, { refreshToken });
 
         // 2. Update new tokens
-        const { accessToken } = res.data;
-        localStorage.setItem("accessToken", accessToken);
+        const { authToken } = res.data;
+        localStorage.setItem("authToken", authToken);
 
         // 3. Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${authToken}`;
         return axiosInstance(originalRequest);
 
       } catch (err) {
         // Refresh failed! Force logout
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
         window.location.href = "/login"; // Redirect to login
         return Promise.reject(err);

@@ -48,19 +48,9 @@ export default function LoginPage() {
     },
   });
 
-  // useEffect(() => {
-  //   if (error) {
-  //     uiToast({
-  //       variant: "destructive",
-  //       title: "Login Failed",
-  //       description: error,
-  //     });
-  //     dispatch(clearError());
-  //   }
-  // }, [error, uiToast, dispatch]);
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const result = await dispatch(
+      const result = await  dispatch(
         loginUser({ email: data.email, password: data.password })
       ).unwrap();
       console.log("resule", result);

@@ -9,12 +9,12 @@ interface AuthGuardProps {
 }
 
 export const AuthGuard = ({ children }: AuthGuardProps) => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   
-  useEffect(() => {
-    dispatch(checkAuthStatus());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(checkAuthStatus());
+  // }, [dispatch]);
   
   if (isLoading) {
     return (

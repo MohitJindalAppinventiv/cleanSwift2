@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
-import { logout } from "@/store/slices/authSlice";
+import { logoutUser } from "@/store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -25,8 +25,8 @@ export function TopBar() {
   const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async() => {
+    await dispatch(logoutUser());
     navigate("/login");
     toast("Logged out successfully", {
       description: "You have been logged out of your account.",

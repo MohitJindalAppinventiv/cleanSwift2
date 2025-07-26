@@ -3,7 +3,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { create } from "domain";
 
 interface User {
-  // id: string;
   email: string;
   name: string;
 }
@@ -17,7 +16,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem("authToken"),
   isLoading: false,
   error: null,
 };
@@ -38,6 +37,7 @@ export const loginUser = createAsyncThunk<
 
     localStorage.setItem("authToken", res.idToken);
     localStorage.setItem("refreshToken", res.refreshToken);
+    localStorage.setItem("sessionToken",res.sessionToken);
     return res.idToken;
   } catch (error) {
     return rejectWithValue(
@@ -48,16 +48,17 @@ export const loginUser = createAsyncThunk<
 
 export const logoutUser = createAsyncThunk<
   string, // return type is token
-  { email: string; password: string },
+  void,
   { rejectValue: string }
 >("auth/logoutUser", async (_, { rejectWithValue }) => {
   try {
-    const res = await logoutAPI();
+    const res = await  logoutAPI();
 
     console.log("response in slice", res);
 
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("sessionToken");
   } catch (error) {
     return rejectWithValue(
       error instanceof Error ? error.message : "Login failed"
@@ -80,16 +81,17 @@ export const checkAuthStatus = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    logout: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.error = null;
-      localStorage.removeItem("authToken");
-    },
-    clearError: (state) => {
-      state.error = null;
-    },
+  reducers: 
+  {
+    // logout: (state) => {
+    //   state.user = null;
+    //   state.isAuthenticated = false;
+    //   state.error = null;
+    //   localStorage.removeItem("authToken");
+    // },
+    // clearError: (state) => {
+    //   state.error = null;
+    // },
   },
   extraReducers: (builder) => {
     builder
@@ -108,6 +110,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+      .addCase(logoutUser.fulfilled, (state, action) => {
+        state = initialState;
+      })
       // Check auth status cases
       .addCase(checkAuthStatus.pending, (state) => {
         state.isLoading = true;
@@ -125,5 +130,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+// export const { } = authSlice.actions;
 export default authSlice.reducer;
