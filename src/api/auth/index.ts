@@ -65,7 +65,7 @@ export const forgotPassword = async ({ email }: { email: string }) => {
 export const logoutAPI = async ()=>{
     try {
         const res = await axiosInstance.post(
-      `${API.LOGOUT()}`,
+      `${API.LOGOUT()}`,{},
       {
         headers: {
           "Content-Type": "application/json",

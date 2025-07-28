@@ -1,27 +1,25 @@
-import axios from 'axios';
+import axios from "axios";
 
+const apiUrl = import.meta.env.VITE_API_URL;
 
-const apiUrl=import.meta.env.VITE_API_URL;
-
-export const axiosInstance=axios.create({
-    baseURL:`${apiUrl}`
+export const axiosInstance = axios.create({
+  baseURL: `${apiUrl}`,
 });
 
-
 axiosInstance.interceptors.request.use(
-    (config)=>{
-        const authToken = localStorage.getItem("authToken");
-        const sessionToken = localStorage.getItem("sessionToken")
+  (config) => {
+    const authToken = localStorage.getItem("authToken");
+    const sessionToken = localStorage.getItem("sessionToken");
 
-        if(authToken){
-            config.headers.Authorization = `Bearer ${authToken}`;
-            config.headers[`X-Session-Token`]= `${sessionToken}`;
-        }
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+      config.headers[`x-session-token`] = `${sessionToken}`;
+    }
 
-        return config;
-    },
-    (err)=>Promise.reject(err)
-)
+    return config;
+  },
+  (err) => Promise.reject(err)
+);
 
 // axiosInstance.interceptors.response.use(
 //     response=>response,
@@ -33,9 +31,6 @@ axiosInstance.interceptors.request.use(
 //         return Promise.reject(error);
 //     }
 // )
-
-
-
 
 // Axios response interceptor
 axiosInstance.interceptors.response.use(
@@ -50,7 +45,9 @@ axiosInstance.interceptors.response.use(
       try {
         // 1. Call refresh token API
         const refreshToken = localStorage.getItem("refreshToken");
-        const res = await axios.post(`${apiUrl}/refreshToken`, { refreshToken });
+        const res = await axios.post(`${apiUrl}/refreshToken`, {
+          refreshToken,
+        });
 
         // 2. Update new tokens
         const { authToken } = res.data;
@@ -59,7 +56,6 @@ axiosInstance.interceptors.response.use(
         // 3. Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${authToken}`;
         return axiosInstance(originalRequest);
-
       } catch (err) {
         // Refresh failed! Force logout
         localStorage.removeItem("authToken");
@@ -72,3 +68,6 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
+
