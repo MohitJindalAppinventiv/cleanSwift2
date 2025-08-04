@@ -1,33 +1,109 @@
-
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { AppBanner } from "../../types/banner";
-import { useBannerManager } from "./BannerManager";
+import axios from "axios";
+import { useState } from "react";
+
+
+
+
+
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    // First validate the file type
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      reject(new Error('Only PNG and JPG images are supported'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result); // Keep the full data URL
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 export const useBannerCreateManager = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { banners, setBanners } = useBannerManager();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add submitting state
+  
 
-  const handleCreateBanner = (bannerData: Omit<AppBanner, "id" | "createdAt">) => {
-    // In a real app, this would make an API call
-    const newBanner: AppBanner = {
-      id: (banners.length + 1).toString(),
-      createdAt: new Date(),
-      ...bannerData,
-    };
-    
-    setBanners([...banners, newBanner]);
-    
-    toast({
-      title: "Banner created",
-      description: "The banner has been created successfully.",
-    });
-    
-    navigate("/config/app-banner");
+  const handleCreateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt">) => {
+    try {
+
+
+       setIsSubmitting(true); 
+      // Validate image type before processing
+      if (bannerData.imageUrl.startsWith('data:image')) {
+        const mimeType = bannerData.imageUrl.split(';')[0].split(':')[1];
+        if (!['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
+          throw new Error('Only PNG and JPG images are supported');
+        }
+      }
+
+      let fileBase64Image = bannerData.imageUrl;
+      
+      // If it's a URL (not data URL), fetch and convert
+      if (bannerData.imageUrl && !bannerData.imageUrl.startsWith('data:image')) {
+        try {
+          const response = await fetch(bannerData.imageUrl);
+          const blob = await response.blob();
+          
+          // Validate the fetched image type
+          if (!['image/png', 'image/jpeg', 'image/jpg'].includes(blob.type)) {
+            throw new Error('Only PNG and JPG images are supported');
+          }
+          
+          fileBase64Image = await fileToBase64(new File([blob], 'banner-image', { type: blob.type }));
+        } catch (error) {
+          console.error("Error converting URL to base64:", error);
+          throw new Error('Failed to process image URL');
+        }
+      }
+
+      const payload = {
+        title: bannerData.title,
+        description: bannerData.description,
+        fileBase64Image: fileBase64Image, // Send full data URL
+      };
+
+      // Make API request
+      const response = await axios.post(
+        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createAppBanner",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast({
+          title: "Banner created",
+          description: "The banner has been created successfully.",
+        });
+        navigate("/config/app-banner");
+      } else {
+        throw new Error(response.data.message || "Failed to create banner");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create banner",
+        variant: "destructive",
+      });
+    }finally {
+      setIsSubmitting(false); // Reset submitting state when done
+    }
   };
 
   return {
     handleCreateBanner,
+     isSubmitting, // Return the submitting state
   };
 };

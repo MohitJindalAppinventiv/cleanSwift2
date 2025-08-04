@@ -1,8 +1,6 @@
-
 import { useState } from "react";
-import { AppBanner } from "../../types/banner";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,14 +11,35 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 
-interface BannerTableProps {
-  banners: AppBanner[];
-  onEdit: (banner: AppBanner) => void;
-  onDelete: (bannerId: string) => void;
+interface Banner {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  isActive: boolean;
+  createdAt: Date;
 }
 
-export function BannerTable({ banners, onEdit, onDelete }: BannerTableProps) {
-  const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+interface BannerTableProps {
+  banners: Banner[];
+  onEdit: (banner: Banner) => void;
+  onDelete: (id: string) => void;
+  onToggle: (id: string) => void;
+}
+
+export function BannerTable({
+  banners,
+  onEdit,
+  onDelete,
+  onToggle,
+}: BannerTableProps) {
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  const handleToggle = async (id: string) => {
+    setUpdatingStatus(id);
+    await onToggle(id);
+    setUpdatingStatus(null);
+  };
 
   return (
     <div className="w-full overflow-auto rounded-md border">
@@ -44,11 +63,7 @@ export function BannerTable({ banners, onEdit, onDelete }: BannerTableProps) {
             </TableRow>
           ) : (
             banners.map((banner) => (
-              <TableRow
-                key={banner.id}
-                onMouseEnter={() => setHoveredRowId(banner.id)}
-                onMouseLeave={() => setHoveredRowId(null)}
-              >
+              <TableRow key={banner.id}>
                 <TableCell className="font-medium">{banner.title}</TableCell>
                 <TableCell className="max-w-xs truncate">
                   {banner.description}
@@ -72,15 +87,28 @@ export function BannerTable({ banners, onEdit, onDelete }: BannerTableProps) {
                   </span>
                 </TableCell>
                 <TableCell>
-                  {format(banner.createdAt, "MMM d, yyyy")}
+                  {format(new Date(banner.createdAt), "MMM d, yyyy")}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end space-x-2">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggle(banner.id)}
+                      disabled={updatingStatus === banner.id}
+                    >
+                      {updatingStatus === banner.id ? (
+                        <span className="animate-spin">↻</span>
+                      ) : banner.isActive ? (
+                        <Eye className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => onEdit(banner)}
-                      aria-label="Edit banner"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -88,7 +116,6 @@ export function BannerTable({ banners, onEdit, onDelete }: BannerTableProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => onDelete(banner.id)}
-                      aria-label="Delete banner"
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>

@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { LogIn } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { loginUser, clearError } from "@/store/slices/authSlice";
+import { loginUser} from "@/store/slices/authSlice";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -59,6 +59,7 @@ export default function LoginPage() {
         toast("Login Successful", {
           description: "Welcome back! You have been logged in successfully.",
         });
+        // navigate("/dashboard");
         navigate("/");
       }
     } catch (error) {

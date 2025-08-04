@@ -35,6 +35,10 @@ import NotFound from "./pages/NotFound";
 import Seed from "./pages/SeedPage";
 import ForgotPassword from './pages/auth/forgot-password';
 import SuccessPage from './pages/redirect-login';
+import AppBanner from './pages/AppBanner';
+import BannerEditPage from './pages/config/components/app-banner/BannerEditPage';
+import ServicePage from './pages/ServicePage';
+import Prodcat from './components/products and category configuration/prodcat';
 
 const queryClient = new QueryClient();
 
@@ -49,7 +53,8 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path='/forgot-password' element={<ForgotPassword/>} />
             <Route path='/redirect-login' element={<SuccessPage/>} />
-            
+            <Route path='/AppBanner' element={<AppBanner/>}/>
+            <Route path='/Serv' element={<ServicePage/>}/>
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/seed" element={<Seed/>} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
@@ -67,10 +72,14 @@ const App = () => (
             <Route path="/config/services/create" element={<AuthGuard><ServiceCreatePage /></AuthGuard>} />
             <Route path="/config/app-banner" element={<AuthGuard><AppBannerPage /></AuthGuard>} />
             <Route path="/config/app-banner/create" element={<AuthGuard><BannerCreatePage /></AuthGuard>} />
+            <Route path="/config/app-banner/edit/:id" element={<AuthGuard><BannerEditPage /></AuthGuard>} />
             <Route path="/config/fcm" element={<AuthGuard><FCMConfigPage /></AuthGuard>} />
             <Route path="/config/area" element={<AuthGuard><AreaConfigPage /></AuthGuard>} />
+            <Route path="/pro_cat" element={<AuthGuard> <Prodcat/> </AuthGuard>}/>
             <Route path="/config/categories" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
-            <Route path="/config/products" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
+            <Route path="/config/categories/:serviceId" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
+            <Route path="/config/products" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
+            <Route path="/config/products/:serviceId" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
             <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} />
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />

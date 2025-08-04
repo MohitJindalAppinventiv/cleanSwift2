@@ -29,6 +29,11 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
     return <Navigate to="/login" replace />;
   }
   
+
+
+
+
+  
   // Render children if authenticated
   return <>{children}</>;
 };

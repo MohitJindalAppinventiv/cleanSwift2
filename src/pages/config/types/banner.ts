@@ -6,9 +6,16 @@ export interface AppBanner {
   imageUrl: string;
   isActive: boolean;
   createdAt: Date;
+  isDeleted?: boolean;
 }
 
+// No mock data needed since we're using API
+
 // Mock data for app banners
+
+
+
+
 export const mockBanners: AppBanner[] = [
   {
     id: '1',

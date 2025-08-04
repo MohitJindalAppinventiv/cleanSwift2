@@ -1,5 +1,3 @@
-
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,34 +14,46 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categorySchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().optional(),
   isActive: z.boolean().default(true),
+  serviceId: z.string().min(1, { message: "Please select a service." }),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
+
+interface Service {
+  id: string;
+  name: string;
+}
 
 interface CategoryFormProps {
   onSubmit: (data: CategoryFormValues) => void;
   onCancel: () => void;
   initialData?: Partial<CategoryFormValues>;
+  services: Service[];
 }
 
-export function CategoryForm({ onSubmit, onCancel, initialData }: CategoryFormProps) {
+export function CategoryForm({ onSubmit, onCancel, initialData, services }: CategoryFormProps) {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
       isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
+      serviceId: initialData?.serviceId || "",
     },
   });
 
   const handleSubmit = (data: CategoryFormValues) => {
+    console.log("Form submitted with data:", data); // Debug log
     onSubmit(data);
   };
+
+  console.log("Services in CategoryForm:", services); // Debug log
 
   return (
     <Form {...form}>
@@ -79,6 +89,46 @@ export function CategoryForm({ onSubmit, onCancel, initialData }: CategoryFormPr
               </FormControl>
               <FormDescription>
                 A brief description of the category.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="serviceId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Service</FormLabel>
+              <Select 
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  console.log("Selected service ID:", value); // Debug log
+                }} 
+                value={field.value || ""}
+              >
+                <FormControl>
+                  <SelectTrigger className="z-[1000]">
+                    <SelectValue placeholder="Select a service" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="z-[1000] max-h-[200px] overflow-y-auto">
+                  {services.length > 0 ? (
+                    services.map((service) => (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-services" disabled>
+                      No services available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Select the service associated with this category.
               </FormDescription>
               <FormMessage />
             </FormItem>

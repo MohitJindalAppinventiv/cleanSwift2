@@ -7,18 +7,18 @@ import ServiceForm from "./components/ServiceForm";
 const ServiceEditPage: React.FC = () => {
   const {
     service,
+    isLoad,
     isLoading,
-    selectedVariants,
     fileInputKey,
     handleInputChange,
     handleStatusChange,
-    handleVariantToggle,
     handleFileChange,
+    handlePricingModelChange,
     handleSubmit,
     handleCancel
   } = useServiceData();
 
-  if (isLoading) {
+  if (isLoad) {
     return (
       <DashboardLayout>
         <div className="flex justify-center items-center h-full">
@@ -47,11 +47,11 @@ const ServiceEditPage: React.FC = () => {
 
         <ServiceForm
           service={service}
-          selectedVariants={selectedVariants}
           fileInputKey={fileInputKey}
+          handlePricingModelChange={handlePricingModelChange}
           handleInputChange={handleInputChange}
           handleStatusChange={handleStatusChange}
-          handleVariantToggle={handleVariantToggle}
+          isLoading={isLoading}
           handleFileChange={handleFileChange}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}

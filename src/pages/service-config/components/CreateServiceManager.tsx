@@ -1,18 +1,20 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Service, availableVariants, mockServices } from "../types";
+import axios from "axios";
 
 export const useCreateServiceManager = () => {
   const navigate = useNavigate();
-  const [service, setService] = useState<Service>({
-    id: `srv-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+   const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [service, setService] = useState({
     name: "",
     description: "",
+    pricingmodel: "",
     status: "active",
-    variants: []
+    imageBase64: "",
+    thumbnail: ""
   });
+
   const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
@@ -25,47 +27,70 @@ export const useCreateServiceManager = () => {
     setService(prev => ({ ...prev, status: value as "active" | "inactive" }));
   };
 
-  const handleVariantToggle = (variant: string) => {
-    if (selectedVariants.includes(variant)) {
-      setSelectedVariants(selectedVariants.filter(v => v !== variant));
-    } else {
-      setSelectedVariants([...selectedVariants, variant]);
-    }
+  const handlePricingModelChange = (value: string) => {
+    setService(prev => ({ ...prev, pricingmodel: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVariantToggle = (variant: string) => {
+    setSelectedVariants(prev => 
+      prev.includes(variant) 
+        ? prev.filter(v => v !== variant) 
+        : [...prev, variant]
+    );
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
     const reader = new FileReader();
     
     reader.onloadend = () => {
+      const base64String = reader.result as string;
       setService(prev => ({ 
         ...prev, 
-        thumbnail: reader.result as string 
+        imageBase64: base64String,
+        thumbnail: base64String
       }));
     };
     
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Update the service with the selected variants
-    const newService = {
-      ...service,
-      variants: selectedVariants
-    };
-    
-    // In a real app, this would send data to an API
-    console.log("Saving new service:", newService);
-    
-    // Add to mock services (in a real app this would be an API call)
-    mockServices.unshift(newService);
-    
-    toast.success("Service created successfully");
-    navigate("/config/services");
+     setIsLoading(true); // Set loading to true when submission starts
+    try {
+      // Create payload with only the required fields
+      const payload = {
+        name: service.name,
+        description: service.description,
+        pricingModel: service.pricingmodel,
+        imageBase64: service.imageBase64
+      };
+
+      const res = await axios.post(
+        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createService",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+ if(service.status && service.status !== "active"){
+     await axios.patch(
+        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusOfService?serviceId=${res.data.id}`
+      );
+  }
+      toast.success("Service created successfully");
+      navigate("/config/services");
+    } catch (error) {
+      console.error("Error creating service:", error);
+      toast.error("Failed to create service");
+    }finally {
+      setIsLoading(false); // Reset loading state whether success or error
+    }
   };
 
   const handleCancel = () => {
@@ -76,10 +101,12 @@ export const useCreateServiceManager = () => {
     service,
     selectedVariants,
     fileInputKey,
+    isLoading, // Expose loading state
     handleInputChange,
     handleStatusChange,
     handleVariantToggle,
     handleFileChange,
+    handlePricingModelChange,
     handleSubmit,
     handleCancel,
     setFileInputKey

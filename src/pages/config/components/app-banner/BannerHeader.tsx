@@ -22,10 +22,11 @@ export function BannerHeader({ searchQuery, onSearchChange }: BannerHeaderProps)
           searchQuery={searchQuery}
           onSearchChange={onSearchChange}
         />
-        <Button asChild className="sm:ml-2">
+        <Button asChild className="sm:ml-2"> 
           <Link to="/config/app-banner/create">Create Banner</Link>
         </Button>
       </div>
     </div>
   );
 }
+      

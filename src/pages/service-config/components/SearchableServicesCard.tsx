@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import ServiceTable from "./ServiceTable";
+import { ServiceTable }  from "./ServiceTable";
 import SearchBar from "./SearchBar";
 import { Service } from "../types";
 
@@ -9,12 +9,14 @@ interface SearchableServicesCardProps {
   filteredServices: Service[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+   fetchServices: () => Promise<void>; // Add fetchServices prop
 }
 
 const SearchableServicesCard: React.FC<SearchableServicesCardProps> = ({ 
   filteredServices, 
   searchQuery, 
-  setSearchQuery 
+  setSearchQuery ,
+  fetchServices
 }) => {
   return (
     <Card>
@@ -25,7 +27,7 @@ const SearchableServicesCard: React.FC<SearchableServicesCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <ServiceTable services={filteredServices} />
+        <ServiceTable services={filteredServices} fetchServices = {fetchServices}/> 
         {filteredServices.length === 0 && (
           <div className="py-8 text-center text-muted-foreground">
             No services found. Please try a different search.

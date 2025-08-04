@@ -1,4 +1,3 @@
-
 import React from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useCreateServiceManager } from "./components/CreateServiceManager";
@@ -7,12 +6,13 @@ import ServiceForm from "./components/ServiceForm";
 const ServiceCreatePage: React.FC = () => {
   const {
     service,
-    selectedVariants,
+  
     fileInputKey,
     handleInputChange,
     handleStatusChange,
-    handleVariantToggle,
+    isLoading,
     handleFileChange,
+    handlePricingModelChange,
     handleSubmit,
     handleCancel
   } = useCreateServiceManager();
@@ -26,12 +26,13 @@ const ServiceCreatePage: React.FC = () => {
 
         <ServiceForm
           service={service}
-          selectedVariants={selectedVariants}
+          isLoading = {isLoading}
           fileInputKey={fileInputKey}
           handleInputChange={handleInputChange}
           handleStatusChange={handleStatusChange}
-          handleVariantToggle={handleVariantToggle}
+        
           handleFileChange={handleFileChange}
+          handlePricingModelChange={handlePricingModelChange}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
         />

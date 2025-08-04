@@ -12,3 +12,4 @@ export interface Category {
 export interface CategoryConfig {
   categories: Category[];
 }
+ 

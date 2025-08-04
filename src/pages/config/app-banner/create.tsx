@@ -4,7 +4,7 @@ import { BannerForm } from "../components/app-banner/BannerForm";
 import { useBannerCreateManager } from "../components/app-banner/BannerCreateManager";
 
 export default function BannerCreatePage() {
-  const { handleCreateBanner } = useBannerCreateManager();
+  const { handleCreateBanner  , isSubmitting} = useBannerCreateManager();
 
   return (
     <DashboardLayout>
@@ -14,12 +14,14 @@ export default function BannerCreatePage() {
           <p className="text-sm text-muted-foreground mt-1">
             Add a new promotional banner to display in your app
           </p>
-        </div>
+        </div> 
         
         <div className="rounded-md border p-6">
-          <BannerForm onSave={handleCreateBanner} />
+          <BannerForm onSave={handleCreateBanner} 
+          isSubmitting={isSubmitting}/>
         </div>
       </div>
     </DashboardLayout>
   );
 }
+ 
