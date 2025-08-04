@@ -60,7 +60,7 @@ axiosInstance.interceptors.response.use(
         // Refresh failed! Force logout
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
-        window.location.href = "/login"; // Redirect to login
+        // window.location.href = "/login"; // Redirect to login
         return Promise.reject(err);
       }
     }

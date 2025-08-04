@@ -8,4 +8,4 @@ export default function AreaConfigPage() {
       <AreaConfigManager />
     </DashboardLayout>
   );
-}
+} 

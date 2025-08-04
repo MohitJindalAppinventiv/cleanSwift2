@@ -1,4 +1,3 @@
-
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { Toaster } from "@/components/ui/toaster";
@@ -19,6 +18,7 @@ import ServiceEditPage from "./pages/service-config/edit";
 import ServiceCreatePage from "./pages/service-config/create";
 import AppBannerPage from "./pages/config/app-banner";
 import BannerCreatePage from "./pages/config/app-banner/create";
+import BannerEditPage from "./pages/config/app-banner";
 import FCMConfigPage from "./pages/config/fcm";
 import AreaConfigPage from "./pages/config/area";
 import CategoriesConfigPage from "./pages/config/categories";
@@ -35,38 +35,42 @@ import NotFound from "./pages/NotFound";
 import Seed from "./pages/SeedPage";
 import ForgotPassword from './pages/auth/forgot-password';
 import SuccessPage from './pages/redirect-login';
-import AppBanner from './pages/AppBanner';
-import BannerEditPage from './pages/config/components/app-banner/BannerEditPage';
-import ServicePage from './pages/ServicePage';
+import AreaConfig from './pages/area-config';
+import ServicePage from "./pages/Service";
+import AppBanner from "./pages/AppBanner";
+import MapDemo from './pages/map-demo';
+import Temp from "./pages/Temp";
 import Prodcat from './components/products and category configuration/prodcat';
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <Provider store={store}>
-  <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path='/forgot-password' element={<ForgotPassword/>} />
-            <Route path='/redirect-login' element={<SuccessPage/>} />
-            <Route path='/AppBanner' element={<AppBanner/>}/>
-            <Route path='/Serv' element={<ServicePage/>}/>
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/redirect-login" element={<SuccessPage />} />
+            <Route path="/area-config" element={<AreaConfig />} />
+            <Route path="/AppBanner" element={<AppBanner />} />
+            <Route path="/Serv" element={<ServicePage />} />
+            <Route path="/temp" element={<Temp />} />
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
-            <Route path="/seed" element={<Seed/>} />
+            <Route path="/seed" element={<Seed />} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
             <Route path="/order-details/:id" element={<AuthGuard><OrderDetailsPage /></AuthGuard>} />
             <Route path="/order/create" element={<AuthGuard><CreateOrderPage /></AuthGuard>} />
             <Route path="/customers" element={<AuthGuard><CustomersPage /></AuthGuard>} />
             <Route path="/customers/create" element={<AuthGuard><CreateCustomerPage /></AuthGuard>} />
             <Route path="/customer-details/:id" element={<AuthGuard><CustomerDetailsPage /></AuthGuard>} />
-              <Route path="/payments" element={<AuthGuard><PaymentsPage /></AuthGuard>} />
-              <Route path="/reviews" element={<AuthGuard><ReviewsPage /></AuthGuard>} />
-              <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
-              <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
+            <Route path="/payments" element={<AuthGuard><PaymentsPage /></AuthGuard>} />
+            <Route path="/reviews" element={<AuthGuard><ReviewsPage /></AuthGuard>} />
+            <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
+            <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
             <Route path="/config/services" element={<AuthGuard><ServicesConfigPage /></AuthGuard>} />
             <Route path="/config/services/edit/:id" element={<AuthGuard><ServiceEditPage /></AuthGuard>} />
             <Route path="/config/services/create" element={<AuthGuard><ServiceCreatePage /></AuthGuard>} />
@@ -75,20 +79,20 @@ const App = () => (
             <Route path="/config/app-banner/edit/:id" element={<AuthGuard><BannerEditPage /></AuthGuard>} />
             <Route path="/config/fcm" element={<AuthGuard><FCMConfigPage /></AuthGuard>} />
             <Route path="/config/area" element={<AuthGuard><AreaConfigPage /></AuthGuard>} />
-            <Route path="/pro_cat" element={<AuthGuard> <Prodcat/> </AuthGuard>}/>
+            <Route path="/pro_cat" element={<AuthGuard><Prodcat /></AuthGuard>} />
             <Route path="/config/categories" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
             <Route path="/config/categories/:serviceId" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
-            <Route path="/config/products" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
+            <Route path="/config/products" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
             <Route path="/config/products/:serviceId" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
             <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} />
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
-            
+            <Route path="/map-demo" element={<AuthGuard><MapDemo /></AuthGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
   </Provider>
 );
 

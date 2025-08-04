@@ -21,6 +21,8 @@ import {
   Tags,
   ShoppingBag,
   Ticket,
+  BookTemplate,
+  Eye,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -57,6 +59,7 @@ const sidebarItems: SidebarItem[] = [
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
+      {title:"Temp",icon:Eye,href:"/temp"}
     ]
   },
   { title: "Settings", icon: Settings, href: "/settings" },
