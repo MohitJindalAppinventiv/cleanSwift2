@@ -10,7 +10,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Form,
@@ -23,9 +22,12 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { loginUser, clearError } from "@/store/slices/authSlice";
+import { loginUser } from "@/store/slices/authSlice";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import { getProfileCompletionStatus } from "@/store/slices/profileStatus";
+import { isAxiosError } from "axios";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -39,6 +41,7 @@ export default function LoginPage() {
   const { toast: uiToast } = useToast();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -50,22 +53,63 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const result = await  dispatch(
+      const result = await dispatch(
         loginUser({ email: data.email, password: data.password })
       ).unwrap();
-      console.log("resule", result);
 
-      if (result) {
-        toast("Login Successful", {
-          description: "Welcome back! You have been logged in successfully.",
-        });
-        navigate("/");
+      // const response = await axiosInstance.get("/getProfileCompletionStatus");
+      // console.log("status api", response);
+      // const status = response.data;
+
+      const status = await dispatch(getProfileCompletionStatus()).unwrap();
+      console.log(status);
+
+      if (status?.isComplete === false) {
+        const configs = status.configurations;
+
+        if (configs.banner?.isConfigured === false) {
+          navigate("/AppBanner");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        } else if (configs.area.isConfigured == false) {
+          navigate("/area-config");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        } else {
+          navigate("/Serv");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        }
+        return;
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast("Invalid Email or Password", {
-        description: error?.message || "Something Went wrong",
+
+      // All configs are complete
+      toast("Login Successful", {
+        description: "Welcome back! You have been logged in successfully.",
       });
+      navigate("/");
+    } catch (error: any) {
+      if (isAxiosError(error)) {
+        console.log(error.message);
+        toast("Error", {
+          description: error.message,
+        });
+      }
+
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+       toast("Error", {
+        description: message,
+       });
     }
   };
 
@@ -107,17 +151,33 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                        disabled={isLoading}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                          disabled={isLoading}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? (
+                            <Eye className="w-5 h-5" />
+                          ) : (
+                            <EyeOff className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               {/* 👇 Forgot Password link */}
               <div className="text-right">
                 <Link

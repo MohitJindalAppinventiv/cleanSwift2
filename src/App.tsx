@@ -35,12 +35,15 @@ import NotFound from "./pages/NotFound";
 import Seed from "./pages/SeedPage";
 import ForgotPassword from './pages/auth/forgot-password';
 import SuccessPage from './pages/redirect-login';
+import AreaConfig from './pages/area-config';
+import ServicePage from "./pages/Service";
+import AppBanner from "./pages/AppBanner";
+import MapDemo from './pages/map-demo';
+import Temp from "./pages/Temp";
 
-const queryClient = new QueryClient();
 
 const App = () => (
   <Provider store={store}>
-  <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -49,6 +52,13 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path='/forgot-password' element={<ForgotPassword/>} />
             <Route path='/redirect-login' element={<SuccessPage/>} />
+
+
+            <Route path='/area-config' element={<AreaConfig/>} />
+             <Route path='/AppBanner' element={<AppBanner/>}/>
+            <Route path='/Serv' element={<ServicePage/>}/>
+
+            <Route path='/temp' element={<Temp/>}/>
             
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/seed" element={<Seed/>} />
@@ -74,12 +84,14 @@ const App = () => (
             <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} />
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
+                        <Route path="/map-demo" element={<AuthGuard><MapDemo /></AuthGuard>} />
+
+            
             
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-  </QueryClientProvider>
   </Provider>
 );
 

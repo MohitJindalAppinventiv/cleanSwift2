@@ -59,6 +59,7 @@ export const logoutUser = createAsyncThunk<
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("sessionToken");
+    return res;
   } catch (error) {
     return rejectWithValue(
       error instanceof Error ? error.message : "Login failed"

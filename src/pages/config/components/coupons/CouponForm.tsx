@@ -17,15 +17,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint"; // Adjust this path as needed
 
 const formSchema = z.object({
-  code: z.string().min(3, "Code must be at least 3 characters").max(20, "Code cannot exceed 20 characters"),
-  discountPercentage: z.coerce.number().min(1, "Discount must be at least 1%").max(100, "Discount cannot exceed 100%"),
-  validFrom: z.string().nonempty("Valid from date is required"),
-  validUntil: z.string().nonempty("Valid until date is required"),
-  minOrderValue: z.coerce.number().min(0, "Minimum order value cannot be negative"),
-  maxUsage: z.coerce.number().int().min(1, "Maximum usage must be at least 1"),
+  code: z.string().min(3).max(20),
+  couponName: z.string().min(3).max(50),
+  discountPercentage: z.coerce.number().min(1).max(100),
+  validFrom: z.string().nonempty(),
+  validUntil: z.string().nonempty(),
+  minOrderValue: z.coerce.number().min(0),
   isActive: z.boolean().default(true),
+  // maxUsage: z.coerce.number().min(1, "Must allow at least 1 use"), // ✅ New field
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -33,32 +36,51 @@ type FormValues = z.infer<typeof formSchema>;
 export function CouponForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       code: "",
+      couponName: "",
       discountPercentage: 10,
-      validFrom: new Date().toISOString().split('T')[0],
-      validUntil: new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+      validFrom: new Date().toISOString().split("T")[0],
+      validUntil: new Date(new Date().setMonth(new Date().getMonth() + 3))
+        .toISOString()
+        .split("T")[0],
       minOrderValue: 0,
-      maxUsage: 100,
       isActive: true,
+      // maxUsage: 1, // ✅ New field
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // Simulate adding a coupon
-    console.log("Form submitted:", data);
-    
-    // Show success toast
-    toast({
-      title: "Coupon created successfully",
-      description: `Coupon ${data.code} has been created.`,
-    });
-    
-    // Navigate back to coupons list
-    navigate("/config/coupons");
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const res = await axiosInstance.post(API.CREATE_COUPON(), {
+        couponCode: data.code,
+        couponName: data.couponName,
+        maxDiscount: data.discountPercentage,
+        minValue: data.minOrderValue,
+        validFrom: data.validFrom,
+        validTill: data.validUntil,
+        isActive: data.isActive,
+        // maxUsage: data.maxUsage, // ✅ Added here
+      });
+      console.log("response in create coupon",res);
+
+      toast({
+        title: "Coupon created successfully",
+        description: `Coupon ${data.code} has been created.`,
+      });
+
+      navigate("/config/coupons");
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to create coupon.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -81,7 +103,22 @@ export function CouponForm() {
               </FormItem>
             )}
           />
-          
+
+          <FormField
+            control={form.control}
+            name="couponName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Coupon Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Summer Sale 20% Off" {...field} />
+                </FormControl>
+                <FormDescription>Internal name for the coupon</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="discountPercentage"
@@ -91,14 +128,12 @@ export function CouponForm() {
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Percentage discount to apply
-                </FormDescription>
+                <FormDescription>Percentage discount to apply</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="validFrom"
@@ -112,7 +147,7 @@ export function CouponForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="validUntil"
@@ -126,7 +161,7 @@ export function CouponForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="minOrderValue"
@@ -143,24 +178,7 @@ export function CouponForm() {
               </FormItem>
             )}
           />
-          
-          <FormField
-            control={form.control}
-            name="maxUsage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Maximum Usage</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Maximum number of times this coupon can be used
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
+
           <FormField
             control={form.control}
             name="isActive"
@@ -181,12 +199,28 @@ export function CouponForm() {
               </FormItem>
             )}
           />
+          {/* <FormField
+            control={form.control}
+            name="maxUsage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Maximum Usage</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Maximum number of times this coupon can be used
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          /> */}
         </div>
 
         <div className="flex justify-end gap-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => navigate("/config/coupons")}
           >
             Cancel
