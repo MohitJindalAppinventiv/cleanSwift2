@@ -1,3 +1,4 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,45 +16,49 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Service } from "./types";
 
-const categorySchema = z.object({
+const baseCategorySchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().optional(),
   isActive: z.boolean().default(true),
+});
+
+const categorySchemaWithService = baseCategorySchema.extend({
   serviceId: z.string().min(1, { message: "Please select a service." }),
 });
 
-type CategoryFormValues = z.infer<typeof categorySchema>;
-
-interface Service {
-  id: string;
-  name: string;
-}
+const categorySchemaWithoutService = baseCategorySchema.extend({
+  serviceId: z.string().optional(),
+});
 
 interface CategoryFormProps {
-  onSubmit: (data: CategoryFormValues) => void;
+  onSubmit: (data: { name: string; serviceId?: string; isActive?: boolean }) => void;
   onCancel: () => void;
-  initialData?: Partial<CategoryFormValues>;
-  services: Service[];
+  initialData?: Partial<{ name: string; serviceId?: string; isActive?: boolean }>;
+  services?: Service[];
 }
 
 export function CategoryForm({ onSubmit, onCancel, initialData, services }: CategoryFormProps) {
-  const form = useForm<CategoryFormValues>({
+  const categorySchema = services && services.length > 0 ? categorySchemaWithService : categorySchemaWithoutService;
+
+  const form = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: initialData?.name || "",
-      description: initialData?.description || "",
+      description: "",
       isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
-      serviceId: initialData?.serviceId || "",
+      serviceId: initialData?.serviceId || (services && services.length > 0 ? services[0].id : ""),
     },
   });
 
-  const handleSubmit = (data: CategoryFormValues) => {
-    console.log("Form submitted with data:", data); // Debug log
-    onSubmit(data);
+  const handleSubmit = (data: z.infer<typeof categorySchema>) => {
+    onSubmit({
+      name: data.name,
+      serviceId: data.serviceId,
+      isActive: data.isActive
+    });
   };
-
-  console.log("Services in CategoryForm:", services); // Debug log
 
   return (
     <Form {...form}>
@@ -75,65 +80,35 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services }: Cate
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter category description (optional)"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                A brief description of the category.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="serviceId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Service</FormLabel>
-              <Select 
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  console.log("Selected service ID:", value); // Debug log
-                }} 
-                value={field.value || ""}
-              >
-                <FormControl>
-                  <SelectTrigger className="z-[1000]">
-                    <SelectValue placeholder="Select a service" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className="z-[1000] max-h-[200px] overflow-y-auto">
-                  {services.length > 0 ? (
-                    services.map((service) => (
+        {services && services.length > 0 && (
+          <FormField
+            control={form.control}
+            name="serviceId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Service</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a service" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {services.map((service) => (
                       <SelectItem key={service.id} value={service.id}>
                         {service.name}
                       </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="no-services" disabled>
-                      No services available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Select the service associated with this category.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Select the service associated with this category.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}

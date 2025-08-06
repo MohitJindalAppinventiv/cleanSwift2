@@ -1,116 +1,459 @@
-
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingBag, Plus } from "lucide-react";
-import { ProductConfig, Product } from "../../types/products";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { ProductModal } from "./ProductModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ProductFormValues } from "./ProductForm";
 
-const fetchProductsConfig = async (): Promise<ProductConfig> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        products: [
-          {
-            id: "1",
-            name: "Basic Cleaning Kit",
-            description: "A complete kit for basic home cleaning",
-            price: 29.99,
-            categoryId: "1", // Cleaning category
-            serviceId: "1", // Basic Cleaning service
-            isActive: true,
-            imageUrl: "/images/cleaning-kit.jpg",
-            createdAt: "2023-01-01T00:00:00Z",
-            updatedAt: "2023-01-01T00:00:00Z",
-          },
-          {
-            id: "2",
-            name: "Premium Tools Set",
-            description: "High-quality repair tools for professionals",
-            price: 129.99,
-            categoryId: "2", // Repairs category
-            serviceId: "3", // Furniture Repair service
-            isActive: true,
-            imageUrl: "/images/tools-set.jpg",
-            createdAt: "2023-01-02T00:00:00Z",
-            updatedAt: "2023-01-02T00:00:00Z",
-          }
-        ],
-      });
-    }, 500);
-  });
-};
+const API_BASE_URL = "https://us-central1-laundry-app-dee6a.cloudfunctions.net";
 
-// Mock categories for demo
-const mockCategories = [
-  { id: "1", name: "Cleaning" },
-  { id: "2", name: "Repairs" },
-  { id: "3", name: "Installation" },
-  { id: "4", name: "Maintenance" },
-];
+interface Product {
+  id: string;
+  name: string;
+  price?: number; // Optional to match API response
+  categoryId?: string;
+  serviceId?: string;
+  categoryName?: string;
+  serviceName?: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  pricingModel: "per_kg" | "per_item";
+}
+
+interface Category {
+  categoryId: string;
+  categoryName: string;
+  serviceName: string;
+}
 
 export function ProductsConfigManager() {
   const { toast } = useToast();
-  
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["productsConfig"],
-    queryFn: fetchProductsConfig,
-  });
+  const { state } = useLocation();
+  const { serviceId: paramServiceId, serviceId: paramCategoryId } = useParams();
+  const navigate = useNavigate();
+  const idType = state?.idType;
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedService, setSelectedService] = useState<string>("");
+  const [currentContext, setCurrentContext] = useState<{
+    type: "category" | "service" | "all";
+    name?: string;
+  }>({ type: "all" });
+
+  // Set current context based on navigation
+  useEffect(() => {
+    if (idType === "category" && paramCategoryId) {
+      const category = categories.find((c) => c.categoryId === paramCategoryId);
+      setCurrentContext({
+        type: "category",
+        name: category?.categoryName || "Unknown Category",
+      });
+    } else if (idType === "service" && paramServiceId) {
+      const service = services.find((s) => s.id === paramServiceId);
+      setCurrentContext({
+        type: "service",
+        name: service?.name || "Unknown Service",
+      });
+    } else {
+      setCurrentContext({ type: "all" });
+    }
+  }, [idType, paramServiceId, paramCategoryId, categories, services]);
+
+  // Fetch services and categories
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [servicesRes, categoriesRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/getAllServices`),
+          axios.get(`${API_BASE_URL}/getAllCategoriesWithServiceNames`),
+        ]);
+        setServices(servicesRes.data.data);
+        setCategories(categoriesRes.data.data);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load services and categories",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchInitialData();
+  }, [toast]);
+
+  // Fetch products based on context
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        let endpoint = `${API_BASE_URL}/getAllProducts`;
+        let params = {};
+
+        if (idType === "category" && paramCategoryId) {
+          endpoint = `${API_BASE_URL}/getAllProductsByCategoryId`;
+          params = { categoryId: paramCategoryId };
+        } else if (idType === "service" && paramServiceId) {
+          endpoint = `${API_BASE_URL}/getProductByServiceId`;
+          params = { serviceId: paramServiceId };
+        }
+
+        const response = await axios.get(endpoint, { params });
+
+        const fetchedProducts = response.data.data.map((item: any) => ({
+          id: item.productId || item.id,
+          name: item.productName || item.name,
+          price: item.price ?? 0, // Default to 0 if price is undefined
+          categoryId: item.categoryId || item.CategoryId,
+          serviceId: item.serviceId,
+          categoryName: item.categoryName,
+          serviceName: item.serviceName,
+        }));
+
+        setProducts(fetchedProducts);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: `Failed to load products for ${
+            idType === "category"
+              ? "category"
+              : idType === "service"
+              ? "service"
+              : "all products"
+          }`,
+          variant: "destructive",
+        });
+        setProducts([]); // Set empty array on error to show "No products" message
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [idType, paramServiceId, paramCategoryId, toast]);
+
+ const createProduct = async (productData: ProductFormValues) => {
+  try {
+    let categoryIdToUse: string | undefined;
+    let serviceIdToUse: string | undefined;
+
+    if (idType === "category" && paramCategoryId) {
+      categoryIdToUse = paramCategoryId;
+    } else if (idType === "service" && paramServiceId) {
+      serviceIdToUse = paramServiceId;
+    } else {
+      // When idType is undefined (all products view)
+      if (!selectedService) {
+        toast({
+          title: "Error",
+          description: "Please select a service first",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const service = services.find((s) => s.id === selectedService);
+      if (!service) {
+        toast({
+          title: "Error",
+          description: "Selected service not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (service.pricingModel === "per_item") {
+        const matchingCategory = categories.find(
+          (cat) => cat.serviceName === service.name
+        );
+        if (!matchingCategory) {
+          toast({
+            title: "Error",
+            description: "No category found for the selected service",
+            variant: "destructive",
+          });
+          return;
+        }
+        categoryIdToUse = matchingCategory.categoryId;
+      } else {
+        serviceIdToUse = service.id;
+      }
+    }
+
+    const response = await axios.post(`${API_BASE_URL}/createProduct`, {
+      name: productData.name,
+      price: productData.price,
+      ...(categoryIdToUse && { categoryId: categoryIdToUse }),
+      ...(serviceIdToUse && { serviceId: serviceIdToUse }),
+    });
+
+    // Derive categoryName and serviceName for the new product
+    const category = categoryIdToUse
+      ? categories.find((c) => c.categoryId === categoryIdToUse)
+      : null;
+    const service = serviceIdToUse
+      ? services.find((s) => s.id === serviceIdToUse)
+      : category
+      ? services.find((s) => s.name === category.serviceName)
+      : null;
+
+    toast({
+      title: "Success",
+      description: "Product created successfully",
+    });
+    setCreateModalOpen(false);
+    setProducts([
+      ...products,
+      {
+        id: response.data.id,
+        name: productData.name,
+        price: productData.price,
+        categoryId: categoryIdToUse,
+        serviceId: serviceIdToUse,
+        categoryName: category?.categoryName,
+        serviceName: service?.name,
+      },
+    ]);
+  } catch (error) {
+    console.error("Error creating product:", error);
+    toast({
+      title: "Error",
+      description: "Failed to create product",
+      variant: "destructive",
+    });
+  }
+};
+
+  const updateProduct = async (
+    productId: string,
+    productData: ProductFormValues
+  ) => {
+    try {
+      await axios.put(
+        `${API_BASE_URL}/updateProduct`,
+        {
+          
+          name: productData.name,
+          price: productData.price,
+        },
+        {
+          params: { productId },
+        }
+      );
+
+      toast({
+        title: "Success",
+        description: "Product updated successfully",
+      });
+      setEditModalOpen(false);
+      setProducts(
+        products.map((p) =>
+          p.id === productId
+            ? { ...p, name: productData.name, price: productData.price }
+            : p
+        )
+      );
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update product",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteProduct = async (productId: string) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/deleteProduct`, {
+        params: { productId },
+      });
+
+      toast({
+        title: "Success",
+        description: "Product deleted successfully",
+      });
+      setProducts(products.filter((p) => p.id !== productId));
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Products Configuration</CardTitle>
-          <CardDescription>Loading products configuration...</CardDescription>
+          <CardTitle>Products</CardTitle>
         </CardHeader>
+        <CardContent>Loading products...</CardContent>
       </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Products Configuration</h2>
-        <Button asChild>
-          <Link to="/config/products/create">
-            <Plus className="mr-2 h-4 w-4" /> Add New Product
-          </Link>
+      <ProductModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onSubmit={createProduct}
+        title="Add New Product"
+        isSubmitting={false}
+      />
+
+      <ProductModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onSubmit={(data: ProductFormValues) => {
+          if (selectedProduct) {
+            updateProduct(selectedProduct.id, data);
+          }
+        }}
+        initialData={
+          selectedProduct
+            ? { name: selectedProduct.name, price: selectedProduct.price ?? 0 }
+            : undefined
+        }
+        title="Edit Product"
+        isSubmitting={false}
+      />
+
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" />
         </Button>
+        <div>
+          <h2 className="text-3xl font-bold">Products</h2>
+          {currentContext.type !== "all" && (
+            <p className="text-sm text-gray-500">
+              {currentContext.type === "category"
+                ? `Under Category: ${currentContext.name}`
+                : `Under Service: ${currentContext.name}`}
+            </p>
+          )}
+        </div>
+        <div className="ml-auto">
+          <Button onClick={() => setCreateModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add New Product
+          </Button>
+        </div>
       </div>
+
+      {!idType && createModalOpen && (
+        <div className="p-4 bg-gray-50 rounded-md mb-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Service</label>
+            <Select value={selectedService} onValueChange={setSelectedService}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent>
+                {services.map((service) => (
+                  <SelectItem key={service.id} value={service.id}>
+                    {service.name} ({service.pricingModel})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500">
+              {selectedService &&
+                (services.find((s) => s.id === selectedService)?.pricingModel ===
+                "per_item"
+                  ? "Will create under the service's category"
+                  : "Will create under the service directly")}
+            </p>
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Products</CardTitle>
-          <CardDescription>
-            Configure products for your application. You can add, edit, or remove products.
-          </CardDescription>
+          <CardTitle>Product List</CardTitle>
+          {currentContext.type !== "all" && (
+            <p className="text-sm text-gray-500">
+              Showing products{" "}
+              {currentContext.type === "category"
+                ? `for category "${currentContext.name}"`
+                : `for service "${currentContext.name}"`}
+            </p>
+          )}
         </CardHeader>
-        <CardContent>
-          {data?.products.map((product) => (
-            <div key={product.id} className="p-4 border rounded-md mb-2">
-              <div className="flex justify-between items-center">
+        <CardContent className="space-y-4">
+          {products.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">
+                {idType === "category"
+                  ? "No products found under this category"
+                  : idType === "service"
+                  ? "No products found under this service"
+                  : "No products found"}
+              </p>
+            </div>
+          ) : (
+            products.map((product) => (
+              <div
+                key={product.id}
+                className="flex justify-between items-center p-4 border rounded-md"
+              >
                 <div>
                   <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-sm text-gray-500">{product.description}</p>
-                  <div className="flex items-center gap-4 mt-1">
-                    <span className="font-semibold">${product.price.toFixed(2)}</span>
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {product.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
+                  <p className="text-sm">
+                    {product.price !== undefined
+                      ? `$${product.price.toFixed(2)}`
+                      : "Price not set"}
+                  </p>
+                  {product.categoryName && (
+                    <p className="text-xs text-gray-500">
+                      Category: {product.categoryName}
+                    </p>
+                  )}
+                  {product.serviceName && (
+                    <p className="text-xs text-gray-500">
+                      Service: {product.serviceName}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <Button variant="outline" className="mr-2">Edit</Button>
-                  <Button variant="destructive" size="sm">Delete</Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setEditModalOpen(true);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => deleteProduct(product.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </CardContent>
       </Card>
     </div>

@@ -23,7 +23,7 @@ import FCMConfigPage from "./pages/config/fcm";
 import AreaConfigPage from "./pages/config/area";
 import CategoriesConfigPage from "./pages/config/categories";
 import ProductsConfigPage from "./pages/config/products";
-import ProductCreatePage from "./pages/config/products/create";
+// import ProductCreatePage from "./pages/config/products/create";
 import CouponsConfigPage from "./pages/config/coupons";
 import CreateCouponPage from "./pages/config/coupons/create";
 import LoginPage from "./pages/auth/login";
@@ -40,7 +40,6 @@ import ServicePage from "./pages/Service";
 import AppBanner from "./pages/AppBanner";
 import MapDemo from './pages/map-demo';
 import Temp from "./pages/Temp";
-import Prodcat from './components/products and category configuration/prodcat';
 
 const queryClient = new QueryClient();
 
@@ -79,12 +78,11 @@ const App = () => (
             <Route path="/config/app-banner/edit/:id" element={<AuthGuard><BannerEditPage /></AuthGuard>} />
             <Route path="/config/fcm" element={<AuthGuard><FCMConfigPage /></AuthGuard>} />
             <Route path="/config/area" element={<AuthGuard><AreaConfigPage /></AuthGuard>} />
-            <Route path="/pro_cat" element={<AuthGuard><Prodcat /></AuthGuard>} />
             <Route path="/config/categories" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
             <Route path="/config/categories/:serviceId" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
             <Route path="/config/products" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
             <Route path="/config/products/:serviceId" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
-            <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} />
+            {/* <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} /> */}
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
             <Route path="/map-demo" element={<AuthGuard><MapDemo /></AuthGuard>} />

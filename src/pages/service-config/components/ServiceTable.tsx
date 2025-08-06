@@ -40,7 +40,9 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
     try {
       if (service.pricingmodel === "per_kg") {
         // Go directly to product page for per_kg pricing
-        navigate(`/config/products/${service.id}`);
+       navigate(`/config/products/${service.id}`, {
+  state: { idType: 'service' }
+});
       } else {
         // Go to category page for per_item pricing
         navigate(`/config/categories/${service.id}`);
