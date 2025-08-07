@@ -141,11 +141,12 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
             </TableRow>
           ) : (
             localServices.map((service) => (
-              <TableRow
+              <TableRow 
                 key={service.id}
                 onMouseEnter={() => setHoveredRowId(service.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
                 onClick={() => handleServiceClick(service)}
+                className="cursor-grab"
               >
                 <TableCell className="font-medium">{service.name}</TableCell>
                 <TableCell>

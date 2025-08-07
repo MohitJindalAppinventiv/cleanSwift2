@@ -8,6 +8,7 @@ import { CategoryForm } from "./CategoryForm";
 import { useToast } from "@/components/ui/use-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { Service, ServiceSpecificCategory, AllCategoriesResponse, Category, isAllCategoriesResponse } from "./types";
+import { Breadcrumb } from "@/components/breadcrumb/breadcrumb";
 
 const API_BASE_URL = "https://us-central1-laundry-app-dee6a.cloudfunctions.net";
 
@@ -68,14 +69,12 @@ export function CategoriesConfigManager() {
   }, [serviceId, toast]);
 
   const handleCategoryClick = (category: Category) => {
-    // When viewing a specific service's categories, navigate to products page
     if (serviceId) {
       const categoryId = isAllCategoriesResponse(category) ? category.categoryId : category.id;
       navigate(`/config/products/${categoryId}`, {
-  state: { idType: 'category' }
-});
+        state: { idType: 'category' },
+      });
     } else {
-      // When viewing all categories, navigate to the service's categories page
       const targetServiceId = isAllCategoriesResponse(category)
         ? services.find(s => s.name === category.serviceName)?.id
         : category.serviceId;
@@ -185,9 +184,7 @@ export function CategoriesConfigManager() {
       const response = await axios.put(`${API_BASE_URL}/updateCategory`, 
         { name: formData.name },
         { 
-          params: {
-            categoryId
-          }
+          params: { categoryId }
         }
       );
       
@@ -250,6 +247,12 @@ export function CategoriesConfigManager() {
     handleDeleteCategory(getCategoryId(category));
   };
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: "Services", to: "/config/services" },
+    { label: "Categories", to: serviceId ? `/config/categories/${serviceId}` : "/config/categories" },
+  ];
+
   if (isLoading) {
     return (
       <Card>
@@ -266,6 +269,7 @@ export function CategoriesConfigManager() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={breadcrumbItems} />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -341,13 +345,6 @@ export function CategoriesConfigManager() {
                           <p className="text-xs text-muted-foreground">
                             Service: {getServiceName(category)}
                           </p>
-                          {/* <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            isPerItem
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-orange-100 text-orange-800'
-                          }`}>
-                            {isPerItem ? 'Per Item' : 'Per Kg'}
-                          </span> */}
                         </div>
                       )}
                       {!isAllCategoriesResponse(category) && category.createdAt && (

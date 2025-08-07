@@ -14,13 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductFormValues } from "./ProductForm";
+import { Breadcrumb } from "@/components/breadcrumb/breadcrumb";
 
 const API_BASE_URL = "https://us-central1-laundry-app-dee6a.cloudfunctions.net";
 
 interface Product {
   id: string;
   name: string;
-  price?: number; // Optional to match API response
+  price?: number;
   categoryId?: string;
   serviceId?: string;
   categoryName?: string;
@@ -42,7 +43,10 @@ interface Category {
 export function ProductsConfigManager() {
   const { toast } = useToast();
   const { state } = useLocation();
-  const { serviceId: paramServiceId, serviceId: paramCategoryId } = useParams();
+  const { serviceId: paramServiceId, serviceId: paramCategoryId } = useParams<{
+    serviceId?: string;
+    categoryId?: string;
+  }>();
   const navigate = useNavigate();
   const idType = state?.idType;
 
@@ -54,6 +58,8 @@ export function ProductsConfigManager() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
   const [currentContext, setCurrentContext] = useState<{
     type: "category" | "service" | "all";
     name?: string;
@@ -82,16 +88,25 @@ export function ProductsConfigManager() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [servicesRes, categoriesRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/getAllServices`),
-          axios.get(`${API_BASE_URL}/getAllCategoriesWithServiceNames`),
-        ]);
+        const servicesRes = await axios.get(`${API_BASE_URL}/getAllServices`);
         setServices(servicesRes.data.data);
-        setCategories(categoriesRes.data.data);
       } catch (error) {
+        console.error("Error fetching services:", error);
         toast({
           title: "Error",
-          description: "Failed to load services and categories",
+          description: "Failed to load services",
+          variant: "destructive",
+        });
+      }
+
+      try {
+        const categoriesRes = await axios.get(`${API_BASE_URL}/getAllCategoriesWithServiceNames`);
+        setCategories(categoriesRes.data.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load categories",
           variant: "destructive",
         });
       }
@@ -120,7 +135,7 @@ export function ProductsConfigManager() {
         const fetchedProducts = response.data.data.map((item: any) => ({
           id: item.productId || item.id,
           name: item.productName || item.name,
-          price: item.price ?? 0, // Default to 0 if price is undefined
+          price: item.price ?? 0,
           categoryId: item.categoryId || item.CategoryId,
           serviceId: item.serviceId,
           categoryName: item.categoryName,
@@ -140,7 +155,7 @@ export function ProductsConfigManager() {
           }`,
           variant: "destructive",
         });
-        setProducts([]); // Set empty array on error to show "No products" message
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
@@ -149,97 +164,92 @@ export function ProductsConfigManager() {
     fetchProducts();
   }, [idType, paramServiceId, paramCategoryId, toast]);
 
- const createProduct = async (productData: ProductFormValues) => {
-  try {
-    let categoryIdToUse: string | undefined;
-    let serviceIdToUse: string | undefined;
+  const createProduct = async (productData: ProductFormValues) => {
+    try {
+      let categoryIdToUse: string | undefined;
+      let serviceIdToUse: string | undefined;
 
-    if (idType === "category" && paramCategoryId) {
-      categoryIdToUse = paramCategoryId;
-    } else if (idType === "service" && paramServiceId) {
-      serviceIdToUse = paramServiceId;
-    } else {
-      // When idType is undefined (all products view)
-      if (!selectedService) {
-        toast({
-          title: "Error",
-          description: "Please select a service first",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const service = services.find((s) => s.id === selectedService);
-      if (!service) {
-        toast({
-          title: "Error",
-          description: "Selected service not found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (service.pricingModel === "per_item") {
-        const matchingCategory = categories.find(
-          (cat) => cat.serviceName === service.name
-        );
-        if (!matchingCategory) {
+      if (idType === "category" && paramCategoryId) {
+        categoryIdToUse = paramCategoryId;
+      } else if (idType === "service" && paramServiceId) {
+        serviceIdToUse = paramServiceId;
+      } else {
+        if (!selectedService) {
           toast({
             title: "Error",
-            description: "No category found for the selected service",
+            description: "Please select a service first",
             variant: "destructive",
           });
           return;
         }
-        categoryIdToUse = matchingCategory.categoryId;
-      } else {
-        serviceIdToUse = service.id;
+
+        const service = services.find((s) => s.id === selectedService);
+        if (!service) {
+          toast({
+            title: "Error",
+            description: "Selected service not found",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (service.pricingModel === "per_item") {
+          if (!selectedCategory) {
+            toast({
+              title: "Error",
+              description: "Please select a category for this service",
+              variant: "destructive",
+            });
+            return;
+          }
+          categoryIdToUse = selectedCategory;
+        } else {
+          serviceIdToUse = service.id;
+        }
       }
-    }
 
-    const response = await axios.post(`${API_BASE_URL}/createProduct`, {
-      name: productData.name,
-      price: productData.price,
-      ...(categoryIdToUse && { categoryId: categoryIdToUse }),
-      ...(serviceIdToUse && { serviceId: serviceIdToUse }),
-    });
-
-    // Derive categoryName and serviceName for the new product
-    const category = categoryIdToUse
-      ? categories.find((c) => c.categoryId === categoryIdToUse)
-      : null;
-    const service = serviceIdToUse
-      ? services.find((s) => s.id === serviceIdToUse)
-      : category
-      ? services.find((s) => s.name === category.serviceName)
-      : null;
-
-    toast({
-      title: "Success",
-      description: "Product created successfully",
-    });
-    setCreateModalOpen(false);
-    setProducts([
-      ...products,
-      {
-        id: response.data.id,
+      const response = await axios.post(`${API_BASE_URL}/createProduct`, {
         name: productData.name,
         price: productData.price,
-        categoryId: categoryIdToUse,
-        serviceId: serviceIdToUse,
-        categoryName: category?.categoryName,
-        serviceName: service?.name,
-      },
-    ]);
-  } catch (error) {
-    console.error("Error creating product:", error);
-    toast({
-      title: "Error",
-      description: "Failed to create product",
-      variant: "destructive",
-    });
-  }
-};
+        ...(categoryIdToUse && { categoryId: categoryIdToUse }),
+        ...(serviceIdToUse && { serviceId: serviceIdToUse }),
+      });
+
+      const category = categoryIdToUse
+        ? categories.find((c) => c.categoryId === categoryIdToUse)
+        : null;
+      const service = serviceIdToUse
+        ? services.find((s) => s.id === serviceIdToUse)
+        : category
+        ? services.find((s) => s.name === category.serviceName)
+        : null;
+
+      toast({
+        title: "Success",
+        description: "Product created successfully",
+      });
+      setCreateModalOpen(false);
+      setProducts([
+        ...products,
+        {
+          id: response.data.id,
+          name: productData.name,
+          price: productData.price,
+          categoryId: categoryIdToUse,
+          serviceId: serviceIdToUse,
+          categoryName: category?.categoryName,
+          serviceName: service?.name,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create product",
+        variant: "destructive",
+      });
+    }
+  };
 
   const updateProduct = async (
     productId: string,
@@ -249,7 +259,6 @@ export function ProductsConfigManager() {
       await axios.put(
         `${API_BASE_URL}/updateProduct`,
         {
-          
           name: productData.name,
           price: productData.price,
         },
@@ -271,6 +280,7 @@ export function ProductsConfigManager() {
         )
       );
     } catch (error) {
+      console.error("Error updating product:", error);
       toast({
         title: "Error",
         description: "Failed to update product",
@@ -291,11 +301,29 @@ export function ProductsConfigManager() {
       });
       setProducts(products.filter((p) => p.id !== productId));
     } catch (error) {
+      console.error("Error deleting product:", error);
       toast({
         title: "Error",
         description: "Failed to delete product",
         variant: "destructive",
       });
+    }
+  };
+
+  // Breadcrumb items
+  const breadcrumbItems = () => {
+    const baseItems = [{ label: "Services", to: "/config/services" }];
+
+    if (idType === "category" && paramCategoryId) {
+      const category = categories.find((c) => c.categoryId === paramCategoryId);
+      const service = services.find((s) => s.name === category?.serviceName);
+      return [
+        ...baseItems,
+        { label: "Categories", to: `/config/categories/${service?.id || ""}` },
+        { label: "Products", to: `/config/products/${paramCategoryId}` },
+      ];
+    } else {
+      return [...baseItems, { label: "Products", to: `/config/products${paramServiceId ? `/${paramServiceId}` : ""}` }];
     }
   };
 
@@ -312,31 +340,7 @@ export function ProductsConfigManager() {
 
   return (
     <div className="space-y-6">
-      <ProductModal
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        onSubmit={createProduct}
-        title="Add New Product"
-        isSubmitting={false}
-      />
-
-      <ProductModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        onSubmit={(data: ProductFormValues) => {
-          if (selectedProduct) {
-            updateProduct(selectedProduct.id, data);
-          }
-        }}
-        initialData={
-          selectedProduct
-            ? { name: selectedProduct.name, price: selectedProduct.price ?? 0 }
-            : undefined
-        }
-        title="Edit Product"
-        isSubmitting={false}
-      />
-
+      <Breadcrumb items={breadcrumbItems()} />
       <div className="flex items-center gap-4">
         <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
@@ -358,32 +362,37 @@ export function ProductsConfigManager() {
         </div>
       </div>
 
-      {!idType && createModalOpen && (
-        <div className="p-4 bg-gray-50 rounded-md mb-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Select Service</label>
-            <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a service" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    {service.name} ({service.pricingModel})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500">
-              {selectedService &&
-                (services.find((s) => s.id === selectedService)?.pricingModel ===
-                "per_item"
-                  ? "Will create under the service's category"
-                  : "Will create under the service directly")}
-            </p>
-          </div>
-        </div>
-      )}
+      <ProductModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onSubmit={createProduct}
+        title="Add New Product"
+        isSubmitting={false}
+        services={services}
+        categories={categories}
+        selectedService={selectedService}
+        setSelectedService={setSelectedService}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        showServiceCategorySelect={!idType}
+      />
+
+      <ProductModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onSubmit={(data: ProductFormValues) => {
+          if (selectedProduct) {
+            updateProduct(selectedProduct.id, data);
+          }
+        }}
+        initialData={
+          selectedProduct
+            ? { name: selectedProduct.name, price: selectedProduct.price ?? 0 }
+            : undefined
+        }
+        title="Edit Product"
+        isSubmitting={false}
+      />
 
       <Card>
         <CardHeader>

@@ -18,12 +18,11 @@ import ServiceEditPage from "./pages/service-config/edit";
 import ServiceCreatePage from "./pages/service-config/create";
 import AppBannerPage from "./pages/config/app-banner";
 import BannerCreatePage from "./pages/config/app-banner/create";
-import BannerEditPage from "./pages/config/app-banner";
+import BannerEditPage from "@/pages/config/components/app-banner/BannerEditPage";
 import FCMConfigPage from "./pages/config/fcm";
 import AreaConfigPage from "./pages/config/area";
 import CategoriesConfigPage from "./pages/config/categories";
 import ProductsConfigPage from "./pages/config/products";
-// import ProductCreatePage from "./pages/config/products/create";
 import CouponsConfigPage from "./pages/config/coupons";
 import CreateCouponPage from "./pages/config/coupons/create";
 import LoginPage from "./pages/auth/login";
@@ -82,7 +81,6 @@ const App = () => (
             <Route path="/config/categories/:serviceId" element={<AuthGuard><CategoriesConfigPage /></AuthGuard>} />
             <Route path="/config/products" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
             <Route path="/config/products/:serviceId" element={<AuthGuard><ProductsConfigPage /></AuthGuard>} />
-            {/* <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} /> */}
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
             <Route path="/map-demo" element={<AuthGuard><MapDemo /></AuthGuard>} />

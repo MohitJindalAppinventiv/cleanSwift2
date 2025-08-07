@@ -4,7 +4,6 @@ import { CategoriesConfigManager } from "./components/categories/CategoriesConfi
 export default function CategoriesConfigPage() {
   return (
     <DashboardLayout>
-
       <CategoriesConfigManager /> 
     </DashboardLayout>
   );
