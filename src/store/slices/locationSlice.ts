@@ -227,6 +227,7 @@ export const getAreas = createAsyncThunk(
       const response = await axiosInstance.get(API.GET_AREAS(), {
         params: { page, limit },
       });
+      console.log("location response",response);
 
       const rawData = response.data;
 
@@ -240,9 +241,9 @@ export const getAreas = createAsyncThunk(
 
       return {
         data: transformed,
-        total: rawData.total,
-        page: rawData.page,
-        limit: rawData.limit,
+        total: rawData.pagination.totalPages,
+        page: rawData.pagination.page,
+        limit: rawData.pagination.limit,
       };
     } catch (err: any) {
       return rejectWithValue(

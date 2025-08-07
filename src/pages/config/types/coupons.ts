@@ -7,7 +7,6 @@ export interface Coupon {
   validFrom: Date;
   validUntil: Date;
   minOrderValue?: number;
-  maxUsage?: number;
   currentUsage: number;
   isActive: boolean;
   createdAt: Date;

@@ -37,7 +37,7 @@ export const loginUser = createAsyncThunk<
 
     localStorage.setItem("authToken", res.idToken);
     localStorage.setItem("refreshToken", res.refreshToken);
-    localStorage.setItem("sessionToken",res.sessionToken);
+    localStorage.setItem("sessionToken", res.sessionToken);
     return res.idToken;
   } catch (error) {
     return rejectWithValue(
@@ -52,13 +52,14 @@ export const logoutUser = createAsyncThunk<
   { rejectValue: string }
 >("auth/logoutUser", async (_, { rejectWithValue }) => {
   try {
-    const res = await  logoutAPI();
+    const res = await logoutAPI();
 
     console.log("response in slice", res);
 
     localStorage.removeItem("authToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("sessionToken");
+    localStorage.removeItem("persist:root");
     return res;
   } catch (error) {
     return rejectWithValue(
@@ -82,18 +83,7 @@ export const checkAuthStatus = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: 
-  {
-    // logout: (state) => {
-    //   state.user = null;
-    //   state.isAuthenticated = false;
-    //   state.error = null;
-    //   localStorage.removeItem("authToken");
-    // },
-    // clearError: (state) => {
-    //   state.error = null;
-    // },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       // Login cases
@@ -111,9 +101,13 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      .addCase(logoutUser.fulfilled, (state, action) => {
-        state = initialState;
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.isLoading = false;
+        state.error = null;
       })
+
       // Check auth status cases
       .addCase(checkAuthStatus.pending, (state) => {
         state.isLoading = true;
@@ -127,7 +121,7 @@ const authSlice = createSlice({
       })
       .addCase(checkAuthStatus.rejected, (state) => {
         state.isLoading = false;
-      })
+      });
   },
 });
 

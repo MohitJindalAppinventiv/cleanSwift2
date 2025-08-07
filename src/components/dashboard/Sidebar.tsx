@@ -23,6 +23,7 @@ import {
   Ticket,
   BookTemplate,
   Eye,
+  AlarmCheck,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,8 @@ const sidebarItems: SidebarItem[] = [
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
-      {title:"Temp",icon:Eye,href:"/temp"}
+      {title:"Temp",icon:Eye,href:"/temp"},
+      {title:"Slots Config",icon:AlarmCheck,href:"/config/slots"}
     ]
   },
   { title: "Settings", icon: Settings, href: "/settings" },

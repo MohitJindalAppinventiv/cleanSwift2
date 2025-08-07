@@ -23,11 +23,12 @@ import API from "@/api/endpoints/endpoint"; // Adjust this path as needed
 const formSchema = z.object({
   code: z.string().min(3).max(20),
   couponName: z.string().min(3).max(50),
-  discountPercentage: z.coerce.number().min(1).max(100),
+  maxDiscount: z.coerce.number().min(1),
   validFrom: z.string().nonempty(),
   validUntil: z.string().nonempty(),
   minOrderValue: z.coerce.number().min(0),
   isActive: z.boolean().default(true),
+  discountPercentage: z.coerce.number().min(1).max(100),
   // maxUsage: z.coerce.number().min(1, "Must allow at least 1 use"), // ✅ New field
 });
 
@@ -42,13 +43,14 @@ export function CouponForm() {
     defaultValues: {
       code: "",
       couponName: "",
-      discountPercentage: 10,
+      maxDiscount: 100,
       validFrom: new Date().toISOString().split("T")[0],
       validUntil: new Date(new Date().setMonth(new Date().getMonth() + 3))
         .toISOString()
         .split("T")[0],
       minOrderValue: 0,
       isActive: true,
+      discountPercentage: 10,
       // maxUsage: 1, // ✅ New field
     },
   });
@@ -58,11 +60,12 @@ export function CouponForm() {
       const res = await axiosInstance.post(API.CREATE_COUPON(), {
         couponCode: data.code,
         couponName: data.couponName,
-        maxDiscount: data.discountPercentage,
+        maxDiscount: data.maxDiscount,
         minValue: data.minOrderValue,
         validFrom: data.validFrom,
         validTill: data.validUntil,
         isActive: data.isActive,
+        discountPercentage:data.discountPercentage
         // maxUsage: data.maxUsage, // ✅ Added here
       });
       console.log("response in create coupon",res);
@@ -121,14 +124,14 @@ export function CouponForm() {
 
           <FormField
             control={form.control}
-            name="discountPercentage"
+            name="maxDiscount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Discount Percentage</FormLabel>
+                <FormLabel>Maximum Discount</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
-                <FormDescription>Percentage discount to apply</FormDescription>
+                <FormDescription>Maximum Discount to apply</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -199,22 +202,22 @@ export function CouponForm() {
               </FormItem>
             )}
           />
-          {/* <FormField
+          <FormField
             control={form.control}
-            name="maxUsage"
+            name="discountPercentage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Maximum Usage</FormLabel>
+                <FormLabel>Discount Percentage</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Maximum number of times this coupon can be used
+                  Discount Percentage
                 </FormDescription>
-                <FormMessage />
+                <FormControl />
               </FormItem>
             )}
-          /> */}
+          />
         </div>
 
         <div className="flex justify-end gap-4">

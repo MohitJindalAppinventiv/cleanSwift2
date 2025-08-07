@@ -17,6 +17,7 @@ import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { logoutUser } from "@/store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
+import { clearProfile } from "@/store/slices/settingsSlice";
 
 export function TopBar() {
   const isMobile = useIsMobile();
@@ -27,11 +28,13 @@ export function TopBar() {
   
   const handleLogout = async() => {
     await dispatch(logoutUser());
+    const response =  dispatch(clearProfile());
+    // console.log("clear profile response",response);
     navigate("/login");
     toast("Logged out successfully", {
       description: "You have been logged out of your account.",
     });
-    navigate("/login");
+    console.log("navigating");
   };
 
   return (
