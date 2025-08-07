@@ -451,6 +451,7 @@ const couponSchema = z.object({
   couponCode: z.string().min(2),
   maxDiscount: z.coerce.number().positive(),
   minValue: z.coerce.number().positive(),
+  discountPercentage:z.coerce.number().min(1).max(100),
   validFrom: z.string(),
   validTill: z.string(),
   isActive: z.boolean(),
@@ -465,6 +466,7 @@ interface Props {
     couponCode: string;
     maxDiscount: number;
     minValue: number;
+    discountPercentage:number;
     validFrom: { _seconds: number };
     validTill: { _seconds: number };
     isActive: boolean;
@@ -491,6 +493,7 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
       couponCode: coupon.couponCode,
       maxDiscount: coupon.maxDiscount,
       minValue: coupon.minValue,
+      discountPercentage:coupon.discountPercentage,
       validFrom: format(
         new Date(coupon.validFrom._seconds * 1000),
         "yyyy-MM-dd"
@@ -562,6 +565,16 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
             {errors.maxDiscount && (
               <p className="text-red-500 text-sm">
                 {errors.maxDiscount.message}
+              </p>
+            )}
+          </div>
+
+                    <div>
+            <label>Discount Percentage</label>
+            <Input type="number" {...register("discountPercentage")} />
+            {errors.discountPercentage && (
+              <p className="text-red-500 text-sm">
+                {errors.discountPercentage.message}
               </p>
             )}
           </div>

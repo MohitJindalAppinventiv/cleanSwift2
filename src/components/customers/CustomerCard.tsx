@@ -17,30 +17,30 @@ export const CustomerCard = ({ customer }: CustomerCardProps) => {
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarFallback>
-              {customer.name
+              {customer.fullName
                 .split(" ")
                 .map((n) => n[0])
                 .join("")}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h4 className="font-bold">{customer.name}</h4>
+            <h4 className="font-bold">{customer.fullName}</h4>
             <p className="text-sm text-muted-foreground">
-              {customer.email}
+              {customer?.email}
             </p>
           </div>
         </div>
         <Badge
           variant="outline"
-          className={`${statusStyles[customer.status]}`}
+          className={`${statusStyles[customer?.isActive]}`}
         >
-          {customer.status}
+          {customer.isActive}
         </Badge>
       </div>
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div>
           <p className="text-muted-foreground">Phone:</p>
-          <p>{customer.phone}</p>
+          <p>{customer.phoneNumber}</p>
         </div>
         <div>
           <p className="text-muted-foreground">Orders:</p>

@@ -32,35 +32,72 @@ axiosInstance.interceptors.request.use(
 //     }
 // )
 
-// Axios response interceptor
+// // Axios response interceptor
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     // If 401 (Unauthorized) and not already retried
+//     if (error.response.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true; // Mark as retried
+
+//       try {
+//         // 1. Call refresh token API
+//         const refreshToken = localStorage.getItem("refreshToken");
+//         console.log("refresh token",refreshToken);
+//         const res = await axiosInstance.post(`/refreshToken`, {
+//           refreshToken,
+//         });
+
+//         console.log("refresh token",res);
+
+//         // 2. Update new tokens
+//         const { id_token : authToken } = res.data;
+//         localStorage.setItem("authToken", authToken);
+
+//         // 3. Retry original request with new token
+//         originalRequest.headers.Authorization = `Bearer ${authToken}`;
+//         return axiosInstance(originalRequest);
+//       } catch (err) {
+//         // Refresh failed! Force logout
+//         localStorage.removeItem("authToken");
+//         localStorage.removeItem("refreshToken");
+//         // window.location.href = "/login"; // Redirect to login
+//         return Promise.reject(err);
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+
+
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 (Unauthorized) and not already retried
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // Mark as retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
       try {
-        // 1. Call refresh token API
         const refreshToken = localStorage.getItem("refreshToken");
-        const res = await axios.post(`${apiUrl}/refreshToken`, {
+        const res = await axiosInstance.post("/refreshToken", {
           refreshToken,
         });
 
-        // 2. Update new tokens
-        const { authToken } = res.data;
+        const { id_token: authToken } = res.data;
         localStorage.setItem("authToken", authToken);
 
-        // 3. Retry original request with new token
+        // Retry original request
         originalRequest.headers.Authorization = `Bearer ${authToken}`;
         return axiosInstance(originalRequest);
       } catch (err) {
-        // Refresh failed! Force logout
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
-        // window.location.href = "/login"; // Redirect to login
         return Promise.reject(err);
       }
     }
@@ -68,6 +105,3 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-
-

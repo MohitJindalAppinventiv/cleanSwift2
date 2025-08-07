@@ -1,13 +1,14 @@
 
 export interface Customer {
   id: string;
-  name: string;
-  email: string;
-  phone: string;
-  orders: number;
-  spent: number;
-  status: "active" | "inactive" | "new";
-  lastOrder: string;
+  readableUserId: string;
+  fullName: string;
+  phoneNumber: string;
+  alternateNumber: string | null;
+  isActive: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deletedByAdmin: boolean;
 }
 
 export const mockCustomers: Customer[] = [

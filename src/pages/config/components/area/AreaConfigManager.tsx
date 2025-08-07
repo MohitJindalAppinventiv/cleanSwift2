@@ -165,7 +165,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch } from "@/store/index";
+import { AppDispatch, RootState } from "@/store/index";
 import {
   Card,
   CardContent,
@@ -207,8 +207,8 @@ export function AreaConfigManager() {
   const isLoading = useSelector(selectIsLoading);
   const error = useSelector(selectError);
   const isSuccess = useSelector(selectIsSuccess);
-  const total = useSelector((state: any) => state.location.total); // adapt if stored differently
-
+  const total = useSelector((state: RootState) => state.location.total); // adapt if stored differently
+console.log("total Pages",total)
   const [activeTab, setActiveTab] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [editingArea, setEditingArea] = useState<Area | null>(null);

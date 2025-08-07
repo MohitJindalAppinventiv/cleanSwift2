@@ -12,8 +12,7 @@ import { format } from "date-fns";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { axiosInstance } from "@/api/axios/axiosInstance";
-import API from "@/api/endpoints/endpoint";
+
 import { CouponFormModal } from "./CouponFormModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -23,6 +22,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useDispatch } from "react-redux";
+import { deleteCoupon, fetchCoupons } from "@/store/slices/couponSlice";
 
 interface FirestoreTimestamp {
   _seconds: number;
@@ -35,6 +36,7 @@ interface Coupon {
   couponName: string;
   maxDiscount: string;
   minValue: number;
+  // discountPercentage:number;
   validFrom: FirestoreTimestamp;
   validTill: FirestoreTimestamp;
   isActive: boolean;
@@ -44,32 +46,29 @@ interface Coupon {
 interface Props {
   coupons: Coupon[];
   loading: boolean;
-  refetchCoupons: () => void;
 }
 
-export function CouponsTable({ coupons, loading, refetchCoupons }: Props) {
+export function CouponsTable({ coupons, loading }: Props) {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [couponIdToDelete, setCouponIdToDelete] = useState<string | null>(null);
-
+  const dispatch = useDispatch();
   const convertFirestoreTimestamp = (ts: FirestoreTimestamp): Date =>
     new Date(ts._seconds * 1000);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
-    try {
-      const res = await axiosInstance.delete(API.DELETE_COUPON(), {
-        params: { couponId: id },
-      });
 
-      toast.success("Coupon deleted");
+    try {
+      dispatch(deleteCoupon(id));
     } catch (error) {
-      toast.error("Failed to delete coupon");
-    } finally {
       setDeletingId(null);
-      refetchCoupons();
     }
   };
+
+  const refetchCoupon=async()=>{
+    await dispatch(fetchCoupons());
+  }
 
   if (loading) {
     return (
@@ -160,7 +159,7 @@ export function CouponsTable({ coupons, loading, refetchCoupons }: Props) {
         <CouponFormModal
           coupon={selectedCoupon}
           onClose={() => setSelectedCoupon(null)}
-          onUpdateSuccess={refetchCoupons}
+          onUpdateSuccess={refetchCoupon}
         />
       )}
 

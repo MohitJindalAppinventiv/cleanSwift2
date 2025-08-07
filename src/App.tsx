@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import { store } from './store';
+import { persistor, store } from './store';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,6 +41,9 @@ import AppBanner from "./pages/AppBanner";
 import MapDemo from './pages/map-demo';
 import Temp from "./pages/Temp";
 import Prodcat from './components/products and category configuration/prodcat';
+import { PublicGuard } from './components/auth/PublicGuard';
+import { PersistGate } from 'redux-persist/integration/react';
+import SlotsConfigPage from './pages/SlotsConfigPage';
 
 const queryClient = new QueryClient();
 
@@ -50,17 +53,25 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PersistGate loading={null} persistor={persistor}>
+
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/redirect-login" element={<SuccessPage />} />
+
+            {/* Public Routes */}
+            <Route path="/login" element={<PublicGuard><LoginPage /></PublicGuard>} />
+            <Route path="/forgot-password" element={<PublicGuard><ForgotPassword /></PublicGuard>} />
+            <Route path="/redirect-login" element={<PublicGuard><SuccessPage /></PublicGuard>} />
             <Route path="/area-config" element={<AreaConfig />} />
             <Route path="/AppBanner" element={<AppBanner />} />
             <Route path="/Serv" element={<ServicePage />} />
             <Route path="/temp" element={<Temp />} />
-            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/seed" element={<Seed />} />
+
+
+            {/* Protected Routes */}
+
+            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
             <Route path="/order-details/:id" element={<AuthGuard><OrderDetailsPage /></AuthGuard>} />
             <Route path="/order/create" element={<AuthGuard><CreateOrderPage /></AuthGuard>} />
@@ -71,6 +82,8 @@ const App = () => (
             <Route path="/reviews" element={<AuthGuard><ReviewsPage /></AuthGuard>} />
             <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
             <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
+
+            {/* Configuration Service */}
             <Route path="/config/services" element={<AuthGuard><ServicesConfigPage /></AuthGuard>} />
             <Route path="/config/services/edit/:id" element={<AuthGuard><ServiceEditPage /></AuthGuard>} />
             <Route path="/config/services/create" element={<AuthGuard><ServiceCreatePage /></AuthGuard>} />
@@ -87,10 +100,16 @@ const App = () => (
             <Route path="/config/products/create" element={<AuthGuard><ProductCreatePage /></AuthGuard>} />
             <Route path="/config/coupons" element={<AuthGuard><CouponsConfigPage /></AuthGuard>} />
             <Route path="/config/coupons/create" element={<AuthGuard><CreateCouponPage /></AuthGuard>} />
+            <Route path='/config/slots' element={<AuthGuard><SlotsConfigPage /></AuthGuard>} />
+
+            {/* Demo Routes */}
             <Route path="/map-demo" element={<AuthGuard><MapDemo /></AuthGuard>} />
+
+            {/* Catch All routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        </PersistGate>
       </TooltipProvider>
     </QueryClientProvider>
   </Provider>

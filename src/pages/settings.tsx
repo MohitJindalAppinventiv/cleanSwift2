@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/store/index"; // Adjust import path as needed
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
   Card,
@@ -15,9 +17,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Shield } from "lucide-react";
-import { axiosInstance } from "@/api/axios/axiosInstance";
 import { toast } from "@/components/ui/use-toast";
-import API from "@/api/endpoints/endpoint";
+import {
+  fetchProfile,
+  updatePhoneNumber,
+  updatePassword,
+  selectProfile,
+  selectProfileLoading,
+  selectProfileError,
+  clearError,
+} from "../store/slices/settingsSlice"; // Adjust import path as needed
+
 const passwordSchema = z
   .object({
     oldPassword: z.string().min(6),
@@ -34,7 +44,11 @@ const passwordSchema = z
   });
 
 export default function SettingsPage() {
-  const [profile, setProfile] = useState<any>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const profile = useSelector(selectProfile);
+  const loading = useSelector(selectProfileLoading);
+  const error = useSelector(selectProfileError);
+
   const [mobile, setMobile] = useState("");
 
   const {
@@ -46,51 +60,82 @@ export default function SettingsPage() {
     resolver: zodResolver(passwordSchema),
   });
 
+  // Initialize mobile number from profile when profile is loaded
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axiosInstance.get(`${API.GET_PROFILE()}`);
-        if (res.data.success) {
-          setProfile(res.data.profile);
-          setMobile(res.data.profile.phoneNumber || "");
-        }
-        console.log("response", res);
-      } catch (err) {
-        toast({ title: "Failed to load profile", variant: "destructive" });
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (profile?.phoneNumber) {
+      setMobile(profile.phoneNumber.substring(3));
+    }
+  }, [profile]);
+
+  // Fetch profile on component mount
+  useEffect(() => {
+    if (!profile) {
+      dispatch(fetchProfile());
+    }
+  }, [dispatch, profile]);
+
+  // Handle errors from Redux state
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      });
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   const handlePasswordUpdate = async (data: any) => {
-    console.log(data)
     try {
-      await axiosInstance.post(`${API.UPDATE_PASSWORD()}`, {oldPassword:data.oldPassword,newPassword:data.newPassword});
+      const result = await dispatch(
+        updatePassword({
+          oldPassword: data.oldPassword,
+          newPassword: data.newPassword,
+        })
+      ).unwrap();
+      
       toast({ title: "Password updated successfully!" });
       reset();
     } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err.response?.data?.message || "Failed to update password",
-        variant: "destructive",
-      });
+      // Error is already handled by the useEffect above
+      // This catch block ensures the form doesn't break if there's an error
     }
   };
 
   const handlePhoneUpdate = async () => {
-    try {
-      console.log("running",mobile)
-      const res = await axiosInstance.post(`${API.UPDATE_PHONE_NUMBER()}`, { newPhoneNumber: mobile });
-      console.log(res);
-      toast({ title: "Phone number updated" });
-    } catch (err: any) {
+    // Only update if the mobile number has actually changed
+    const changeMobile=`+91${mobile}`
+    if (changeMobile === profile?.phoneNumber) {
       toast({
-        title: "Failed to update phone",
-        description: err.response?.data?.message || "Try again.",
-        variant: "destructive",
+        title: "No changes",
+        description: "Phone number is the same as current number",
+        variant: "default",
       });
+      return;
+    }
+
+    try {
+      await dispatch(updatePhoneNumber(changeMobile)).unwrap();
+      toast({ title: "Phone number updated successfully!" });
+    } catch (err: any) {
+      // Error is already handled by the useEffect above
+      // Reset mobile to original value if update failed
+      setMobile(profile?.phoneNumber || "");
     }
   };
+
+  if (loading && !profile) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <p>Loading profile...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -125,7 +170,7 @@ export default function SettingsPage() {
                   <div>
                     <Label>ID</Label>
                     <p className="text-muted-foreground">
-                      {profile?.uid}
+                      {profile?.uid || "-"}
                     </p>
                   </div>
                   <div>
@@ -163,7 +208,7 @@ export default function SettingsPage() {
                 <div>
                   <Label>Last Logged In</Label>
                   <p className="text-muted-foreground">
-                    {profile?.lastSignInTime}
+                    {profile?.lastSignInTime || "-"}
                   </p>
                 </div>
               </CardContent>
@@ -186,12 +231,22 @@ export default function SettingsPage() {
                     <Input
                       type="tel"
                       value={mobile}
-                      onChange={(e) => setMobile(e.target.value)}
+                      onChange={(e) => setMobile(`${e.target.value}`)}
+                      disabled={loading}
                     />
-                    <Button type="button" onClick={handlePhoneUpdate}>
-                      Update
+                    <Button 
+                      type="button" 
+                      onClick={handlePhoneUpdate}
+                      disabled={loading || mobile === profile?.phoneNumber}
+                    >
+                      {loading ? "Updating..." : "Update"}
                     </Button>
                   </div>
+                  {mobile !== profile?.phoneNumber && (
+                    <p className="text-sm text-muted-foreground">
+                      Phone number will be updated from "{profile?.phoneNumber || 'Not set'}" to "{mobile}"
+                    </p>
+                  )}
                 </div>
 
                 {/* Update Password */}
@@ -203,7 +258,11 @@ export default function SettingsPage() {
 
                   <div>
                     <Label>Current Password</Label>
-                    <Input type="password" {...register("oldPassword")} />
+                    <Input 
+                      type="password" 
+                      {...register("oldPassword")} 
+                      disabled={loading}
+                    />
                     {errors.oldPassword && (
                       <p className="text-sm text-red-500">
                         {errors.oldPassword.message}
@@ -212,7 +271,11 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <Label>New Password</Label>
-                    <Input type="password" {...register("newPassword")} />
+                    <Input 
+                      type="password" 
+                      {...register("newPassword")} 
+                      disabled={loading}
+                    />
                     {errors.newPassword && (
                       <p className="text-sm text-red-500">
                         {errors.newPassword.message}
@@ -221,14 +284,20 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <Label>Confirm New Password</Label>
-                    <Input type="password" {...register("confirmPassword")} />
+                    <Input 
+                      type="password" 
+                      {...register("confirmPassword")} 
+                      disabled={loading}
+                    />
                     {errors.confirmPassword && (
                       <p className="text-sm text-red-500">
                         {errors.confirmPassword.message}
                       </p>
                     )}
                   </div>
-                  <Button type="submit">Update Password</Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Updating..." : "Update Password"}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
