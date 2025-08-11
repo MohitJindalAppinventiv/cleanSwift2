@@ -99,10 +99,10 @@ export default function UpdateSlotModal({ open, onClose, slot, onUpdated }: Upda
 
 
           {/* <div className="space-y-2">
-            <Label>Date</Label>
+            <Label>Propogate Weeks</Label>
             <Input
               type="number"
-              value={slot.date}
+              value={slot.propogateWeeks}
               onChange={(e) => setDate(e.target.value)}
             />
           </div> */}

@@ -1,16 +1,3 @@
-// import React from 'react'
-// import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
-// export default function SlotsConfigPage() {
-//   return (
-//     <DashboardLayout>
-//         <div>Dashboard config page</div>
-//     </DashboardLayout>
-//   )
-// }
-
-
-// File: pages/SlotsConfigPage.tsx
-
 import React, { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -28,10 +15,6 @@ export default function SlotsConfigPage() {
   console.log("dateRange",dateRange);
 
   const handleAddSlot = () => setShowModal(true);
-
-  // useEffect(()=>{
-    
-  // },[dateRange,typeFilter,setDateRange,setTypeFilter])
 
   return (
     <DashboardLayout>

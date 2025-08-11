@@ -203,6 +203,7 @@ interface StoreLocationState {
   total: number;
   page: number;
   limit: number;
+  totalPages:number;
 }
 
 const initialState: StoreLocationState = {
@@ -214,6 +215,7 @@ const initialState: StoreLocationState = {
   total: 0,
   page: 1,
   limit: 10,
+  totalPages:1,
 };
 
 // GET (with pagination support)
@@ -237,13 +239,16 @@ export const getAreas = createAsyncThunk(
         address: item.address || "N/A",
         range: item.range,
         isActive: item.active,
+        lat:item.coordinates.latitude,
+        lng:item.coordinates.longitude,
       }));
 
       return {
         data: transformed,
-        total: rawData.pagination.totalPages,
+        total: rawData.pagination.total,
         page: rawData.pagination.page,
         limit: rawData.pagination.limit,
+        totalPages:rawData.pagination.totalPages,
       };
     } catch (err: any) {
       return rejectWithValue(
@@ -337,6 +342,7 @@ const storeLocationSlice = createSlice({
       state.total = action.payload.total;
       state.page = action.payload.page;
       state.limit = action.payload.limit;
+      state.totalPages=action.payload.totalPages;
     });
     builder.addCase(getAreas.rejected, (state, action) => {
       state.isLoading = false;
@@ -410,7 +416,7 @@ export const selectIsSuccess = (state: RootState) => state.location.isSuccess;
 export const selectTotal = (state: RootState) => state.location.total;
 export const selectPage = (state: RootState) => state.location.page;
 export const selectLimit = (state: RootState) => state.location.limit;
-
+export const selectTotalPages=(state:RootState)=>state.location.totalPages;
 // Actions
 export const { clearStoreStatus } = storeLocationSlice.actions;
 

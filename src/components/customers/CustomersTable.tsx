@@ -272,7 +272,7 @@ export const CustomersTable = ({
           </Table>
 
           {/* Pagination Controls */}
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-center gap-6 items-center mt-4">
             <Button onClick={handlePrevious} disabled={page === 1}>
               <ChevronLeft className="mr-2 h-4 w-4" />
               Previous
