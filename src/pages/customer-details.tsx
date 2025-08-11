@@ -1,5 +1,299 @@
+// import { useEffect, useState } from "react";
+// import { useParams } from "react-router-dom";
+// import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Badge } from "@/components/ui/badge";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
+// import { mockOrders } from "@/components/dashboard/orders/types";
+// import { OrderStatusBadge } from "@/components/dashboard/orders/OrderStatusBadge";
+// import { useIsMobile } from "@/hooks/use-mobile";
+// import axios from "axios";
+// import { axiosInstance } from "@/api/axios/axiosInstance";
+// import { useNavigate } from "react-router-dom";
+
+// const CustomerDetailsPage = () => {
+//   const { id } = useParams<{ id: string }>();
+//   console.log("id: ", id);
+//   const isMobile = useIsMobile();
+//   const [activeTab, setActiveTab] = useState("details");
+
+//   const [customer, setCustomer] = useState<any>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   const navigate=useNavigate();
+
+//   // 🟡 Replace with real order API later
+//   const customerOrders = mockOrders.filter(
+//     (order) => order.customer === customer?.fullName
+//   );
+
+//   useEffect(() => {
+//     const fetchCustomer = async () => {
+//       setLoading(true);
+//       setError("");
+//       try {
+//         const res = await axiosInstance.get(`/getUserProfileById`, {
+//           params: {
+//             userId: `${id}`,
+//           },
+//         }); // <-- Adjust URL to your backend
+//         console.log("customer details", res);
+//         setCustomer(res.data.data);
+//       } catch (err: any) {
+//         setError("Failed to load customer details");
+//         console.error(err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     if (id) fetchCustomer();
+//   }, [id]);
+
+//   if (loading) {
+//     return (
+//       <DashboardLayout>
+//         <div className="p-6">Loading customer details...</div>
+//       </DashboardLayout>
+//     );
+//   }
+
+//   if (error || !customer) {
+//     return (
+//       <DashboardLayout>
+//         <div className="p-6">
+//           <h2 className="text-2xl font-bold mb-4">Error</h2>
+//           <p>{error || "Customer not found"}</p>
+//         </div>
+//       </DashboardLayout>
+//     );
+//   }
+
+//   return (
+    
+//     <DashboardLayout>
+//       <div className="space-y-6">
+//         {/* <div className="flex items-center justify-between">
+//           <h2 className="text-3xl font-bold tracking-tight">
+//             Customer Details
+//           </h2>
+//           <Badge variant="outline" className="text-green-600 border-green-600">
+//             {customer.isActive ? "Active" : "Inactive"}
+//           </Badge>
+//         </div> */}
+
+//         <div className="flex items-center justify-between">
+//   <div className="flex items-center gap-4">
+//     <button
+//       onClick={() => navigate("/customers")}
+//       className="text-sm px-4 py-2 border rounded-md hover:bg-gray-100 transition"
+//     >
+//       ← Back
+//     </button>
+//     <h2 className="text-3xl font-bold tracking-tight">Customer Details</h2>
+//   </div>
+//   <Badge variant="outline" className="text-green-600 border-green-600">
+//     {customer.isActive ? "Active" : "Inactive"}
+//   </Badge>
+// </div>
+
+
+//         <Card>
+//           <CardContent className="p-6">
+//             <div className="flex flex-col md:flex-row gap-6 items-start">
+//               <div className="flex items-center gap-4">
+//                 {/* <Avatar className="h-20 w-20">
+//                   <AvatarFallback className="text-xl">
+//                     {customer.fullName
+//                       .split(" ")
+//                       .map((n: string) => n[0])
+//                       .join("")}
+//                   </AvatarFallback>
+//                 </Avatar> */}
+//                 <Avatar className="h-20 w-20">
+//                   {customer.profilePictureUrl && (
+//                     <AvatarImage
+//                       src={customer.profilePictureUrl}
+//                       alt={customer.fullName}
+//                     />
+//                   )}
+//                   <AvatarFallback className="text-xl">
+//                     {customer.fullName
+//                       .split(" ")
+//                       .map((n: string) => n[0])
+//                       .join("")}
+//                   </AvatarFallback>
+//                 </Avatar>
+//                 {/* <img src={customer.profileImageUrl} /> */}
+//                 <div>
+//                   <h3 className="text-2xl font-semibold">
+//                     {customer.fullName}
+//                   </h3>
+//                   <p className="text-muted-foreground">
+//                     {customer.phoneNumber}
+//                   </p>
+//                   <p className="text-muted-foreground">
+//                     {customer.alternateNumber}
+//                   </p>
+//                 </div>
+//               </div>
+
+//               <div
+//                 className={`grid ${
+//                   isMobile ? "grid-cols-2" : "grid-cols-3"
+//                 } gap-6 mt-6 md:mt-0 md:ml-auto`}
+//               >
+//                 <div className="text-center p-4 bg-slate-50 rounded-md">
+//                   <h4 className="text-lg font-semibold">
+//                     {customerOrders.length}
+//                   </h4>
+//                   <p className="text-sm text-muted-foreground">Total Orders</p>
+//                 </div>
+//                 <div className="text-center p-4 bg-slate-50 rounded-md">
+//                   <h4 className="text-lg font-semibold">$120.50</h4>{" "}
+//                   {/* demo total */}
+//                   <p className="text-sm text-muted-foreground">Total Spent</p>
+//                 </div>
+//                 <div className="text-center p-4 bg-slate-50 rounded-md">
+//                   <h4 className="text-lg font-semibold">July 2024</h4>{" "}
+//                   {/* demo last order */}
+//                   <p className="text-sm text-muted-foreground">Last Order</p>
+//                 </div>
+//               </div>
+//             </div>
+//           </CardContent>
+//         </Card>
+
+//         <Tabs
+//           defaultValue="details"
+//           value={activeTab}
+//           onValueChange={setActiveTab}
+//           className="w-full"
+//         >
+//           <TabsList className="grid w-full grid-cols-2 mb-6">
+//             <TabsTrigger value="details">Personal Details</TabsTrigger>
+//             <TabsTrigger value="orders">Order History</TabsTrigger>
+//           </TabsList>
+
+//           <TabsContent value="details">
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle>Personal Information</CardTitle>
+//               </CardHeader>
+//               <CardContent>
+//                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Full Name
+//                     </dt>
+//                     <dd className="mt-1 text-sm">{customer.fullName}</dd>
+//                   </div>
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Phone Number
+//                     </dt>
+//                     <dd className="mt-1 text-sm">{customer.phoneNumber}</dd>
+//                   </div>
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Alternate Number
+//                     </dt>
+//                     <dd className="mt-1 text-sm">{customer.alternateNumber}</dd>
+//                   </div>
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Address
+//                     </dt>
+//                     <dd className="mt-1 text-sm">{customer.address}</dd>
+//                   </div>
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Customer ID
+//                     </dt>
+//                     <dd className="mt-1 text-sm">{customer.readableUserId}</dd>
+//                   </div>
+//                   <div>
+//                     <dt className="text-sm font-medium text-muted-foreground">
+//                       Status
+//                     </dt>
+//                     <dd className="mt-1 text-sm">
+//                       <Badge
+//                         variant="outline"
+//                         className="text-green-600 border-green-600"
+//                       >
+//                         {customer.isActive ? "Active" : "Inactive"}
+//                       </Badge>
+//                     </dd>
+//                   </div>
+//                 </dl>
+//               </CardContent>
+//             </Card>
+//           </TabsContent>
+
+//           <TabsContent value="orders">
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle>Order History</CardTitle>
+//               </CardHeader>
+//               <CardContent>
+//                 {customerOrders.length > 0 ? (
+//                   <Table>
+//                     <TableHeader>
+//                       <TableRow>
+//                         <TableHead>Order ID</TableHead>
+//                         <TableHead>Date</TableHead>
+//                         <TableHead>Amount</TableHead>
+//                         <TableHead>Status</TableHead>
+//                       </TableRow>
+//                     </TableHeader>
+//                     <TableBody>
+//                       {customerOrders.map((order) => (
+//                         <TableRow key={order.id}>
+//                           <TableCell className="font-medium">
+//                             {order.id}
+//                           </TableCell>
+//                           <TableCell>{order.date}</TableCell>
+//                           <TableCell>${order.total.toFixed(2)}</TableCell>
+//                           <TableCell>
+//                             <OrderStatusBadge status={order.status} />
+//                           </TableCell>
+//                         </TableRow>
+//                       ))}
+//                     </TableBody>
+//                   </Table>
+//                 ) : (
+//                   <div className="text-center py-6">
+//                     <p className="text-muted-foreground">
+//                       No orders found for this customer.
+//                     </p>
+//                   </div>
+//                 )}
+//               </CardContent>
+//             </Card>
+//           </TabsContent>
+//         </Tabs>
+//       </div>
+//     </DashboardLayout>
+//   );
+// };
+
+// export default CustomerDetailsPage;
+
+
+
+
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,23 +310,18 @@ import {
 import { mockOrders } from "@/components/dashboard/orders/types";
 import { OrderStatusBadge } from "@/components/dashboard/orders/OrderStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import axios from "axios";
 import { axiosInstance } from "@/api/axios/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, Phone, MapPin, User } from "lucide-react";
 
 const CustomerDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  console.log("id: ", id);
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("details");
-
   const [customer, setCustomer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const navigate=useNavigate();
-
-  // 🟡 Replace with real order API later
   const customerOrders = mockOrders.filter(
     (order) => order.customer === customer?.fullName
   );
@@ -43,11 +332,8 @@ const CustomerDetailsPage = () => {
       setError("");
       try {
         const res = await axiosInstance.get(`/getUserProfileById`, {
-          params: {
-            userId: `${id}`,
-          },
-        }); // <-- Adjust URL to your backend
-        console.log("customer details", res);
+          params: { userId: `${id}` },
+        });
         setCustomer(res.data.data);
       } catch (err: any) {
         setError("Failed to load customer details");
@@ -63,111 +349,112 @@ const CustomerDetailsPage = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="p-6">Loading customer details...</div>
-      </DashboardLayout>
-    );
+        <div className="p-6 flex items-center justify-center">
+          <div className="animate-pulse text-lg text-gray-600">
+            Loading customer details...
+          </div>
+          </div>
+        </DashboardLayout>
+      );
   }
 
   if (error || !customer) {
     return (
       <DashboardLayout>
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Error</h2>
-          <p>{error || "Customer not found"}</p>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600">{error || "Customer not found"}</p>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Customer Details
-          </h2>
-          <Badge variant="outline" className="text-green-600 border-green-600">
+      <div className="p-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/customers")}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Customers
+            </button>
+            <h2 className="text-3xl font-bold text-gray-900">
+              {customer.fullName}
+            </h2>
+          </div>
+          <Badge
+            variant="outline"
+            className={`px-3 py-1 text-sm font-medium ${
+              customer.isActive
+                ? "text-green-600 border-green-600"
+                : "text-red-600 border-red-600"
+            }`}
+          >
             {customer.isActive ? "Active" : "Inactive"}
           </Badge>
-        </div> */}
+        </div>
 
-        <div className="flex items-center justify-between">
-  <div className="flex items-center gap-4">
-    <button
-      onClick={() => navigate("/customers")}
-      className="text-sm px-4 py-2 border rounded-md hover:bg-gray-100 transition"
-    >
-      ← Back
-    </button>
-    <h2 className="text-3xl font-bold tracking-tight">Customer Details</h2>
-  </div>
-  <Badge variant="outline" className="text-green-600 border-green-600">
-    {customer.isActive ? "Active" : "Inactive"}
-  </Badge>
-</div>
-
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <div className="flex items-center gap-4">
-                {/* <Avatar className="h-20 w-20">
-                  <AvatarFallback className="text-xl">
-                    {customer.fullName
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar> */}
-                <Avatar className="h-20 w-20">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row gap-8 items-start">
+              <div className="flex items-center gap-6">
+                <Avatar className="h-24 w-24 ring-2 ring-gray-200">
                   {customer.profilePictureUrl && (
                     <AvatarImage
                       src={customer.profilePictureUrl}
                       alt={customer.fullName}
+                      className="object-cover"
                     />
                   )}
-                  <AvatarFallback className="text-xl">
+                  <AvatarFallback className="text-2xl bg-gray-100 text-gray-600">
                     {customer.fullName
                       .split(" ")
                       .map((n: string) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                {/* <img src={customer.profileImageUrl} /> */}
-                <div>
-                  <h3 className="text-2xl font-semibold">
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-semibold text-gray-900">
                     {customer.fullName}
                   </h3>
-                  <p className="text-muted-foreground">
-                    {customer.phoneNumber}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {customer.alternateNumber}
-                  </p>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Phone className="h-4 w-4" />
+                    <span>{customer.phoneNumber}</span>
+                  </div>
+                  {customer.alternateNumber && (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone className="h-4 w-4" />
+                      <span>{customer.alternateNumber}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Mail className="h-4 w-4" />
+                    <span>{customer.email || "N/A"}</span>
+                  </div>
                 </div>
               </div>
 
               <div
                 className={`grid ${
                   isMobile ? "grid-cols-2" : "grid-cols-3"
-                } gap-6 mt-6 md:mt-0 md:ml-auto`}
+                } gap-4 mt-6 md:mt-0 md:ml-auto`}
               >
-                <div className="text-center p-4 bg-slate-50 rounded-md">
-                  <h4 className="text-lg font-semibold">
+                <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                  <h4 className="text-lg font-semibold text-gray-900">
                     {customerOrders.length}
                   </h4>
-                  <p className="text-sm text-muted-foreground">Total Orders</p>
+                  <p className="text-sm text-gray-500">Total Orders</p>
                 </div>
-                <div className="text-center p-4 bg-slate-50 rounded-md">
-                  <h4 className="text-lg font-semibold">$120.50</h4>{" "}
-                  {/* demo total */}
-                  <p className="text-sm text-muted-foreground">Total Spent</p>
+                <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                  <h4 className="text-lg font-semibold text-gray-900">$120.50</h4>
+                  <p className="text-sm text-gray-500">Total Spent</p>
                 </div>
-                <div className="text-center p-4 bg-slate-50 rounded-md">
-                  <h4 className="text-lg font-semibold">July 2024</h4>{" "}
-                  {/* demo last order */}
-                  <p className="text-sm text-muted-foreground">Last Order</p>
+                <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                  <h4 className="text-lg font-semibold text-gray-900">July 2024</h4>
+                  <p className="text-sm text-gray-500">Last Order</p>
                 </div>
               </div>
             </div>
@@ -180,60 +467,103 @@ const CustomerDetailsPage = () => {
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="details">Personal Details</TabsTrigger>
-            <TabsTrigger value="orders">Order History</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger
+              value="details"
+              className="py-2 text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Personal Details
+            </TabsTrigger>
+            <TabsTrigger
+              value="orders"
+              className="py-2 text-sm font-medium rounded-md transition-all duration-200 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              Order History
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="details">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900">
+                  Personal Information
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Full Name
-                    </dt>
-                    <dd className="mt-1 text-sm">{customer.fullName}</dd>
+                <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Full Name
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {customer.fullName}
+                      </dd>
+                    </div>
                   </div>
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Phone Number
-                    </dt>
-                    <dd className="mt-1 text-sm">{customer.phoneNumber}</dd>
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Phone Number
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {customer.phoneNumber}
+                      </dd>
+                    </div>
                   </div>
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Alternate Number
-                    </dt>
-                    <dd className="mt-1 text-sm">{customer.alternateNumber}</dd>
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Alternate Number
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {customer.alternateNumber || "N/A"}
+                      </dd>
+                    </div>
                   </div>
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Address
-                    </dt>
-                    <dd className="mt-1 text-sm">{customer.address}</dd>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Address
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {customer.address || "N/A"}
+                      </dd>
+                    </div>
                   </div>
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Customer ID
-                    </dt>
-                    <dd className="mt-1 text-sm">{customer.readableUserId}</dd>
+                  <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 text-gray-500 mt-1" />
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Customer ID
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {customer.readableUserId}
+                      </dd>
+                    </div>
                   </div>
-                  <div>
-                    <dt className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </dt>
-                    <dd className="mt-1 text-sm">
-                      <Badge
-                        variant="outline"
-                        className="text-green-600 border-green-600"
-                      >
-                        {customer.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </dd>
+                  <div className="flex items-start gap-3">
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Status
+                      </dt>
+                      <dd className="mt-1 text-sm">
+                        <Badge
+                          variant="outline"
+                          className={`${
+                            customer.isActive
+                              ? "text-green-600 border-green-600"
+                              : "text-red-600 border-red-600"
+                          }`}
+                        >
+                          {customer.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </dd>
+                    </div>
                   </div>
                 </dl>
               </CardContent>
@@ -241,29 +571,38 @@ const CustomerDetailsPage = () => {
           </TabsContent>
 
           <TabsContent value="orders">
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Order History</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900">
+                  Order History
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {customerOrders.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead className="text-gray-700">Order ID</TableHead>
+                        <TableHead className="text-gray-700">Date</TableHead>
+                        <TableHead className="text-gray-700">Amount</TableHead>
+                        <TableHead className="text-gray-700">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {customerOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">
+                        <TableRow
+                          key={order.id}
+                          className="hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <TableCell className="font-medium text-gray-900">
                             {order.id}
                           </TableCell>
-                          <TableCell>{order.date}</TableCell>
-                          <TableCell>${order.total.toFixed(2)}</TableCell>
+                          <TableCell className="text-gray-600">
+                            {order.date}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            ${order.total.toFixed(2)}
+                          </TableCell>
                           <TableCell>
                             <OrderStatusBadge status={order.status} />
                           </TableCell>
@@ -272,8 +611,8 @@ const CustomerDetailsPage = () => {
                     </TableBody>
                   </Table>
                 ) : (
-                  <div className="text-center py-6">
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">
                       No orders found for this customer.
                     </p>
                   </div>

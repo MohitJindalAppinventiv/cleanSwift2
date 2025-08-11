@@ -21,7 +21,7 @@ export function ServicePerformance() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Service Distribution</CardTitle>
+        <CardTitle>Orders Distribution</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
