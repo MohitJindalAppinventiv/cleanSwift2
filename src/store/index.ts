@@ -3,7 +3,7 @@ import authSlice from './slices/authSlice';
 import locationSlice from "./slices/locationSlice";
 import profileStatus from "./slices/profileStatus";
 import settingSlice from "./slices/settingsSlice";
-
+import SlotSlice from "./slices/slotSlice";
 // export const store = configureStore({
 //   reducer: {
 //     auth: authSlice,
@@ -36,7 +36,8 @@ const rootReducer = combineReducers({
       auth: authSlice,
     location:locationSlice,
     profileStatus:profileStatus,
-    coupons:couponSlice
+    coupons:couponSlice,
+    slots:SlotSlice,
   // add other slices here if needed
 });
 

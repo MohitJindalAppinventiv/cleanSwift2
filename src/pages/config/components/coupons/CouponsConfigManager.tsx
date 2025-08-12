@@ -43,7 +43,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCoupons } from "@/store/slices/couponSlice";
 import { Card } from "@/components/ui/card";
 import { CouponsHeader } from "./CouponsHeader";
-import { CouponsTable } from "./CouponsTable";
+import { CouponsCardView } from "./CouponsTable";
 
 export function CouponsConfigManager() {
   const dispatch = useAppDispatch();
@@ -58,7 +58,7 @@ export function CouponsConfigManager() {
     <div className="space-y-4">
       <CouponsHeader />
       <Card>
-        <CouponsTable coupons={coupons} loading={loading} />
+        <CouponsCardView coupons={coupons} loading={loading} />
       </Card>
     </div>
   );

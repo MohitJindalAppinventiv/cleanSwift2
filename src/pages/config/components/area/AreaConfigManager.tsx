@@ -162,7 +162,6 @@
 //   );
 // }
 
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/index";
@@ -174,12 +173,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AreaTable } from "./AreaTable";
 import Modal from "@/components/modal";
 import StoreLocationPicker from "@/components/StoreLocationPicker";
@@ -191,6 +185,7 @@ import {
   selectError,
   selectIsSuccess,
   clearStoreStatus,
+  selectTotalPages,
 } from "@/store/slices/locationSlice";
 
 export interface Area {
@@ -208,14 +203,15 @@ export function AreaConfigManager() {
   const error = useSelector(selectError);
   const isSuccess = useSelector(selectIsSuccess);
   const total = useSelector((state: RootState) => state.location.total); // adapt if stored differently
-console.log("total Pages",total)
+  console.log("total", total);
+  const totalPages = useSelector(selectTotalPages);
+  console.log("total pages", totalPages);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [editingArea, setEditingArea] = useState<Area | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const limit = 10;
-  const totalPages = Math.ceil(total / limit);
 
   // Fetch areas on component mount or page change
   useEffect(() => {
@@ -263,11 +259,15 @@ console.log("total Pages",total)
 
   return (
     <div className="space-y-6">
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Service Area Configuration</h1>
+      <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-3xl font-extrabold text-purple-700 tracking-tight">
+          Service Area Configuration
+        </h1>
         <button
           onClick={() => setIsDialogOpen(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+          className="px-5 py-2.5 bg-purple-600 text-white font-medium rounded-lg 
+               shadow-md hover:bg-purple-700 active:bg-purple-800 
+               transition-all duration-200 flex items-center gap-2"
         >
           Add New Service Area
         </button>
@@ -310,18 +310,27 @@ console.log("total Pages",total)
                 </TabsList>
 
                 <TabsContent value="all">
-                  <AreaTable areas={filteredAreas.all} onEditClick={openEditModal} />
+                  <AreaTable
+                    areas={filteredAreas.all}
+                    onEditClick={openEditModal}
+                  />
                 </TabsContent>
                 <TabsContent value="active">
-                  <AreaTable areas={filteredAreas.active} onEditClick={openEditModal} />
+                  <AreaTable
+                    areas={filteredAreas.active}
+                    onEditClick={openEditModal}
+                  />
                 </TabsContent>
                 <TabsContent value="inactive">
-                  <AreaTable areas={filteredAreas.inactive} onEditClick={openEditModal} />
+                  <AreaTable
+                    areas={filteredAreas.inactive}
+                    onEditClick={openEditModal}
+                  />
                 </TabsContent>
               </Tabs>
 
               {/* Pagination Controls */}
-              <div className="flex justify-between items-center mt-4">
+              {/* <div className="flex justify-between items-center mt-4">
                 <button
                   className="px-4 py-2 border rounded disabled:opacity-50"
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -334,6 +343,36 @@ console.log("total Pages",total)
                 </span>
                 <button
                   className="px-4 py-2 border rounded disabled:opacity-50"
+                  onClick={() =>
+                    setCurrentPage((p) =>
+                      Math.min(p + 1, totalPages || currentPage + 1)
+                    )
+                  }
+                  disabled={currentPage === totalPages || totalPages === 0}
+                >
+                  Next
+                </button>
+              </div> */}
+
+              <div className="flex justify-center items-center gap-5 mt-4">
+                <button
+                  className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium 
+               hover:bg-purple-700 transition-colors duration-200 
+               disabled:bg-purple-300 disabled:cursor-not-allowed"
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+
+                <span className="text-sm text-gray-700 font-medium">
+                  Page {currentPage} of {totalPages || 1}
+                </span>
+
+                <button
+                  className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium 
+               hover:bg-purple-700 transition-colors duration-200 
+               disabled:bg-purple-300 disabled:cursor-not-allowed"
                   onClick={() =>
                     setCurrentPage((p) =>
                       Math.min(p + 1, totalPages || currentPage + 1)

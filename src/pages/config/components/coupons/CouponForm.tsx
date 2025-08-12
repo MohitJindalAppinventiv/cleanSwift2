@@ -57,6 +57,7 @@ export function CouponForm() {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      console.log("date in creae coupon",data);
       const res = await axiosInstance.post(API.CREATE_COUPON(), {
         couponCode: data.code,
         couponName: data.couponName,
