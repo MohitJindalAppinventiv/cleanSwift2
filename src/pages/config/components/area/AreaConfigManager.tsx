@@ -178,6 +178,7 @@ import { AreaTable } from "./AreaTable";
 import Modal from "@/components/modal";
 import StoreLocationPicker from "@/components/StoreLocationPicker";
 import { toast } from "sonner";
+import AreaTableSkeleton from "./AreaTableSkeleton";
 import {
   getAreas,
   selectStores,
@@ -290,10 +291,25 @@ export function AreaConfigManager() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-              <span className="ml-2">Loading areas...</span>
-            </div>
+            <>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList>
+                  <TabsTrigger value="all">All Areas</TabsTrigger>
+                  <TabsTrigger value="active">Active</TabsTrigger>
+                  <TabsTrigger value="inactive">Inactive</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="all">
+                  <AreaTableSkeleton />
+                </TabsContent>
+                <TabsContent value="active">
+                  <AreaTableSkeleton />
+                </TabsContent>
+                <TabsContent value="inactive">
+                  <AreaTableSkeleton />
+                </TabsContent>
+              </Tabs>
+            </>
           ) : (
             <>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -328,32 +344,6 @@ export function AreaConfigManager() {
                   />
                 </TabsContent>
               </Tabs>
-
-              {/* Pagination Controls */}
-              {/* <div className="flex justify-between items-center mt-4">
-                <button
-                  className="px-4 py-2 border rounded disabled:opacity-50"
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                <span className="text-sm text-gray-600">
-                  Page {currentPage} of {totalPages || 1}
-                </span>
-                <button
-                  className="px-4 py-2 border rounded disabled:opacity-50"
-                  onClick={() =>
-                    setCurrentPage((p) =>
-                      Math.min(p + 1, totalPages || currentPage + 1)
-                    )
-                  }
-                  disabled={currentPage === totalPages || totalPages === 0}
-                >
-                  Next
-                </button>
-              </div> */}
-
               <div className="flex justify-center items-center gap-5 mt-4">
                 <button
                   className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium 

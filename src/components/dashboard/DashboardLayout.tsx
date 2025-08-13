@@ -1,6 +1,6 @@
 
 import { Sidebar } from "./Sidebar";
-import { TopBar } from "./TopBar";
+import  TopBar  from "./TopBar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {

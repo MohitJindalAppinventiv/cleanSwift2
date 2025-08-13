@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/api/axios/axiosInstance";
+import { AxiosError } from "axios";
 
 export interface Slot {
   id: string;
@@ -10,8 +11,6 @@ export interface Slot {
   maxOrders: number;
   currentOrders: number;
   active: boolean;
-  startTime12Hour:string;
-  endTime12Hour:string;
 }
 
 export interface DateRange {
@@ -74,7 +73,7 @@ export const addSlot = createAsyncThunk(
       }
 
       return true;
-    } catch (error: any) {
+    } catch (error: AxiosError) {
       console.error("Error adding slots", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to create slots"
@@ -83,7 +82,7 @@ export const addSlot = createAsyncThunk(
   }
 );
 
-// Async thunks
+
 export const fetchSlots = createAsyncThunk(
   "slots/fetchSlots",
   async ({ type, dateRange }: FetchSlotsParams, { rejectWithValue }) => {
@@ -101,6 +100,8 @@ export const fetchSlots = createAsyncThunk(
       }
 
       const response = await axiosInstance.get("/adminListSlots", { params });
+
+      console.log("fetch slots response", response.data);
       return {
         slotsByDate: response.data.slotsByDate,
         fetchParams: { type, dateRange },
@@ -219,14 +220,12 @@ const slotsSlice = createSlice({
         }
       });
     },
-    // Optimistic update for slot deletion (optional)
     optimisticDeleteSlot: (state, action: PayloadAction<string>) => {
       const slotId = action.payload;
       Object.keys(state.slotsByDate).forEach((date) => {
         state.slotsByDate[date] = state.slotsByDate[date].filter(
           (slot) => slot.id !== slotId
         );
-        // Remove date key if no slots remaining
         if (state.slotsByDate[date].length === 0) {
           delete state.slotsByDate[date];
         }
@@ -258,7 +257,6 @@ const slotsSlice = createSlice({
       })
       .addCase(deleteSlot.fulfilled, (state) => {
         state.error = null;
-        // Note: slots are refetched in the thunk, so no need to update state here
       })
       .addCase(deleteSlot.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -271,7 +269,6 @@ const slotsSlice = createSlice({
       })
       .addCase(toggleSlot.fulfilled, (state) => {
         state.error = null;
-        // Note: slots are refetched in the thunk, so no need to update state here
       })
       .addCase(toggleSlot.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -284,7 +281,6 @@ const slotsSlice = createSlice({
       })
       .addCase(updateSlot.fulfilled, (state) => {
         state.error = null;
-        // Note: slots are refetched in the thunk, so no need to update state here
       })
       .addCase(updateSlot.rejected, (state, action) => {
         state.error = action.payload as string;

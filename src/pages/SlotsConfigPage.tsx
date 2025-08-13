@@ -12,7 +12,7 @@ export default function SlotsConfigPage() {
   const [typeFilter, setTypeFilter] = useState<'pickup' | 'delivery' | 'all'>('all')
   const [dateRange, setDateRange] = useState<{ startDate?: Date; endDate?: Date }>({})
   const [showModal, setShowModal] = useState(false)
-  console.log("dateRange",dateRange);
+  // console.log("dateRange",dateRange);
 
   const handleAddSlot = () => setShowModal(true);
 
@@ -40,11 +40,6 @@ export default function SlotsConfigPage() {
                 <Plus className="w-4 h-4 mr-2" />
                 Add Slot
               </Button>
-
-              {/* <Button variant="outline">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </Button> */}
             </div>
           </CardHeader>
         </Card>

@@ -531,23 +531,10 @@
 //   );
 // };
 
-
-
-
-
-
-
-
-
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch } from '@/store'; // Adjust import path as needed
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "@/store"; // Adjust import path as needed
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -584,9 +571,10 @@ import {
   clearError,
   type Slot,
   type DateRange,
-} from '../../store/slices/slotSlice'; // Adjust import path as needed
+} from "../../store/slices/slotSlice"; // Adjust import path as needed
 import axios from "axios";
 import { toast } from "sonner";
+import SlotTableSkeleton from "./SlotTableSkeleton";
 
 // Helper functions
 const format = (date: Date, formatStr: string) => {
@@ -613,9 +601,20 @@ interface SlotTableProps {
   dateRange: DateRange;
 }
 
+const formatTo12Hour = (time24: string) => {
+  if (!time24) return "";
+  const [hourStr, minuteStr] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const minutes = parseInt(minuteStr, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; // convert 0 -> 12, 13 -> 1, etc.
+  return `${hour}:${minutes.toString().padStart(2, "0")} ${ampm}`;
+};
+
+
 export default function SlotTable({ type, dateRange }: SlotTableProps) {
   const dispatch = useDispatch<AppDispatch>();
-  
+
   // Redux selectors
   const slotsByDate = useSelector(selectSlots);
   const loading = useSelector(selectSlotsLoading);
@@ -625,6 +624,9 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
   const [slotToDelete, setSlotToDelete] = useState<Slot | null>(null);
   const [editSlot, setEditSlot] = useState<Slot | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  // Local state for loaders
+  const [deletingSlotId, setDeletingSlotId] = useState<string | null>(null);
+  const [togglingSlotId, setTogglingSlotId] = useState<string | null>(null);
 
   // Fetch slots when type or dateRange changes
   useEffect(() => {
@@ -641,28 +643,56 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
     }
   }, [error, dispatch]);
 
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     await dispatch(deleteSlot(id)).unwrap();
+  //     setSlotToDelete(null);
+  //   } catch (error) {
+  //     // Error is handled in Redux state
+  //     if(axios.isAxiosError(error)){
+  //       toast.error(error.message)
+  //     }
+  //     console.error("Failed to delete slot:", error);
+  //     toast.error("Failed to delete slot.")
+  //   }
+  // };
+
+  // const handleToggle = async (id: string) => {
+  //   try {
+  //     await dispatch(toggleSlot(id)).unwrap();
+  //   } catch (error) {
+  //     // Error is handled in Redux state
+  //     console.error("Failed to toggle slot:", error);
+  //   }
+  // };
+
   const handleDelete = async (id: string) => {
     try {
+      setDeletingSlotId(id);
       await dispatch(deleteSlot(id)).unwrap();
       setSlotToDelete(null);
     } catch (error) {
-      // Error is handled in Redux state
-      if(axios.isAxiosError(error)){
-        toast.error(error.message)
+      if (axios.isAxiosError(error)) {
+        toast.error(error.message);
       }
-      console.error("Failed to delete slot:", error);
-      toast.error("Failed to delete slot.")
+      toast.error("Failed to delete slot.");
+    } finally {
+      setDeletingSlotId(null);
     }
   };
 
   const handleToggle = async (id: string) => {
     try {
+      setTogglingSlotId(id);
       await dispatch(toggleSlot(id)).unwrap();
     } catch (error) {
-      // Error is handled in Redux state
       console.error("Failed to toggle slot:", error);
+    } finally {
+      setTogglingSlotId(null);
     }
   };
+
+  
 
   const handleSlotUpdated = () => {
     // Refetch slots after update
@@ -697,9 +727,11 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
           <AlertCircle className="w-8 h-8 text-red-600" />
         </div>
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-red-600 mb-2">Error Loading Slots</h3>
+          <h3 className="text-lg font-semibold text-red-600 mb-2">
+            Error Loading Slots
+          </h3>
           <p className="text-slate-600 max-w-md">{error}</p>
-          <Button 
+          <Button
             onClick={() => dispatch(fetchSlots({ type, dateRange }))}
             className="mt-4"
             variant="outline"
@@ -711,14 +743,8 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
     );
   }
 
-  // Loading state
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-        <p className="text-slate-600 font-medium">Loading slots...</p>
-      </div>
-    );
+    return <SlotTableSkeleton />;
   }
 
   // Empty state
@@ -728,9 +754,12 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
         <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Calendar className="w-12 h-12 text-slate-400" />
         </div>
-        <h3 className="text-xl font-semibold text-slate-700 mb-2">No slots found</h3>
+        <h3 className="text-xl font-semibold text-slate-700 mb-2">
+          No slots found
+        </h3>
         <p className="text-slate-500 max-w-md mx-auto">
-          No slots match your current filters. Try adjusting your date range or slot type.
+          No slots match your current filters. Try adjusting your date range or
+          slot type.
         </p>
       </div>
     );
@@ -758,7 +787,8 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
                       {format(new Date(date), "EEEE, MMMM do, yyyy")}
                     </CardTitle>
                     <p className="text-sm text-slate-500">
-                      {slots.length} slot{slots.length !== 1 ? "s" : ""} scheduled
+                      {slots.length} slot{slots.length !== 1 ? "s" : ""}{" "}
+                      scheduled
                     </p>
                   </div>
                 </div>
@@ -772,7 +802,9 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
                   )}
                   {deliverySlots.length > 0 && (
                     <div className="text-center">
-                      <div className="font-semibold">{deliverySlots.length}</div>
+                      <div className="font-semibold">
+                        {deliverySlots.length}
+                      </div>
                       <div className="uppercase">Delivery</div>
                     </div>
                   )}
@@ -805,7 +837,9 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
                       />
                     ))
                   ) : (
-                    <p className="text-sm text-slate-500 italic">No pickup slots</p>
+                    <p className="text-sm text-slate-500 italic">
+                      No pickup slots
+                    </p>
                   )}
                 </div>
 
@@ -813,7 +847,9 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
                 <div>
                   <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200">
                     <Truck className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-medium text-slate-800">Delivery Slots</h3>
+                    <h3 className="font-medium text-slate-800">
+                      Delivery Slots
+                    </h3>
                   </div>
                   {deliverySlots.length > 0 ? (
                     deliverySlots.map((slot) => (
@@ -829,10 +865,14 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
                         getSlotUtilization={getSlotUtilization}
                         getUtilizationColor={getUtilizationColor}
                         getUtilizationStatus={getUtilizationStatus}
+                        isDeleting={deletingSlotId === slot.id}
+                        isToggling={togglingSlotId === slot.id}
                       />
                     ))
                   ) : (
-                    <p className="text-sm text-slate-500 italic">No delivery slots</p>
+                    <p className="text-sm text-slate-500 italic">
+                      No delivery slots
+                    </p>
                   )}
                 </div>
               </div>
@@ -848,7 +888,10 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
         onUpdated={handleSlotUpdated}
       />
 
-      <AlertDialog open={!!slotToDelete} onOpenChange={() => setSlotToDelete(null)}>
+      <AlertDialog
+        open={!!slotToDelete}
+        onOpenChange={() => setSlotToDelete(null)}
+      >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-600">
@@ -878,6 +921,8 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
   );
 }
 
+
+
 const SlotCard = ({
   slot,
   onEdit,
@@ -886,6 +931,8 @@ const SlotCard = ({
   getSlotUtilization,
   getUtilizationColor,
   getUtilizationStatus,
+  isDeleting,
+  isToggling,
 }: {
   slot: Slot;
   onEdit: () => void;
@@ -898,6 +945,8 @@ const SlotCard = ({
     icon: React.ComponentType<any>;
     label: string;
   };
+  isDeleting: boolean;
+  isToggling: boolean;
 }) => {
   const utilization = getSlotUtilization(slot);
   const utilizationColor = getUtilizationColor(utilization);
@@ -917,11 +966,15 @@ const SlotCard = ({
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-slate-500" />
           <span className="font-semibold text-slate-900">
-            {slot.startTime12Hour} - {slot.endTime12Hour}
+            {formatTo12Hour(slot.startTime)} - {formatTo12Hour(slot.endTime)}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Switch checked={slot.active} onCheckedChange={onToggle} />
+          {isToggling ? (
+            <div className="w-5 h-5 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin" />
+          ) : (
+            <Switch checked={slot.active} onCheckedChange={onToggle} />
+          )}
           <Badge
             variant={slot.active ? "default" : "secondary"}
             className={`text-xs ${
@@ -957,7 +1010,9 @@ const SlotCard = ({
             <StatusIcon className="w-3 h-3" />
             <span className="font-medium">{status.label}</span>
           </div>
-          <span className="text-xs font-bold text-slate-600">{utilization}% filled</span>
+          <span className="text-xs font-bold text-slate-600">
+            {utilization}% filled
+          </span>
         </div>
       </div>
 
@@ -968,6 +1023,7 @@ const SlotCard = ({
           variant="ghost"
           onClick={onEdit}
           className="h-8 px-2 hover:bg-blue-50 hover:text-blue-700"
+          disabled={isDeleting}
         >
           <Pencil className="w-3 h-3" />
         </Button>
@@ -976,8 +1032,13 @@ const SlotCard = ({
           variant="ghost"
           onClick={onDelete}
           className="h-8 px-2 hover:bg-red-50 hover:text-red-700"
+          disabled={isDeleting}
         >
-          <Trash2 className="w-3 h-3" />
+          {isDeleting ? (
+            <div className="w-4 h-4 border-2 border-slate-300 border-t-red-500 rounded-full animate-spin" />
+          ) : (
+            <Trash2 className="w-3 h-3" />
+          )}
         </Button>
       </div>
     </div>
