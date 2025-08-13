@@ -61,7 +61,7 @@ export function ProductForm({
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Product Price ($)</FormLabel>
+              <FormLabel>Product Price (Rs.)</FormLabel>
               <FormControl>
                 <Input
                   type="number"

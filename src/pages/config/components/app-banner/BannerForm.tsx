@@ -40,42 +40,42 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
       title: defaultValues?.title || "",
       description: defaultValues?.description || "",
       imageUrl: defaultValues?.imageUrl || "",
-      isActive: defaultValues?.isActive === undefined ? true : defaultValues.isActive,
+      isActive: defaultValues?.isActive ?? true,
     },
-    mode: 'onChange', // Add this line to validate on every change
-  }
-);
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
 
   const handleImageUrlChange = (url: string) => {
     setImagePreview(url);
-    form.setValue("imageUrl", url);
+    form.setValue("imageUrl", url, { shouldValidate: true }); // Trigger validation
     setIsFileUpload(false);
   };
 
   const handleFileUpload = (file: File) => {
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  if (!allowedTypes.includes(file.type)) {
-    toast({
-      title: "Invalid file type",
-      description: "Please upload a PNG or JPG image file",
-      variant: "destructive",
-    });
-    return;
-  }
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PNG or JPG image file",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const base64Data = reader.result as string;
-    setImagePreview(base64Data);
-    form.setValue("imageUrl", base64Data);
-    setIsFileUpload(true);
-    toast({
-      title: "Image selected",
-      description: "Your image has been prepared for upload",
-    });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64Data = reader.result as string;
+      setImagePreview(base64Data);
+      form.setValue("imageUrl", base64Data, { shouldValidate: true }); // Trigger validation
+      setIsFileUpload(true);
+      toast({
+        title: "Image selected",
+        description: "Your image has been prepared for upload",
+      });
+    };
+    reader.readAsDataURL(file);
   };
-  reader.readAsDataURL(file);
-};
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -89,7 +89,7 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith("image/")) {
@@ -106,32 +106,27 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
 
   const removeImage = () => {
     setImagePreview("");
-    form.setValue("imageUrl", "");
+    form.setValue("imageUrl", "", { shouldValidate: true }); // Trigger validation
     setIsFileUpload(false);
   };
 
   const onSubmit = (values: FormValues) => {
-  try {
-    // Prepare the data to send
-    const bannerData = {
-      title: values.title,
-      description: values.description,
-      imageUrl: isFileUpload ? values.imageUrl : values.imageUrl, // Will be full base64 string if uploaded
-      isActive: values.isActive,
-    };
-    
-    // If you need to extract just the base64 part (without data:image/... prefix)
-    // const base64Content = isFileUpload ? values.imageUrl.split(',')[1] : values.imageUrl;
-    
-    onSave(bannerData);
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to save banner",
-      variant: "destructive",
-    });
-  }
-};
+    try {
+      const bannerData = {
+        title: values.title,
+        description: values.description,
+        imageUrl: isFileUpload ? values.imageUrl : values.imageUrl,
+        isActive: values.isActive,
+      };
+      onSave(bannerData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save banner",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Form {...form}>
@@ -159,10 +154,10 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter banner description" 
-                      className="min-h-[120px]" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter banner description"
+                      className="min-h-[120px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -177,8 +172,8 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
                 <FormItem>
                   <FormLabel>Image {isFileUpload ? "File" : "URL"}</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder={isFileUpload ? "Image file selected" : "https://example.com/image.jpg"} 
+                    <Input
+                      placeholder={isFileUpload ? "Image file selected" : "https://example.com/image.jpg"}
                       {...field}
                       onChange={(e) => !isFileUpload && handleImageUrlChange(e.target.value)}
                       disabled={isFileUpload}
@@ -215,86 +210,86 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
 
           <div className="space-y-4">
             <div className="text-sm font-medium">Image Preview</div>
-           <div className="relative aspect-[16/9] overflow-hidden rounded-md border bg-gray-50">
-  {imagePreview ? (
-    <>
-      <div className="relative h-full w-full">
-        <img
-          src={imagePreview}
-          alt="Banner preview"
-          className="h-full w-full object-cover"
-          onError={() => {
-            removeImage();
-            toast({
-              title: "Error loading image",
-              description: "Please check the image and try again",
-              variant: "destructive",
-            });
-          }}
-        />
-        <button
-          type="button"
-          className="absolute top-2 right-2 p-1 rounded-full bg-gray-800/50 hover:bg-gray-800/75 text-white"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeImage();
-          }}
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </>
-  ) : (
-    <div 
-      className={`flex h-full flex-col items-center justify-center cursor-pointer ${
-        isDragOver ? 'border-primary border-2' : 'border-dashed border-gray-300'
-      }`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={() => document.getElementById('image-upload')?.click()}
-    >
-      <div className="text-center p-6 flex flex-col items-center gap-2">
-        <div className="bg-gray-100 rounded-full p-3">
-          <FileImage className="h-6 w-6 text-gray-400" />
-        </div>
-        <p className="text-sm font-medium">Upload an image or enter a URL</p>
-        <p className="text-xs text-gray-500">Drag and drop or click to browse</p>
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="sm" 
-          className="mt-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            document.getElementById('image-upload')?.click();
-          }}
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Image
-        </Button>
-      </div>
-    </div>
-  )}
-  <input
-    id="image-upload"
-    type="file"
-    accept="image/*"
-    className="hidden"
-    onChange={(e) => {
-      if (e.target.files && e.target.files[0]) {
-        handleFileUpload(e.target.files[0]);
-      }
-    }}
-  />
-</div>
+            <div className="relative aspect-[16/9] overflow-hidden rounded-md border bg-gray-50">
+              {imagePreview ? (
+                <>
+                  <div className="relative h-full w-full">
+                    <img
+                      src={imagePreview}
+                      alt="Banner preview"
+                      className="h-full w-full object-cover"
+                      onError={() => {
+                        removeImage();
+                        toast({
+                          title: "Error loading image",
+                          description: "Please check the image and try again",
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 p-1 rounded-full bg-gray-800/50 hover:bg-gray-800/75 text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage();
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div
+                  className={`flex h-full flex-col items-center justify-center cursor-pointer ${
+                    isDragOver ? 'border-primary border-2' : 'border-dashed border-gray-300'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <div className="text-center p-6 flex flex-col items-center gap-2">
+                    <div className="bg-gray-100 rounded-full p-3">
+                      <FileImage className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <p className="text-sm font-medium">Upload an image or enter a URL</p>
+                    <p className="text-xs text-gray-500">Drag and drop or click to browse</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        document.getElementById('image-upload')?.click();
+                      }}
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Image
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0]);
+                  }
+                }}
+              />
+            </div>
 
             {imagePreview && (
               <div className="flex justify-end">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={removeImage}
                 >
                   Remove Image
