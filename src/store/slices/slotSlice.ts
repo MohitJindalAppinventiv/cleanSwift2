@@ -10,6 +10,8 @@ export interface Slot {
   maxOrders: number;
   currentOrders: number;
   active: boolean;
+  startTime12Hour:string;
+  endTime12Hour:string;
 }
 
 export interface DateRange {
@@ -171,9 +173,12 @@ export const updateSlot = createAsyncThunk(
     { rejectWithValue, getState, dispatch }
   ) => {
     try {
-      await axiosInstance.put("/adminUpdateSlot", updateData, {
+      console.log(slotId,"slot ID");
+      console.log("updated data",updateData);
+      const response = await axiosInstance.put("/adminUpdateSlot", updateData, {
         params: { slotId },
       });
+      console.log("slot update response",response);
 
       const state = getState() as { slots: SlotsState };
       if (state.slots.lastFetchParams) {

@@ -26,7 +26,7 @@ const formSchema = z.object({
   maxDiscount: z.coerce.number().min(1),
   validFrom: z.string().nonempty(),
   validUntil: z.string().nonempty(),
-  minOrderValue: z.coerce.number().min(0),
+  minOrderValue: z.coerce.number().min(100),
   isActive: z.boolean().default(true),
   discountPercentage: z.coerce.number().min(1).max(100),
   // maxUsage: z.coerce.number().min(1, "Must allow at least 1 use"), // ✅ New field
@@ -51,7 +51,6 @@ export function CouponForm() {
       minOrderValue: 0,
       isActive: true,
       discountPercentage: 10,
-      // maxUsage: 1, // ✅ New field
     },
   });
 

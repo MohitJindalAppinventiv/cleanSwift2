@@ -585,6 +585,8 @@ import {
   type Slot,
   type DateRange,
 } from '../../store/slices/slotSlice'; // Adjust import path as needed
+import axios from "axios";
+import { toast } from "sonner";
 
 // Helper functions
 const format = (date: Date, formatStr: string) => {
@@ -645,7 +647,11 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
       setSlotToDelete(null);
     } catch (error) {
       // Error is handled in Redux state
+      if(axios.isAxiosError(error)){
+        toast.error(error.message)
+      }
       console.error("Failed to delete slot:", error);
+      toast.error("Failed to delete slot.")
     }
   };
 
@@ -911,7 +917,7 @@ const SlotCard = ({
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-slate-500" />
           <span className="font-semibold text-slate-900">
-            {slot.startTime} - {slot.endTime}
+            {slot.startTime12Hour} - {slot.endTime12Hour}
           </span>
         </div>
         <div className="flex items-center gap-2">
