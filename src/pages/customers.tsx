@@ -14,16 +14,22 @@ const CustomersPage = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  // const isMobile = useIsMobile();
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await getAllUsers({ search: searchQuery, page, limit: 10,status });
-      console.log("data in customers",data)
+      const data = await getAllUsers({
+        search: searchQuery,
+        page,
+        limit: 10,
+        status,
+      });
+      console.log("data in customers", data);
       setCustomers(data.profiles);
-      setTotalPages(data.totalPages);
+      setPage(data.pagination.currentPage)
+      setTotalPages(data.pagination.totalPages);
+      console.log(totalPages);
     } catch (err) {
       console.error("Failed to fetch users", err);
     } finally {
@@ -47,35 +53,35 @@ const CustomersPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <CustomersHeader />
-                  <div className="flex gap-2 items-center">
-            <Button
-              variant={status === "all" ? "default" : "outline"}
-              onClick={() => {
-                setStatus("all");
-                setPage(1);
-              }}
-            >
-              All
-            </Button>
-            <Button
-              variant={status === "active" ? "default" : "outline"}
-              onClick={() => {
-                setStatus("active");
-                setPage(1);
-              }}
-            >
-              Active
-            </Button>
-            <Button
-              variant={status === "inactive" ? "default" : "outline"}
-              onClick={() => {
-                setStatus("inactive");
-                setPage(1);
-              }}
-            >
-              Inactive
-            </Button>
-          </div>
+        <div className="flex gap-2 items-center">
+          <Button
+            variant={status === "all" ? "default" : "outline"}
+            onClick={() => {
+              setStatus("all");
+              setPage(1);
+            }}
+          >
+            All
+          </Button>
+          <Button
+            variant={status === "active" ? "default" : "outline"}
+            onClick={() => {
+              setStatus("active");
+              setPage(1);
+            }}
+          >
+            Active
+          </Button>
+          <Button
+            variant={status === "inactive" ? "default" : "outline"}
+            onClick={() => {
+              setStatus("inactive");
+              setPage(1);
+            }}
+          >
+            Inactive
+          </Button>
+        </div>
         <div className="relative max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -89,7 +95,14 @@ const CustomersPage = () => {
         {loading ? (
           <div className="text-muted-foreground">Loading users...</div>
         ) : (
-          <CustomersTable customers={customers} fetchData={fetchUsers} />
+          // <CustomersTable  totalPages={totalPages} customers={customers} fetchData={fetchUsers} />
+          <CustomersTable
+            customers={customers}
+            totalPages={totalPages}
+            page={page}
+            setPage={setPage}
+            fetchData={fetchUsers}
+          />
         )}
       </div>
     </DashboardLayout>
