@@ -468,28 +468,46 @@
 //     </div>
 //   );
 // }
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, ArrowLeft, ShoppingBag, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  ArrowLeft, 
+  Search, 
+  Filter,
+  Grid3X3,
+  List,
+  Package,
+  DollarSign,
+  Tag,
+  Settings
+} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { ProductModal } from "./ProductModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ProductFormValues } from "./ProductForm";
 import { Breadcrumb } from "@/components/breadcrumb/breadcrumb";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 
 const API_BASE_URL = "https://us-central1-laundry-app-dee6a.cloudfunctions.net";
 
@@ -529,119 +547,198 @@ export function ProductsConfigManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [servicesLoaded, setServicesLoaded] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState<"name" | "price" | "category">("name");
 
-  const [currentContext, setCurrentContext] = useState<{
-    type: "category" | "service" | "all";
-    name?: string;
-  }>({ type: "all" });
-
-  // Set current context based on navigation
-  useEffect(() => {
+  // Memoized current context to prevent unnecessary re-renders
+  const currentContext = useMemo(() => {
     if (idType === "category" && paramCategoryId) {
       const category = categories.find((c) => c.categoryId === paramCategoryId);
-      setCurrentContext({
-        type: "category",
+      return {
+        type: "category" as const,
         name: category?.categoryName || "Unknown Category",
-      });
+      };
     } else if (idType === "service" && paramServiceId) {
       const service = services.find((s) => s.id === paramServiceId);
-      setCurrentContext({
-        type: "service",
+      return {
+        type: "service" as const,
         name: service?.name || "Unknown Service",
-      });
+      };
     } else {
-      setCurrentContext({ type: "all" });
+      return { type: "all" as const };
     }
   }, [idType, paramServiceId, paramCategoryId, categories, services]);
 
-  // Fetch services and categories
+  // Memoized filtered and sorted products
+  const filteredProducts = useMemo(() => {
+    let filtered = products.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.categoryName && product.categoryName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (product.serviceName && product.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    // Sort products
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "price":
+          return (a.price || 0) - (b.price || 0);
+        case "category":
+          return (a.categoryName || "").localeCompare(b.categoryName || "");
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [products, searchQuery, sortBy]);
+
+  // Fetch services and categories only once
   useEffect(() => {
+    let mounted = true;
+
     const fetchInitialData = async () => {
       try {
-        const servicesRes = await axios.get(`${API_BASE_URL}/getAllServices`);
-        setServices(servicesRes.data.data);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load services",
-          variant: "destructive",
-        });
-      }
+        const [servicesRes, categoriesRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/getAllServices`),
+          axios.get(`${API_BASE_URL}/getAllCategoriesWithServiceNames`)
+        ]);
 
-      try {
-        const categoriesRes = await axios.get(`${API_BASE_URL}/getAllCategoriesWithServiceNames`);
-        setCategories(categoriesRes.data.data);
+        if (mounted) {
+          setServices(servicesRes.data.data);
+          setServicesLoaded(true);
+          setCategories(categoriesRes.data.data);
+          setCategoriesLoaded(true);
+        }
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load categories",
-          variant: "destructive",
-        });
+        if (mounted) {
+          console.error("Error fetching initial data:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load services and categories",
+            variant: "destructive",
+          });
+          // Set as loaded even if failed to prevent infinite loading
+          setServicesLoaded(true);
+          setCategoriesLoaded(true);
+        }
       }
     };
+
     fetchInitialData();
+
+    return () => {
+      mounted = false;
+    };
   }, [toast]);
 
-  // Fetch products based on context
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        let endpoint = `${API_BASE_URL}/getAllProducts`;
-        let params = {};
+  // Memoized product fetching function
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      let endpoint = `${API_BASE_URL}/getAllProducts`;
+      let params = {};
 
+      if (idType === "category" && paramCategoryId) {
+        endpoint = `${API_BASE_URL}/getAllProductsByCategoryId`;
+        params = { categoryId: paramCategoryId };
+      } else if (idType === "service" && paramServiceId) {
+        endpoint = `${API_BASE_URL}/getProductByServiceId`;
+        params = { serviceId: paramServiceId };
+      }
+
+      const response = await axios.get(endpoint, { params });
+
+      const fetchedProducts = response.data.data.map((item: any) => {
+        const categoryId = item.categoryId || item.CategoryId;
+        const serviceId = item.serviceId;
+        
+        // Enhanced logic to find category and service names
+        let categoryName = item.categoryName;
+        let serviceName = item.serviceName;
+        
+        // If we're fetching by categoryId, we know the category
         if (idType === "category" && paramCategoryId) {
-          endpoint = `${API_BASE_URL}/getAllProductsByCategoryId`;
-          params = { categoryId: paramCategoryId };
-        } else if (idType === "service" && paramServiceId) {
-          endpoint = `${API_BASE_URL}/getProductByServiceId`;
-          params = { serviceId: paramServiceId };
+          const currentCategory = categories.find((c) => c.categoryId === paramCategoryId);
+          if (currentCategory) {
+            categoryName = currentCategory.categoryName;
+            serviceName = currentCategory.serviceName;
+          }
+        }
+        
+        // If we're fetching by serviceId, we know the service
+        if (idType === "service" && paramServiceId) {
+          const currentService = services.find((s) => s.id === paramServiceId);
+          if (currentService) {
+            serviceName = currentService.name;
+          }
+        }
+        
+        // Fallback: try to find from our loaded data
+        if (!categoryName && categoryId) {
+          const category = categories.find((c) => c.categoryId === categoryId);
+          if (category) {
+            categoryName = category.categoryName;
+            if (!serviceName) {
+              serviceName = category.serviceName;
+            }
+          }
+        }
+        
+        if (!serviceName && serviceId) {
+          const service = services.find((s) => s.id === serviceId);
+          if (service) {
+            serviceName = service.name;
+          }
         }
 
-        const response = await axios.get(endpoint, { params });
-
-        const fetchedProducts = response.data.data.map((item: any) => ({
+        return {
           id: item.productId || item.id,
           name: item.productName || item.name,
           price: item.price ?? 0,
-          categoryId: item.categoryId || item.CategoryId,
-          serviceId: item.serviceId,
-          categoryName: item.categoryName,
-          serviceName: item.serviceName,
-        }));
+          categoryId: categoryId,
+          serviceId: serviceId,
+          categoryName: categoryName,
+          serviceName: serviceName,
+        };
+      });
 
-        setProducts(fetchedProducts);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: `Failed to load products for ${
-            idType === "category"
-              ? "category"
-              : idType === "service"
-              ? "service"
-              : "all products"
-          }`,
-          variant: "destructive",
-        });
-        setProducts([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setProducts(fetchedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast({
+        title: "Error",
+        description: `Failed to load products for ${
+          idType === "category"
+            ? "category"
+            : idType === "service"
+            ? "service"
+            : "all products"
+        }`,
+        variant: "destructive",
+      });
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [idType, paramServiceId, paramCategoryId, toast, categories, services]);
 
-    fetchProducts();
-  }, [idType, paramServiceId, paramCategoryId, toast]);
+  // Fetch products only when reference data is loaded and context changes
+  useEffect(() => {
+    // Wait for both services and categories to be loaded before fetching products
+    if (servicesLoaded && categoriesLoaded) {
+      fetchProducts();
+    }
+  }, [servicesLoaded, categoriesLoaded, fetchProducts]);
 
   const createProduct = async (productData: ProductFormValues) => {
     try {
@@ -708,8 +805,8 @@ export function ProductsConfigManager() {
         description: "Product created successfully",
       });
       setCreateModalOpen(false);
-      setProducts([
-        ...products,
+      setProducts((prevProducts) => [
+        ...prevProducts,
         {
           id: response.data.id,
           name: productData.name,
@@ -751,8 +848,8 @@ export function ProductsConfigManager() {
         description: "Product updated successfully",
       });
       setEditModalOpen(false);
-      setProducts(
-        products.map((p) =>
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
           p.id === productId
             ? { ...p, name: productData.name, price: productData.price }
             : p
@@ -768,20 +865,17 @@ export function ProductsConfigManager() {
     }
   };
 
-  const deleteProduct = async () => {
-    if (!productToDelete) return;
-    
+  const deleteProduct = async (productId: string) => {
     try {
-      setIsDeleting(true);
       await axios.delete(`${API_BASE_URL}/deleteProduct`, {
-        params: { productId: productToDelete },
+        params: { productId },
       });
 
       toast({
         title: "Success",
         description: "Product deleted successfully",
       });
-      setProducts(products.filter((p) => p.id !== productToDelete));
+      setProducts((prevProducts) => prevProducts.filter((p) => p.id !== productId));
     } catch (error) {
       console.error("Error deleting product:", error);
       toast({
@@ -789,25 +883,11 @@ export function ProductsConfigManager() {
         description: "Failed to delete product",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-      setProductToDelete(null);
     }
   };
 
-  const openDeleteDialog = (productId: string) => {
-    setProductToDelete(productId);
-    setDeleteDialogOpen(true);
-  };
-
-  // Filter products based on search term
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Breadcrumb items
-  const breadcrumbItems = () => {
+  // Memoized breadcrumb items
+  const breadcrumbItems = useMemo(() => {
     const baseItems = [{ label: "Services", to: "/config/services" }];
 
     if (idType === "category" && paramCategoryId) {
@@ -821,85 +901,295 @@ export function ProductsConfigManager() {
     } else {
       return [...baseItems, { label: "Products", to: `/config/products${paramServiceId ? `/${paramServiceId}` : ""}` }];
     }
-  };
+  }, [idType, paramCategoryId, paramServiceId, categories, services]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const ProductCard = ({ product }: { product: Product }) => (
+    <Card className="group hover:shadow-md transition-all duration-200">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary text-primary-foreground font-semibold text-lg">
+              {product.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground text-lg group-hover:text-primary transition-colors">
+                {product.name}
+              </h3>
+              <div className="flex items-center space-x-1 mt-1">
+               Rs.  <span className="text-xl font-bold text-green-600">
+                  {product.price !== undefined ? product.price.toFixed(2) : "0.00"}
+                </span>
+              </div>
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Settings className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => {
+                  setSelectedProduct(product);
+                  setEditModalOpen(true);
+                }}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit Product
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => deleteProduct(product.id)}
+                className="text-red-600 focus:text-red-600"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Product
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
+        <div className="space-y-3">
+          {(product.categoryName || (idType === "category" && currentContext.name)) && (
+            <div className="flex items-center space-x-2">
+              <Tag className="w-4 h-4 text-orange-500" />
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                {product.categoryName || (idType === "category" ? currentContext.name : "Unknown Category")}
+              </Badge>
+            </div>
+          )}
+          {(product.serviceName || (idType === "service" && currentContext.name)) && (
+            <div className="flex items-center space-x-2">
+              <Package className="w-4 h-4 text-blue-500" />
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                {product.serviceName || (idType === "service" ? currentContext.name : "Unknown Service")}
+              </Badge>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-  return (
-    <div className="space-y-6 p-6">
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this product? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={isDeleting}
+  const ProductListItem = ({ product }: { product: Product }) => (
+    <Card>
+      <CardContent className="p-4">
+        <div className="group flex items-center justify-between">
+          <div className="flex items-center space-x-4 flex-1">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground font-semibold">
+              {product.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                {product.name}
+              </h3>
+              <div className="flex items-center space-x-4 mt-1">
+                <div className="flex items-center space-x-1">
+                  <DollarSign className="w-4 h-4 text-green-600" />
+                  <span className="font-bold text-green-600">
+                    Rs. {product.price !== undefined ? product.price.toFixed(2) : "0.00"}
+                  </span>
+                </div>
+                {product.categoryName && (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                    {product.categoryName}
+                  </Badge>
+                )}
+                {product.serviceName && (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {product.serviceName}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedProduct(product);
+                setEditModalOpen(true);
+              }}
             >
-              Cancel
+              <Pencil className="w-4 h-4" />
             </Button>
             <Button
-              variant="destructive"
-              onClick={deleteProduct}
-              disabled={isDeleting}
+              variant="outline"
+              size="sm"
+              onClick={() => deleteProduct(product.id)}
+              className="text-red-600 hover:text-red-700 hover:border-red-200"
             >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
+              <Trash2 className="w-4 h-4" />
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
-      <Breadcrumb items={breadcrumbItems()} />
-      
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  // Show loading state while initial data is being fetched
+  if (!servicesLoaded || !categoriesLoaded || isLoading) {
+    return (
+      <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Product Catalog</h2>
-            {currentContext.type !== "all" && (
-              <p className="text-sm text-muted-foreground">
-                {currentContext.type === "category"
-                  ? `Under Category: ${currentContext.name}`
-                  : `Under Service: ${currentContext.name}`}
-              </p>
+            <h2 className="text-3xl font-bold text-primary">Products</h2>
+          </div>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Breadcrumb items={breadcrumbItems} />
+      
+      {/* Header Section */}
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex-1">
+          <div className="flex items-center space-x-3">
+            <Package className="w-8 h-8 text-primary" />
+            <h2 className="text-3xl font-bold text-primary">Products</h2>
+          </div>
+          {currentContext.type !== "all" && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {currentContext.type === "category"
+                ? `Managing products in "${currentContext.name}" category`
+                : `Managing products for "${currentContext.name}" service`}
+            </p>
+          )}
+          <div className="flex items-center space-x-6 mt-2 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2">
+              <Package className="w-4 h-4" />
+              <span>{filteredProducts.length} Products</span>
+            </div>
+            {products.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <span>
+                  Total Value: Rs. {products.reduce((sum, p) => sum + (p.price || 0), 0).toFixed(2)}
+                </span>
+              </div>
             )}
           </div>
         </div>
-        
-        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          <Input
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full md:w-64"
-          />
-          <Button onClick={() => setCreateModalOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Product
-          </Button>
-        </div>
+        <Button onClick={() => setCreateModalOpen(true)} className="bg-primary hover:bg-primary/90">
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Product
+        </Button>
       </div>
 
+      {/* Controls Section */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+            <div className="flex items-center space-x-4 flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search products, categories, or services..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                <SelectTrigger className="w-40">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Sort by Name</SelectItem>
+                  <SelectItem value="price">Sort by Price</SelectItem>
+                  <SelectItem value="category">Sort by Category</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <div className="flex items-center border rounded-md p-1">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Products Display */}
+      {filteredProducts.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-16">
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">
+              {searchQuery 
+                ? `No products found matching "${searchQuery}"`
+                : currentContext.type === "category"
+                ? "No products found under this category"
+                : currentContext.type === "service"
+                ? "No products found under this service"
+                : "No products found"
+              }
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {searchQuery 
+                ? "Try adjusting your search terms"
+                : "Get started by adding your first product"
+              }
+            </p>
+            {!searchQuery && (
+              <Button onClick={() => setCreateModalOpen(true)} className="bg-primary hover:bg-primary/90">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Product
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className={
+          viewMode === "grid" 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+            : "space-y-4"
+        }>
+          {filteredProducts.map((product) => 
+            viewMode === "grid" 
+              ? <ProductCard key={product.id} product={product} />
+              : <ProductListItem key={product.id} product={product} />
+          )}
+        </div>
+      )}
+
+      {/* Modals */}
       <ProductModal
         open={createModalOpen}
         onOpenChange={setCreateModalOpen}
@@ -931,88 +1221,6 @@ export function ProductsConfigManager() {
         title="Edit Product"
         isSubmitting={false}
       />
-
-      {filteredProducts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
-            <ShoppingBag className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium">No products found</h3>
-          <p className="text-sm text-muted-foreground text-center max-w-md">
-            {searchTerm
-              ? "No products match your search criteria"
-              : idType === "category"
-              ? "This category doesn't have any products yet"
-              : idType === "service"
-              ? "This service doesn't have any products yet"
-              : "You haven't created any products yet"}
-          </p>
-          <Button onClick={() => setCreateModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Create Product
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="group relative">
-              <Card className={cn(
-                "h-full flex flex-col items-center text-center p-4 transition-all",
-                "rounded-full aspect-square w-full max-w-[180px] mx-auto",
-                "hover:shadow-lg hover:scale-105 hover:border-primary"
-              )}>
-                <CardHeader className="p-0 pb-2">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 mx-auto">
-                    <ShoppingBag className="h-8 w-8 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg line-clamp-2">{product.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 flex-grow flex flex-col justify-center">
-                  <span className="text-xl font-bold text-primary">
-                    Rs. {product.price?.toFixed(2) || "0.00"}
-                  </span>
-                  {(product.serviceName || product.categoryName) && (
-                    <div className="mt-2 flex flex-col gap-1">
-                      {product.serviceName && (
-                        <Badge variant="secondary" className="text-xs w-fit mx-auto">
-                          {product.serviceName}
-                        </Badge>
-                      )}
-                      {product.categoryName && (
-                        <Badge variant="outline" className="text-xs w-fit mx-auto">
-                          {product.categoryName}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="p-0 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full h-8 w-8 p-0"
-                      onClick={() => {
-                        setSelectedProduct(product);
-                        setEditModalOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="rounded-full h-8 w-8 p-0"
-                      onClick={() => openDeleteDialog(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
