@@ -71,35 +71,6 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
     return `${time} ${period}`;
   };
 
-  // const handleSubmit = async () => {
-  //   // Convert time ranges to the required format
-  //   const formattedTimeRanges = timeRanges.map(range => ({
-  //     startTime: formatTimeForDisplay(range.startTime, range.startPeriod),
-  //     endTime: formatTimeForDisplay(range.endTime, range.endPeriod),
-  //     maxOrders: range.maxOrders
-  //   }));
-
-  //   const result = await dispatch(
-  //     addSlot({ type, weekDay, propagateWeeks, timeRanges: formattedTimeRanges })
-  //   );
-
-  //   if (addSlot.fulfilled.match(result)) {
-  //     setType("pickup");
-  //     setWeekDay(1);
-  //     setPropagateWeeks(2);
-  //     setTimeRanges([{
-  //       startTime: "",
-  //       startPeriod: "AM",
-  //       endTime: "",
-  //       endPeriod: "PM",
-  //       maxOrders: 5
-  //     }]);
-  //     toast.success("Slots created successfully");
-  //     onClose();
-  //   } else {
-  //     toast.error((result.payload as string) || "Failed to create slots");
-  //   }
-  // };
   const handleSubmit = async () => {
     // Convert AM/PM to 24-hour format before sending
     const formattedTimeRanges = timeRanges.map((range) => ({

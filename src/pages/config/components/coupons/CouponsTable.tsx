@@ -62,7 +62,7 @@ export function CouponsCardView({ coupons, loading }: Props) {
       dispatch(deleteCoupon(id));
     } catch {
       setDeletingId(null);
-    }
+    } 
   };
 
   const refetchCoupon = async () => {

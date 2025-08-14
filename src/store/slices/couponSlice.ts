@@ -17,6 +17,7 @@ export interface Coupon {
   minValue: number;
   validFrom: FirestoreTimestamp;
   validTill: FirestoreTimestamp;
+  discountPercentage:string
   isActive: boolean;
   currentUsage?: number;
 }
