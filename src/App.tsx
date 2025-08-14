@@ -158,7 +158,7 @@ const AppBanner = lazy(() => import("./pages/AppBanner"));
 const MapDemo = lazy(() => import("./pages/map-demo"));
 const Temp = lazy(() => import("./pages/Temp"));
 const SlotsConfigPage = lazy(() => import("./pages/SlotsConfigPage"));
-
+import LaundryPageLoader from "./PageLoading";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -221,7 +221,7 @@ const App = () => (
         <Sonner />
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
-            <Suspense fallback={<div className="p-4">Loading...</div>}>
+            <Suspense fallback={<LaundryPageLoader/>}>
               <AppRoutes />
             </Suspense>
           </BrowserRouter>

@@ -102,8 +102,8 @@
 //         </h1>
 //         <button
 //           onClick={() => setIsDialogOpen(true)}
-//           className="px-5 py-2.5 bg-purple-600 text-white font-medium rounded-lg 
-//                shadow-md hover:bg-purple-700 active:bg-purple-800 
+//           className="px-5 py-2.5 bg-purple-600 text-white font-medium rounded-lg
+//                shadow-md hover:bg-purple-700 active:bg-purple-800
 //                transition-all duration-200 flex items-center gap-2"
 //         >
 //           Add New Service Area
@@ -182,8 +182,8 @@
 //               </Tabs>
 //               <div className="flex justify-center items-center gap-5 mt-4">
 //                 <button
-//                   className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium 
-//                hover:bg-purple-700 transition-colors duration-200 
+//                   className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium
+//                hover:bg-purple-700 transition-colors duration-200
 //                disabled:bg-purple-300 disabled:cursor-not-allowed"
 //                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
 //                   disabled={currentPage === 1}
@@ -196,8 +196,8 @@
 //                 </span>
 
 //                 <button
-//                   className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium 
-//                hover:bg-purple-700 transition-colors duration-200 
+//                   className="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium
+//                hover:bg-purple-700 transition-colors duration-200
 //                disabled:bg-purple-300 disabled:cursor-not-allowed"
 //                   onClick={() =>
 //                     setCurrentPage((p) =>
@@ -217,8 +217,6 @@
 //     </div>
 //   );
 // }
-
-
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -241,7 +239,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, ArrowUpDown, ArrowUp, ArrowDown, X } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  X,
+} from "lucide-react";
 import { AreaTable } from "./AreaTable";
 import Modal from "@/components/modal";
 import StoreLocationPicker from "@/components/StoreLocationPicker";
@@ -265,9 +270,9 @@ export interface Area {
   isActive: boolean;
 }
 
-type SortField = 'name' | 'range' | 'status';
-type SortOrder = 'asc' | 'desc';
-type StatusFilter = 'all' | 'active' | 'inactive';
+type SortField = "name" | "range" | "status";
+type SortOrder = "asc" | "desc";
+type StatusFilter = "all" | "active" | "inactive";
 
 export function AreaConfigManager() {
   const dispatch = useDispatch<AppDispatch>();
@@ -277,18 +282,18 @@ export function AreaConfigManager() {
   const isSuccess = useSelector(selectIsSuccess);
   const total = useSelector((state: RootState) => state.location.total);
   const totalPages = useSelector(selectTotalPages);
-  
+
   // State management
   const [activeTab, setActiveTab] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [editingArea, setEditingArea] = useState<Area | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  
+
   // Search, Sort, Filter state
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const limit = 10;
@@ -328,36 +333,37 @@ export function AreaConfigManager() {
     // Apply search filter
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter((area) => 
-        area.locationName.toLowerCase().includes(searchLower) ||
-        (area.address && area.address.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (area) =>
+          area.locationName.toLowerCase().includes(searchLower) ||
+          (area.address && area.address.toLowerCase().includes(searchLower))
       );
     }
 
     // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter((area) => 
-        statusFilter === 'active' ? area.isActive : !area.isActive
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((area) =>
+        statusFilter === "active" ? area.isActive : !area.isActive
       );
     }
 
     // Apply sorting
     filtered.sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortField) {
-        case 'name':
+        case "name":
           comparison = a.locationName.localeCompare(b.locationName);
           break;
-        case 'range':
+        case "range":
           comparison = a.range - b.range;
           break;
-        case 'status':
+        case "status":
           comparison = a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1;
           break;
       }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
+
+      return sortOrder === "asc" ? comparison : -comparison;
     });
 
     return filtered;
@@ -381,58 +387,72 @@ export function AreaConfigManager() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
   };
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSortField('name');
-    setSortOrder('asc');
-    setStatusFilter('all');
+    setSortField("name");
+    setSortOrder("asc");
+    setStatusFilter("all");
   };
 
-  const hasActiveFilters = searchTerm || sortField !== 'name' || sortOrder !== 'asc' || statusFilter !== 'all';
+  const hasActiveFilters =
+    searchTerm ||
+    sortField !== "name" ||
+    sortOrder !== "asc" ||
+    statusFilter !== "all";
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
-    return sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+    return sortOrder === "asc" ? (
+      <ArrowUp className="w-4 h-4" />
+    ) : (
+      <ArrowDown className="w-4 h-4" />
+    );
   };
 
   return (
     <div className="space-y-6">
-      <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-extrabold text-purple-700 tracking-tight">
-          Service Area Configuration
-        </h1>
-        <button
-          onClick={() => setIsDialogOpen(true)}
-          className="px-5 py-2.5 bg-purple-600 text-white font-medium rounded-lg 
-               shadow-md hover:bg-purple-700 active:bg-purple-800 
-               transition-all duration-200 flex items-center gap-2"
-        >
-          Add New Service Area
-        </button>
+      {/* <div> */}
+        {/* <CardHeader className="flex flex-row items-center justify-between"> */}
+          {/* <div>
+            <CardTitle className="text-xl font-semibold">
+              Service Areas
+            </CardTitle>
+            <CardDescription>
+              Configure service areas for your application. Total areas: {total}
+            </CardDescription>
+          </div> */}
 
+                  <h2 className="text-3xl font-bold tracking-tight">Service Areas</h2>
+                  <div className="flex flex-row justify-between align-center">
+
+        <p className="text-muted-foreground">
+          Configure service areas for your application. Total areas: {total}.
+        </p>
+
+          <Button
+            size="sm"
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-purple-600 text-white hover:bg-purple-700"
+            >
+            Add Service Area
+          </Button>
+            </div>
+        {/* </CardHeader> */}
         <Modal isOpen={isDialogOpen} onClose={handleModalClose}>
+          {" "}
           <StoreLocationPicker
             key={editingArea?.id || "new"}
             close={handleModalClose}
             areaToEdit={editingArea}
-          />
+          />{" "}
         </Modal>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Service Areas</CardTitle>
-          <CardDescription>
-            Configure service areas for your application. Total areas: {total}
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           {/* Search and Filter Controls */}
           <div className="space-y-4 mb-6">
@@ -465,7 +485,8 @@ export function AreaConfigManager() {
                 className="flex items-center gap-2"
               >
                 <Filter className="w-4 h-4" />
-                Filters {hasActiveFilters && <span className="text-purple-600">•</span>}
+                Filters{" "}
+                {hasActiveFilters && <span className="text-purple-600">•</span>}
               </Button>
 
               {hasActiveFilters && (
@@ -491,7 +512,10 @@ export function AreaConfigManager() {
                     Sort by
                   </label>
                   <div className="flex gap-2">
-                    <Select value={sortField} onValueChange={(value: SortField) => setSortField(value)}>
+                    <Select
+                      value={sortField}
+                      onValueChange={(value: SortField) => setSortField(value)}
+                    >
                       <SelectTrigger className="flex-1">
                         <SelectValue />
                       </SelectTrigger>
@@ -504,7 +528,9 @@ export function AreaConfigManager() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      onClick={() =>
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                      }
                     >
                       {getSortIcon(sortField)}
                     </Button>
@@ -515,7 +541,12 @@ export function AreaConfigManager() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
-                  <Select value={statusFilter} onValueChange={(value: StatusFilter) => setStatusFilter(value)}>
+                  <Select
+                    value={statusFilter}
+                    onValueChange={(value: StatusFilter) =>
+                      setStatusFilter(value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -608,7 +639,9 @@ export function AreaConfigManager() {
                 <div className="text-center py-8 text-gray-500">
                   <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium">No areas found</p>
-                  <p className="text-sm">Try adjusting your search or filter criteria</p>
+                  <p className="text-sm">
+                    Try adjusting your search or filter criteria
+                  </p>
                 </div>
               )}
 
@@ -645,7 +678,7 @@ export function AreaConfigManager() {
           )}
         </CardContent>
         <CardFooter />
-      </Card>
-    </div>
+      </div>
+    // </div>
   );
 }
