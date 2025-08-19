@@ -19,6 +19,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import { ArrowLeft, Mail, Phone, MapPin, User } from "lucide-react";
 import axios from "axios";
+import CustomerDetailsSkeleton from "./customerDetailsSkeleton";
 
 const CustomerDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +42,7 @@ const CustomerDetailsPage = () => {
         const res = await axiosInstance.get(`/getUserProfileById`, {
           params: { userId: `${id}` },
         });
+        console.log("response",res);
         setCustomer(res.data.data);
       } catch (err: any) {
         if(axios.isAxiosError(err)){
@@ -59,13 +61,7 @@ const CustomerDetailsPage = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="p-6 flex items-center justify-center">
-          <div className="animate-pulse text-lg text-gray-600">
-            Loading customer details...
-          </div>
-          </div>
-        </DashboardLayout>
+          <CustomerDetailsSkeleton/>
       );
   }
 

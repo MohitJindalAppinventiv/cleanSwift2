@@ -433,7 +433,7 @@ const App = () => (
         <Sonner />
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
-            <Suspense fallback={<LaundryPageLoader />}>
+            <Suspense>
               <AppRoutes />
             </Suspense>
           </BrowserRouter>

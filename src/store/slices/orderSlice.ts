@@ -100,8 +100,8 @@ interface OrdersState {
 }
 
 interface FetchOrdersParams {
-  page: number;
-  limit: number;
+  page?: number;
+  limit?: number;
   status?: string;
   search?: string;
   startDate?: string;
@@ -125,7 +125,7 @@ const initialState: OrdersState = {
 
 // Async thunk for fetching orders
 export const fetchOrders = createAsyncThunk<
-  ApiResponse,
+  any,
   FetchOrdersParams,
   { rejectValue: string }
 >(
@@ -195,6 +195,35 @@ export const getOrderByIdAdmin = createAsyncThunk<
   }
 });
 
+// Async thunk for updating order status
+export const updateOrderStatus = createAsyncThunk<
+  { orderId: string; status: string },
+  { orderId: string; status: string },
+  { rejectValue: string }
+>(
+  "orders/updateOrderStatus",
+  async ({ orderId, status }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/updateOrderStatus", {
+        orderId,
+        status,
+      });
+
+      if (response.data.success) {
+        return { orderId, status };
+      } else {
+        return rejectWithValue(
+          response.data.message || "Failed to update status"
+        );
+      }
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to update status"
+      );
+    }
+  }
+);
+
 const orderSlice = createSlice({
   name: "orders",
   initialState,
@@ -224,7 +253,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || "An unexpected error occurred";
+        state.error = action.payload || "An unexpected error occurred 1";
       });
 
     // getOrderByIdAdmin
@@ -242,6 +271,36 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload || "An unexpected error occurred";
         state.selectedOrder = null;
+      });
+
+    // updateOrderStatus
+    builder
+      .addCase(updateOrderStatus.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        // Update order in state.orders
+        const index = state.orders.findIndex(
+          (order) => order.id === action.payload.orderId
+        );
+        if (index !== -1) {
+          state.orders[index].status = action.payload.status;
+        }
+
+        // Also update selectedOrder if it matches
+        if (
+          state.selectedOrder &&
+          state.selectedOrder.id === action.payload.orderId
+        ) {
+          state.selectedOrder.status = action.payload.status;
+        }
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "Failed to update status";
       });
   },
 });

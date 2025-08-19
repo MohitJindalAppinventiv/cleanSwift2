@@ -8,7 +8,7 @@ import { RecentCustomers } from "@/components/dashboard/RecentCustomers";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchOrders } from "@/store/slices/orderSlice";
 
 
@@ -19,14 +19,18 @@ const Index = () => {
     (state) => state.orders
   );
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(10);
+    const [pageSize] = useState(5);
+
+      const handlePageChange = useCallback((page: number) => {
+        setCurrentPage(page);
+      }, []);
 
   useEffect(()=>{
     dispatch(fetchOrders({
         page: currentPage,
         limit: pageSize,
       }));
-  },[])
+  },[currentPage])
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -47,9 +51,9 @@ const Index = () => {
         <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"}`}>
           <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
             <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
-            <OrdersTable orders={orders} pagination={pagination} isLoading={isLoading} />
+            <OrdersTable orders={orders} pagination={pagination} isLoading={isLoading} onPageChange={handlePageChange} />
           </div>
-          <div>
+          <div> 
             <RecentCustomers />
           </div>
         </div>

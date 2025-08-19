@@ -328,6 +328,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { axiosInstance } from "@/api/axios/axiosInstance";
+import { OrderDetailsSkeleton } from "./orderDetailsSkeleton";
 
 interface OrderItem {
   productId: string;
@@ -343,6 +344,7 @@ interface FirebasetimeStamp {
 interface Order {
   id: string;
   userId: string;
+  orderId:string;
   status: string;
   paymentMethod: string;
   finalTotal: number;
@@ -364,22 +366,44 @@ interface Order {
 }
 
 const OrderDetailsPage = () => {
-  const { id } = useParams();
+  // const { id } = useParams();
+  // const navigate = useNavigate();
+  // const [order, setOrder] = useState<Order | null>(null);
+
+  // useEffect(() => {
+  //   const fetchOrder = async () => {
+  //     try {
+  //       const res = await axiosInstance.get(`/getOrderByIdAdmin`, {
+  //         params: {
+  //           orderId: id,
+  //         },
+  //       });
+  //       console.log(res);
+  //       setOrder(res.data.data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch order", err);
+  //     }
+  //   };
+  //   fetchOrder();
+  // }, [id]);
+
+    const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true); // ✅ loading state
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
+        setLoading(true);
         const res = await axiosInstance.get(`/getOrderByIdAdmin`, {
-          params: {
-            orderId: id,
-          },
+          params: { orderId: id },
         });
-        console.log(res);
         setOrder(res.data.data);
       } catch (err) {
         console.error("Failed to fetch order", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchOrder();
@@ -390,6 +414,9 @@ const OrderDetailsPage = () => {
     const date = new Date(time._seconds * 1000 + time._nanoseconds / 1000);
     return date.toLocaleString();
   }
+
+    if (loading) return <OrderDetailsSkeleton />;
+
 
   if (!order) {
     return (
@@ -416,8 +443,10 @@ const OrderDetailsPage = () => {
 
   const items = order.items || [];
   const subtotal = items.reduce(
-    (acc, item) => acc + item.quantity * item.price,
+    (acc, item) => acc + item.qty * item.price,
     0
+
+    
   );
 
   return (
@@ -436,7 +465,7 @@ const OrderDetailsPage = () => {
             </Button>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">
-                Order {order.id}
+                Order {order.orderId}
               </h2>
               <p className="text-muted-foreground">
                 View and manage order details
@@ -470,7 +499,7 @@ const OrderDetailsPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-sm text-muted-foreground">Order ID:</dt>
-                    <dd className="text-sm font-medium">{order.id}</dd>
+                    <dd className="text-sm font-medium">{order.orderId}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-sm text-muted-foreground">
