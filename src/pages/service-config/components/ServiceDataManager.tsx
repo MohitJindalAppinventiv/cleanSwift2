@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Service } from "../types";
-import axios from "axios";
+import API from "@/api/endpoints/endpoint";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 export const useServiceData = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,9 +19,8 @@ export const useServiceData = () => {
       try {
         setIsLoad(true);
         // First fetch all services
-        const response = await axios.get(
-          "https://us-central1-laundry-app-dee6a.cloudfunctions.net/getAllServices"
-        );
+        const response = await axiosInstance.get(
+          `${API.GET_ALL_SERVICES()}`);
         if (response.data.success) {
           // Find the specific service from the array
           const foundService = response.data.data.find((s: any) => s.id === id);
@@ -63,8 +63,8 @@ export const useServiceData = () => {
   const handleStatusChange = async (value: string) => {
     if (!service) return;
     setService(prev => prev ? { ...prev, status: value as "active" | "inactive" } : null);
-    await axios.patch(
-        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusOfService?serviceId=${id}`
+    await axiosInstance.patch(
+        `${API.TOGGLE_SERVICE_STATUS()}?serviceId=${id}`
       );
   };
 
@@ -92,7 +92,14 @@ export const useServiceData = () => {
     reader.readAsDataURL(file);
   };
 
-  
+  const handleRemoveThumbnail = () => {
+    setService(prev => ({
+      ...prev,
+      imageBase64: "",
+      thumbnail: ""
+    }));
+    setFileInputKey(Date.now()); // Reset file input
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -119,8 +126,8 @@ export const useServiceData = () => {
       };
 
 
-      await axios.put(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/updateService",
+      await axiosInstance.put(
+        `${API.UPDATE_SERVICE()}`,
         payload,
         {
           params: { serviceId: id },
@@ -133,8 +140,8 @@ export const useServiceData = () => {
       toast.success("Service updated successfully");
       navigate("/config/services");
     } catch (error) {
-      console.error("Error updating service:", error);
-      toast.error("Failed to update service");
+      console.error("Error updating service:", error.response.data.message);
+      toast.error(error.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -153,6 +160,7 @@ export const useServiceData = () => {
     handleStatusChange,
     handlePricingModelChange,
     handleFileChange,
+    handleRemoveThumbnail,
     handleSubmit,
     handleCancel,
     setFileInputKey

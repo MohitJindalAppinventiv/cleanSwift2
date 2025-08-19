@@ -1,3 +1,4 @@
+// src/components/products/ProductForm.tsx
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,7 +20,6 @@ const productSchema = z.object({
 });
 
 export type ProductFormValues = z.infer<typeof productSchema>;
-export { productSchema };
 
 interface ProductFormProps {
   onSubmit: (data: ProductFormValues) => void;
@@ -80,7 +80,12 @@ export function ProductForm({
         />
 
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={onCancel}>
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={onCancel}
+            disabled={isSubmitting}  // Disable during submission
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>

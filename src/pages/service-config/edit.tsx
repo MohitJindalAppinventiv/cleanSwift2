@@ -15,7 +15,8 @@ const ServiceEditPage: React.FC = () => {
     handleFileChange,
     handlePricingModelChange,
     handleSubmit,
-    handleCancel
+    handleCancel,
+    handleRemoveThumbnail,
   } = useServiceData();
 
   if (isLoad) {
@@ -46,6 +47,7 @@ const ServiceEditPage: React.FC = () => {
         </div>
 
         <ServiceForm
+        handleRemoveThumbnail={handleRemoveThumbnail}
           service={service}
           fileInputKey={fileInputKey}
           handlePricingModelChange={handlePricingModelChange}

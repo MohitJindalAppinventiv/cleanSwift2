@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "
 interface ServiceTableProps {
   services: Service[];
   fetchServices: () => Promise<void>;
+  isLoading: boolean;
 }
 
-export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
+export function ServiceTable({ services, fetchServices, isLoading }: ServiceTableProps) {
   const navigate = useNavigate();
   const [deletingServiceId, setDeletingServiceId] = useState<string | null>(null);
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
@@ -112,14 +113,21 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
   return (
     <>
       {/* Delete Confirmation Dialog */}
-      <Dialog open={confirmDialog.open} onOpenChange={() => setConfirmDialog({ open: false, serviceId: null })}>
+      <Dialog 
+        open={confirmDialog.open} 
+        onOpenChange={() => !deletingServiceId && setConfirmDialog({ open: false, serviceId: null })}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <p>Are you sure you want to delete this service? This action cannot be undone.</p>
           </DialogHeader>
           <DialogFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog({ open: false, serviceId: null })}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog({ open: false, serviceId: null })}
+              disabled={!!deletingServiceId} // Disable during deletion
+            >
               Cancel
             </Button>
             <Button
@@ -129,9 +137,32 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                   deleteService(confirmDialog.serviceId);
                 }
               }}
+              disabled={!!deletingServiceId} // Disable during deletion
             >
               {deletingServiceId === confirmDialog.serviceId ? (
-                <span className="animate-spin">↻</span>
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Deleting...
+                </>
               ) : (
                 "Delete"
               )}
@@ -192,7 +223,36 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
           </Button>
         </div>
 
-        {filteredServices.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+              >
+                <div className="h-40 bg-gray-200 rounded-t-lg animate-pulse"></div>
+                <div className="p-4 space-y-2">
+                  <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="px-4 pb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-6 w-12 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex gap-1">
+                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="px-4 pb-4">
+                  <div className="h-9 w-full bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredServices.length === 0 ? (
           <div className="flex items-center justify-center h-64 text-center">
             <p className="text-gray-500 text-lg">No services found.</p>
           </div>
@@ -205,7 +265,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                 onMouseEnter={() => setHoveredRowId(service.id)}
                 onMouseLeave={() => setHoveredRowId(null)}
               >
-                {/* Service Image */}
                 <div className="relative group">
                   {service.thumbnail ? (
                     <>
@@ -215,7 +274,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                         className="w-full h-40 object-cover rounded-t-lg cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={(e) => handleImageClick(e, service.thumbnail)}
                       />
-                      {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg cursor-pointer"
                            onClick={(e) => handleImageClick(e, service.thumbnail)}>
                         <span className="text-white text-sm font-medium px-3 py-1 bg-black/30 rounded-md">
@@ -228,8 +286,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                       <span className="text-gray-400 text-sm">No image</span>
                     </div>
                   )}
-                  
-                  {/* Status Badge */}
                   <div className="absolute top-2 left-2">
                     <span
                       className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
@@ -243,24 +299,17 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                   </div>
                 </div>
 
-                {/* Card Content */}
                 <div className="p-4 cursor-pointer" onClick={() => handleServiceClick(service)}>
-                  {/* Service Name */}
                   <h3 className="font-semibold text-lg mb-2 truncate" title={service.name}>
                     {service.name}
                   </h3>
-
-                  {/* Service Description */}
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2 min-h-[2.5rem]" title={service.description}>
                     {service.description}
                   </p>
                 </div>
 
-                {/* Actions Section - Non-clickable */}
                 <div className="px-4 pb-4">
-                  {/* Actions */}
                   <div className="flex items-center justify-between mb-3">
-                    {/* Toggle Switch */}
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">Active</span>
                       <Switch
@@ -269,8 +318,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                         disabled={updatingStatus === service.id}
                       />
                     </div>
-
-                    {/* Edit and Delete Buttons */}
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
@@ -282,7 +329,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-
                       <Button
                         variant="ghost"
                         size="sm"
@@ -299,8 +345,6 @@ export function ServiceTable({ services, fetchServices }: ServiceTableProps) {
                       </Button>
                     </div>
                   </div>
-
-                  {/* Pricing Model Button */}
                   <div className="w-full">
                     <Button
                       variant="outline"

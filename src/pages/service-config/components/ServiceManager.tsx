@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Service, mockServices } from "../types";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint";
 
 export const useServiceManager = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -14,8 +16,8 @@ export const useServiceManager = () => {
       setIsLoading(true);
       setError(null);
       
-      const response = await axios.get(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/getAllServices"
+      const response = await axiosInstance.get(
+        `${API.GET_ALL_SERVICES()}`
       );
       
       if (response.data.success) {

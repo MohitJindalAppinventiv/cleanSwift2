@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,15 +13,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Service } from "./types";
+import { Loader2 } from "lucide-react";
+import { Service, CategoryFormValues } from "./types";
 
 const baseCategorySchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),
 });
 
 const categorySchemaWithService = baseCategorySchema.extend({
@@ -33,13 +31,15 @@ const categorySchemaWithoutService = baseCategorySchema.extend({
 });
 
 interface CategoryFormProps {
-  onSubmit: (data: { name: string; serviceId?: string; isActive?: boolean }) => void;
+  onSubmit: (data: CategoryFormValues) => Promise<void>;
   onCancel: () => void;
-  initialData?: Partial<{ name: string; serviceId?: string; isActive?: boolean }>;
+  initialData?: Partial<CategoryFormValues>;
   services?: Service[];
 }
 
 export function CategoryForm({ onSubmit, onCancel, initialData, services }: CategoryFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const categorySchema = services && services.length > 0 ? categorySchemaWithService : categorySchemaWithoutService;
 
   const form = useForm<z.infer<typeof categorySchema>>({
@@ -47,17 +47,20 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services }: Cate
     defaultValues: {
       name: initialData?.name || "",
       description: "",
-      isActive: initialData?.isActive !== undefined ? initialData.isActive : true,
       serviceId: initialData?.serviceId || (services && services.length > 0 ? services[0].id : ""),
     },
   });
 
-  const handleSubmit = (data: z.infer<typeof categorySchema>) => {
-    onSubmit({
-      name: data.name,
-      serviceId: data.serviceId,
-      isActive: data.isActive
-    });
+  const handleSubmit = async (data: z.infer<typeof categorySchema>) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        name: data.name,
+        serviceId: data.serviceId,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,32 +113,25 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services }: Cate
           />
         )}
 
-        <FormField
-          control={form.control}
-          name="isActive"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Active Status</FormLabel>
-                <FormDescription>
-                  Set whether this category should be active or inactive.
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button" onClick={onCancel}>
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button type="submit">Save Category</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Category"
+            )}
+          </Button>
         </div>
       </form>
     </Form>

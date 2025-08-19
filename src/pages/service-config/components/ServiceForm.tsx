@@ -5,9 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check } from "lucide-react";
+import { X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Service, availableVariants } from "../types";
 
 interface ServiceFormProps {
   service: any;
@@ -17,6 +16,7 @@ interface ServiceFormProps {
   handleStatusChange: (value: string) => void;
   isLoading: boolean;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveThumbnail: () => void;
   handleSubmit: (e: React.FormEvent) => void;
   handleCancel: () => void;
 }
@@ -29,6 +29,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   handleStatusChange,
   handlePricingModelChange,
   handleFileChange,
+  handleRemoveThumbnail,
   handleSubmit,
   handleCancel
 }) => {
@@ -51,28 +52,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             />
           </div>
           
-          {/* Selected Variants (multiselect) */}
-          {/* <div className="space-y-2">
-            <Label>Selected Variants</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {availableVariants.map((variant) => (
-                <Button
-                  key={variant}
-                  type="button"
-                  variant={selectedVariants.includes(variant) ? "default" : "outline"}
-                  className={`justify-start ${selectedVariants.includes(variant) ? "bg-primary text-primary-foreground" : ""}`}
-                  onClick={() => handleVariantToggle(variant)}
-                >
-                  {selectedVariants.includes(variant) ? (
-                    <Check className="mr-2 h-4 w-4" />
-                  ) : (
-                    <div className="w-4 h-4 mr-2" />
-                  )}
-                  {variant}
-                </Button>
-              ))}
-            </div>
-          </div> */}
            {/* Pricing Model */}
           <div className="space-y-2">
             <Label htmlFor="pricingModel">Pricing Model</Label>
@@ -90,7 +69,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             </Select>
           </div>
 
-          {/* Thumbnail (File upload) */}
+        
+        {/* Thumbnail (File upload) */}
           <div className="space-y-2">
             <Label htmlFor="thumbnail">Thumbnail (File upload)</Label>
             <div className="flex flex-col gap-2">
@@ -105,12 +85,20 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
               {service.thumbnail && (
                 <div className="mt-2">
                   <Label>Current Thumbnail</Label>
-                  <div className="border rounded p-2 w-fit mt-1">
+                  <div className="relative border rounded p-2 w-fit mt-1">
                     <img
                       src={service.thumbnail}
                       alt={service.name}
                       className="w-32 h-24 object-cover rounded"
                     />
+                    <button
+                      type="button"
+                      onClick={handleRemoveThumbnail}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      aria-label="Remove thumbnail"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               )}

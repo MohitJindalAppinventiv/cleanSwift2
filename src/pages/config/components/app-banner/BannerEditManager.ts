@@ -1,9 +1,10 @@
 // src/components/app-banner/BannerEditManager.ts
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast"; // Changed import
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { AppBanner } from "../../types/banner";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint";
 
 interface ApiBanner {
   bannerId: string;
@@ -29,8 +30,8 @@ export const useBannerEditManager = () => {
     const fetchBanner = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(
-          "https://us-central1-laundry-app-dee6a.cloudfunctions.net/getAllAppBanner"
+        const response = await axiosInstance.get(
+          `${API.GET_ALL_BANNERS()}`
         );
 
         if (!response.data.success) {
@@ -67,7 +68,7 @@ export const useBannerEditManager = () => {
       } catch (error) {
         console.error("Error fetching banner:", error);
         toast({
-          title: "Error",
+          title: error.response.data.message,
           description: "Failed to load banner data",
           variant: "destructive",
         });
@@ -159,8 +160,8 @@ const handleUpdateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt"
       }
     }
 
-    const response = await axios.put(
-      "https://us-central1-laundry-app-dee6a.cloudfunctions.net/updateAppBanner",
+    const response = await axiosInstance.put(
+      `${API.UPDATE_BANNER()}`,
       payload,
       {
         params: { bannerId: id },

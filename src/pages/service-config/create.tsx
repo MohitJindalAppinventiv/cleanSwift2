@@ -14,7 +14,8 @@ const ServiceCreatePage: React.FC = () => {
     handleFileChange,
     handlePricingModelChange,
     handleSubmit,
-    handleCancel
+    handleCancel,
+    handleRemoveThumbnail
   } = useCreateServiceManager();
 
   return (
@@ -25,6 +26,7 @@ const ServiceCreatePage: React.FC = () => {
         </div>
 
         <ServiceForm
+          handleRemoveThumbnail={handleRemoveThumbnail}
           service={service}
           isLoading = {isLoading}
           fileInputKey={fileInputKey}

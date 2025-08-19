@@ -3,7 +3,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { AppBanner } from "../../types/banner";
 import axios from "axios";
 import { useState } from "react";
-
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint";
 
 
 
@@ -140,8 +141,8 @@ const handleCreateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt"
       };
 
       // Make API request to create banner
-      const response = await axios.post(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createAppBanner",
+      const response = await axiosInstance.post(
+       `${API.CREATE_BANNER()}`,
         payload,
         {
           headers: {
@@ -156,16 +157,16 @@ const handleCreateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt"
         // If the banner is created as inactive, we need to toggle its status
         if (bannerData.isActive === false) {
           try {
-            await axios.patch(
-              "https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusAppBanner",
+            await axiosInstance.patch(
+              `${API.TOGGLE_BANNER_STATUS()}`,
               null,
               { params: { bannerId } }
             );
           } catch (toggleError) {
             console.error("Failed to update banner status:", toggleError);
-            // Don't fail the whole operation if status update fails
+            // Don't fail the whole operation if status update fails  error.response.data.message
             toast({
-              title: "Banner created but status update failed",
+              title: toggleError.response.data.message,
               description: "The banner was created but we couldn't update its status. You may need to update it manually.",
               variant: "destructive",
             });

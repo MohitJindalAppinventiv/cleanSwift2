@@ -3,8 +3,7 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useServiceManager } from "./components/ServiceManager";
 import ServiceHeader from "./components/ServiceHeader";
 import SearchableServicesCard from "./components/SearchableServicesCard";
-import { LoadingSpinner } from "@/components/ui/loadingspinner"; // Assuming you have a spinner component
-import { Alert } from "@/components/ui/alert"; // Assuming you have an alert component
+import { Alert } from "@/components/ui/alert";
 
 const ServiceListingPage: React.FC = () => {
   const {
@@ -13,59 +12,29 @@ const ServiceListingPage: React.FC = () => {
     filteredServices,
     isLoading,
     error,
-    fetchServices
+    fetchServices,
   } = useServiceManager();
-
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <LoadingSpinner className="w-8 h-8" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-       <DashboardLayout>
-      {/* Show error alert at top (but don't return early) */}
-      {error && (
-        <Alert variant="destructive" className="mx-auto max-w-4xl mb-4">
-          {error} - Showing demo data instead
-        </Alert>
-      )}
-      
-      <div className="space-y-4">
-        <ServiceHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-        
-        <SearchableServicesCard
-         fetchServices={fetchServices}
-          filteredServices={filteredServices}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-      </div>
-    </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        <ServiceHeader 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-        
+        {/* Show error alert at top */}
+        {error && (
+          <Alert variant="destructive" className="mx-auto max-w-4xl mb-4">
+            {error} - Showing demo data instead
+          </Alert>
+        )}
+        {/* Render fixed UI immediately */}
+        <ServiceHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+         <p className="text-muted-foreground">
+          Welcome to the Service Page, where you can create and manage services.
+        </p>
         <SearchableServicesCard
+          fetchServices={fetchServices}
           filteredServices={filteredServices}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          fetchServices = {fetchServices}
+          isLoading={isLoading} // Pass isLoading to SearchableServicesCard
         />
       </div>
     </DashboardLayout>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -13,7 +12,7 @@ interface ServiceHeaderProps {
 const ServiceHeader: React.FC<ServiceHeaderProps> = ({ searchQuery, setSearchQuery }) => {
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-2xl font-bold">Service Management</h1>
+      <h2 className="text-3xl font-bold tracking-tight">Service Management</h2>
       <Button className="flex items-center gap-2" asChild>
         <Link to="/config/services/create">
           <Plus size={16} />

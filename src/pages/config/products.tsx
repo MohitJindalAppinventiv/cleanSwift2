@@ -4,13 +4,15 @@ import { ProductsConfigManager } from "./components/products/ProductsConfigManag
 import { useLocation } from "react-router-dom";
 
 export default function ProductsConfigPage() {
-  const { state }   = useLocation();
+  const { state } = useLocation();
   const idType = state?.idType;
   console.log(idType);
 
   return (
     <DashboardLayout>
-      <ProductsConfigManager />
+      <div className="space-y-4">
+        <ProductsConfigManager />
+      </div>
     </DashboardLayout>
   );
 }

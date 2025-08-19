@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AppBanner } from "../../types/banner";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint";
 
 interface ApiBanner {
   bannerId: string;
@@ -23,61 +24,50 @@ export const useBannerManager = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchBanners = async () => {
-    try {
-
-       
-      const response = await fetch(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/getAllAppBanner"
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch banners");
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || "Failed to fetch banners");
-      }
-
-      const transformedBanners = result.data
-        .map((banner: ApiBanner) => ({
-          id: banner.bannerId,
-          title: banner.title,
-          description: banner.description,
-          imageUrl: banner.imageUrl,
-          isActive: banner.enable ?? banner.isActive ?? false,
-          createdAt: new Date(
-            banner.createdAt._seconds * 1000 +
-              banner.createdAt._nanoseconds / 1000000
-          ),
-          isDeleted: banner.isDeleted,
-        }))
-        .filter((banner: AppBanner) => !banner.isDeleted);
-
-      setBanners(transformedBanners);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to load banners",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+ const fetchBanners = async () => {
+  try {
+    const response = await axiosInstance.get(`${API.GET_ALL_BANNERS()}`);
+    
+    if (response.status !== 200 || !response.data.success) {
+      throw new Error(response.data.message || "Failed to fetch banners");
     }
-  };
+
+    const transformedBanners = response.data.data
+      .map((banner: ApiBanner) => ({
+        id: banner.bannerId,
+        title: banner.title,
+        description: banner.description,
+        imageUrl: banner.imageUrl,
+        isActive: banner.enable ?? banner.isActive ?? false,
+        createdAt: new Date(
+          banner.createdAt._seconds * 1000 +
+          banner.createdAt._nanoseconds / 1000000
+        ),
+        isDeleted: banner.isDeleted,
+      }))
+      .filter((banner: AppBanner) => !banner.isDeleted);
+
+    setBanners(transformedBanners);
+  } catch (error) {
+    toast({
+      title: "Error",
+      description:
+        error instanceof Error ? error.message : "Failed to load banners",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchBanners();
   }, []);
 
   const handleDeleteBanner = async (id: string) => {
-    try {
-
-
-      
-      const response = await axios.delete(
-        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/deleteAppBanner/${id}`,
+    try {      
+      const response = await axiosInstance.delete(
+        `${API.DELETE_BANNER()}/${id}`,
         {
           params: {
             bannerId: id,
@@ -106,8 +96,8 @@ export const useBannerManager = () => {
 
   const handleToggleStatus = async (id: string) => {
     try {
-      await axios.patch(
-        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusAppBanner`,
+      await axiosInstance.patch(
+        `${API.TOGGLE_BANNER_STATUS()}/changeStatusAppBanner`,
         null,
         { params: { bannerId: id } }
       );

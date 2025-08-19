@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
+import API from "@/api/endpoints/endpoint";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 export const useCreateServiceManager = () => {
   const navigate = useNavigate();
@@ -57,6 +59,16 @@ export const useCreateServiceManager = () => {
     reader.readAsDataURL(file);
   };
 
+
+  const handleRemoveThumbnail = () => {
+    setService(prev => ({
+      ...prev,
+      imageBase64: "",
+      thumbnail: ""
+    }));
+    setFileInputKey(Date.now()); // Reset file input
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
      setIsLoading(true); // Set loading to true when submission starts
@@ -69,8 +81,8 @@ export const useCreateServiceManager = () => {
         imageBase64: service.imageBase64
       };
 
-      const res = await axios.post(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createService",
+      const res = await axiosInstance.post(
+        `${API.CREATE_SERVICE()}`,
         payload,
         {
           headers: {
@@ -79,15 +91,15 @@ export const useCreateServiceManager = () => {
         }
       );
  if(service.status && service.status !== "active"){
-     await axios.patch(
-        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusOfService?serviceId=${res.data.id}`
+     await axiosInstance.patch(
+        `${API.TOGGLE_SERVICE_STATUS()}?serviceId=${res.data.id}`
       );
   }
       toast.success("Service created successfully");
       navigate("/config/services");
     } catch (error) {
-      console.error("Error creating service:", error);
-      toast.error("Failed to create service");
+      console.error("Error creating service:", error.response.data.message);
+      toast.error(error.response.data.message);
     }finally {
       setIsLoading(false); // Reset loading state whether success or error
     }
@@ -106,6 +118,7 @@ export const useCreateServiceManager = () => {
     handleStatusChange,
     handleVariantToggle,
     handleFileChange,
+    handleRemoveThumbnail,
     handlePricingModelChange,
     handleSubmit,
     handleCancel,
