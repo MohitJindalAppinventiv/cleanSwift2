@@ -1,315 +1,3 @@
-// import React, { useState, useCallback, useRef, useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { AppDispatch } from "@/store/index";
-// import {
-//   createArea,
-//   updateArea,
-//   selectIsSubmitting,
-// } from "@/store/slices/locationSlice";
-
-// // Google Maps API configuration
-// const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
-// interface Area {
-//   id: string;
-//   locationName: string;
-//   address?: string;
-//   range: number;
-//   isActive: boolean;
-// }
-
-// interface StoreProps {
-//   close: () => void;
-//   areaToEdit?: Area | null;
-// }
-
-// interface StoreFormData {
-//   storeName: string;
-//   serviceAreaKm?: number;
-//   address: string;
-//   lat: number | null;
-//   lng: number | null;
-// }
-
-// declare global {
-//   interface Window {
-//     google: any;
-//   }
-// }
-
-// const StoreLocationPicker: React.FC<StoreProps> = ({
-//   close,
-//   areaToEdit,
-// }) => {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const isSubmitting = useSelector(selectIsSubmitting);
-
-//   const [storeData, setStoreData] = useState<StoreFormData>({
-//     storeName: "",
-//     serviceAreaKm: undefined,
-//     address: "",
-//     lat: null,
-//     lng: null,
-//   });
-
-//   const [isMapLoaded, setIsMapLoaded] = useState(false);
-//   const [error, setError] = useState<string | null>(null);
-
-//   const mapRef = useRef<HTMLDivElement>(null);
-//   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-//   const markerRef = useRef<google.maps.Marker | null>(null);
-
-//   // Set form state when editing
-//   useEffect(() => {
-//     if (areaToEdit) {
-//       setStoreData({
-//         storeName: areaToEdit.locationName,
-//         serviceAreaKm: areaToEdit.range,
-//         address: areaToEdit.address ?? "",
-//         lat: null,
-//         lng: null,
-//       });
-//     }
-//   }, [areaToEdit]);
-
-//   // Load Google Maps script
-//   useEffect(() => {
-//     const existingScript = document.getElementById("google-maps-script");
-//     if (!existingScript) {
-//       const script = document.createElement("script");
-//       script.id = "google-maps-script";
-//       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-//       script.async = true;
-//       script.defer = true;
-//       script.onload = () => setIsMapLoaded(true);
-//       script.onerror = () => setError("Failed to load Google Maps");
-//       document.body.appendChild(script);
-//     } else {
-//       setIsMapLoaded(true);
-//     }
-//   }, []);
-
-//   // Initialize or reinitialize the map
-//   useEffect(() => {
-//     if (!isMapLoaded || !window.google || !mapRef.current) return;
-
-//     navigator.geolocation.getCurrentPosition(
-//       (position) => {
-//         const center = {
-//           lat: position.coords.latitude,
-//           lng: position.coords.longitude,
-//         };
-
-//         if (mapRef.current) {
-//           mapInstanceRef.current = new window.google.maps.Map(mapRef.current, {
-//             center,
-//             zoom: 15,
-//           });
-
-//           mapInstanceRef.current.addListener("click", handleMapClick);
-
-//           setMarker(center.lat, center.lng);
-//           reverseGeocode(center.lat, center.lng);
-//         }
-//       },
-//       (err) => {
-//         console.error(err);
-//         setError("Failed to get your location");
-//       }
-//     );
-
-//     return () => {
-//       // Cleanup on unmount
-//       if (markerRef.current) {
-//         markerRef.current.setMap(null);
-//         markerRef.current = null;
-//       }
-//       if (mapInstanceRef.current) {
-//         mapInstanceRef.current = null;
-//       }
-//     };
-//   }, [isMapLoaded]);
-
-//   const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
-//     if (!event.latLng) return;
-//     const lat = event.latLng.lat();
-//     const lng = event.latLng.lng();
-//     setMarker(lat, lng);
-//     reverseGeocode(lat, lng);
-//   }, []);
-
-//   const setMarker = (lat: number, lng: number) => {
-//     if (!mapInstanceRef.current) return;
-
-//     if (markerRef.current) {
-//       markerRef.current.setMap(null);
-//     }
-
-//     markerRef.current = new window.google.maps.Marker({
-//       position: { lat, lng },
-//       map: mapInstanceRef.current,
-//       title: "Store Location",
-//       draggable: true,
-//     });
-
-//     markerRef.current.addListener("dragend", (e: google.maps.MapMouseEvent) => {
-//       if (e.latLng) {
-//         reverseGeocode(e.latLng.lat(), e.latLng.lng());
-//       }
-//     });
-
-//     setStoreData((prev) => ({
-//       ...prev,
-//       lat,
-//       lng,
-//     }));
-//   };
-
-//   const reverseGeocode = (lat: number, lng: number) => {
-//     const geocoder = new window.google.maps.Geocoder();
-//     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-//       if (status === "OK" && results && results[0]) {
-//         setStoreData((prev) => ({
-//           ...prev,
-//           address: results[0].formatted_address,
-//         }));
-//       } else {
-//         console.error("Geocoder failed due to:", status);
-//       }
-//     });
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-
-//     // Validation
-//     if (!storeData.storeName.trim()) {
-//       setError("Store name is required");
-//       return;
-//     }
-//     if (!storeData.serviceAreaKm || storeData.serviceAreaKm <= 0) {
-//       setError("Service area must be greater than 0");
-//       return;
-//     }
-//     if (!storeData.lat || !storeData.lng) {
-//       setError("Please select a location on the map");
-//       return;
-//     }
-
-//     setError(null);
-
-//     const payload = {
-//       locationName: storeData.storeName,
-//       coordinates: {
-//         latitude: storeData.lat,
-//         longitude: storeData.lng,
-//       },
-//       range: storeData.serviceAreaKm,
-//       address: storeData.address,
-//     };
-
-//     if (areaToEdit) {
-//       dispatch(updateArea({ id: areaToEdit.id, updatedData: payload }));
-//     } else {
-//       dispatch(createArea(payload));
-//     }
-//   };
-
-//   return (
-//     <div className="p-4 max-w-3xl mx-auto space-y-4">
-//       <h2 className="text-2xl font-semibold mb-2">
-//         {areaToEdit ? "Edit Store Location" : "Add New Store Location"}
-//       </h2>
-
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         <div className="space-y-2">
-//           <label className="block text-sm font-medium">Store Name: *</label>
-//           <input
-//             type="text"
-//             value={storeData.storeName}
-//             onChange={(e) =>
-//               setStoreData({ ...storeData, storeName: e.target.value })
-//             }
-//             className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             placeholder="Enter your store name"
-//             required
-//           />
-
-//           <label className="block text-sm font-medium">Detected Address:</label>
-//           <div className="border rounded px-3 py-2 bg-gray-100 text-sm min-h-[40px]">
-//             {storeData.address || "No address detected yet"}
-//           </div>
-
-//           <label className="block text-sm font-medium">
-//             Service Area (in KM): *
-//           </label>
-//           <input
-//             type="number"
-//             min="0.1"
-//             step="0.1"
-//             value={storeData.serviceAreaKm || ""}
-//             onChange={(e) =>
-//               setStoreData({
-//                 ...storeData,
-//                 serviceAreaKm: Number(e.target.value),
-//               })
-//             }
-//             className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-//             placeholder="Service Area in Kilometers"
-//             required
-//           />
-//         </div>
-
-//         <div className="space-y-2">
-//           <label className="block text-sm font-medium">
-//             Location (Click on map to select):
-//           </label>
-//           <div className="h-[400px] w-full border rounded" ref={mapRef} />
-//           {!isMapLoaded && (
-//             <div className="flex items-center justify-center h-[400px] border rounded bg-gray-100">
-//               <span>Loading map...</span>
-//             </div>
-//           )}
-//         </div>
-
-//         {error && (
-//           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-//             {error}
-//           </div>
-//         )}
-
-//         <div className="flex gap-3 pt-4">
-//           <button
-//             type="submit"
-//             disabled={isSubmitting}
-//             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-//           >
-//             {isSubmitting && (
-//               <span className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent border-white"></span>
-//             )}
-//             {isSubmitting
-//               ? (areaToEdit ? "Updating..." : "Creating...")
-//               : (areaToEdit ? "Update Store" : "Create Store")
-//             }
-//           </button>
-//           <button
-//             type="button"
-//             onClick={close}
-//             disabled={isSubmitting}
-//             className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 disabled:opacity-50"
-//           >
-//             Cancel
-//           </button>
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default StoreLocationPicker;
-
-
-
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/store/index";
@@ -325,10 +13,11 @@ import {
   Marker,
   StandaloneSearchBox,
 } from '@react-google-maps/api';
+import type { Libraries } from "@react-google-maps/api";
 
 // Google Maps API configuration and libraries
 const Maps_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const libraries = ['places'];
+const libraries:Libraries = ['places'];
 
 // Map container styles
 const containerStyle = {
@@ -348,6 +37,8 @@ interface Area {
   address?: string;
   range: number;
   isActive: boolean;
+  lat?:number;
+  lng?:number;
 }
 
 interface StoreProps {
@@ -388,19 +79,6 @@ const StoreLocationPicker: React.FC<StoreProps> = ({
   });
   
   const [error, setError] = useState<string | null>(null);
-
-  // Set initial form state for editing an existing area
-  // useEffect(() => {
-  //   if (areaToEdit) {
-  //     setStoreData({
-  //       storeName: areaToEdit.locationName,
-  //       serviceAreaKm: areaToEdit.range,
-  //       address: areaToEdit.address ?? "",
-  //       lat: null, // Note: The original code didn't provide lat/lng
-  //       lng: null, // We'd need to fetch these if they were available
-  //     });
-  //   }
-  // }, [areaToEdit]);
 
   useEffect(() => {
   if (areaToEdit) {
@@ -451,36 +129,6 @@ const StoreLocationPicker: React.FC<StoreProps> = ({
     });
   };
 
-  // Callback for when the map loads
-  // const onLoadMap = useCallback((map: google.maps.Map) => {
-  //   setMap(map);
-  //   // On load, get the current position and set the marker
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const center = {
-  //           lat: position.coords.latitude,
-  //           lng: position.coords.longitude,
-  //         };
-  //         map.panTo(center);
-  //         setMarkerPosition(center);
-  //         setStoreData(prev => ({ ...prev, lat: center.lat, lng: center.lng }));
-  //         reverseGeocode(center.lat, center.lng);
-  //       },
-  //       () => {
-  //         // Fallback to default center if geolocation fails
-  //         setMarkerPosition(defaultCenter);
-  //         reverseGeocode(defaultCenter.lat, defaultCenter.lng);
-  //       }
-  //     );
-  //   } else {
-  //     // Fallback if geolocation is not supported
-  //     setMarkerPosition(defaultCenter);
-  //     reverseGeocode(defaultCenter.lat, defaultCenter.lng);
-  //   }
-  // }, []);
-
-  // When setting initial data for edit mode
 useEffect(() => {
   if (areaToEdit) {
     setStoreData({
@@ -589,6 +237,7 @@ const onLoadMap = useCallback((map: google.maps.Map) => {
     };
 
     if (areaToEdit) {
+      
       dispatch(updateArea({ id: areaToEdit.id, updatedData: payload }));
     } else {
       dispatch(createArea(payload));

@@ -15,23 +15,46 @@ export interface OrderItem {
   price: number;
 }
 
-export interface Order {
-  id: string;
-  customer: string;
-  service: ServiceType;
-  status: OrderStatus;
-  date: string;
-  pickupDate: string;
-  pickupTime: string;
-  deliveryDate: string;
-  deliveryTime: string;
-  total: number;
-  discount: number;
-  deliveryCharge: number;
-  totalQuantity: number;
-  paymentStatus: PaymentStatus;
-  driver?: string;
-  items?: OrderItem[];
+// export interface Order {
+//   id: string;
+//   customer: string;
+//   service: ServiceType;
+//   status: OrderStatus;
+//   date: string;
+//   pickupDate: string;
+//   pickupTime: string;
+//   deliveryDate: string;
+//   deliveryTime: string;
+//   total: number;
+//   discount: number;
+//   deliveryCharge: number;
+//   totalQuantity: number;
+//   paymentStatus: PaymentStatus;
+//   driver?: string;
+//   items?: OrderItem[];
+// }
+
+
+interface AddressDetails{
+  addressLabel:string;
+
+}
+export interface Order{
+  addressDetails:AddressDetails;
+  createdAt:Date;
+  customerName:string;
+  finalTotal:number;
+  id:string;
+  orderId:string;
+  paymentMethod:string;
+  paymentStatus:string;
+  status:string;
+}
+export interface Pagination{
+  limit:number;
+  page:number;
+  total:number;
+  totalPages:number;
 }
 
 export const serviceLabels: Record<ServiceType, string> = {

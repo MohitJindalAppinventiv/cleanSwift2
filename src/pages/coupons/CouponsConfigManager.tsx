@@ -111,7 +111,6 @@
 //   );
 // }
 
-
 import React, { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchCoupons } from "@/store/slices/couponSlice";
@@ -125,16 +124,22 @@ export function CouponsConfigManager() {
 
   // Filters, sort & search state
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
+
   const [sortKey, setSortKey] = useState<"code" | "expiry" | "discount">("code");
+
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchTerm, setSearchTerm] = useState("");
-
+  interface FirestoreTimestamp {
+    _seconds: number;
+    _nanoseconds: number;
+  }
   useEffect(() => {
     dispatch(fetchCoupons());
   }, [dispatch]);
 
   // Utility to convert FirestoreTimestamp to Date for sorting expiry
-  const convertFirestoreTimestamp = (ts: any) => new Date(ts._seconds * 1000);
+  const convertFirestoreTimestamp = (ts: FirestoreTimestamp) =>
+    new Date(ts._seconds * 1000);
 
   // Filter, search, and sort coupons
   const filteredCoupons = useMemo(() => {
@@ -158,8 +163,8 @@ export function CouponsConfigManager() {
 
     // Sort
     filtered = filtered.slice().sort((a, b) => {
-      let aVal: any;
-      let bVal: any;
+      let aVal: string | number;
+      let bVal: string | number;
 
       switch (sortKey) {
         case "code":
@@ -205,4 +210,3 @@ export function CouponsConfigManager() {
     </div>
   );
 }
-

@@ -327,19 +327,25 @@ export function CouponsHeader({
     <div className="bg-white border-b border-border/40 px-6 py-4">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         {/* Header Section */}
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 shadow-sm">
               <Ticket className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Coupons
             </h1>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <br/>
+          <p className="text-muted-foreground">
             Manage discount coupons for your customers
           </p>
         </div>
+
+                {/* <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <p className="text-muted-foreground">
+          Welcome to CleanSwift Admin. View your business metrics and manage operations.
+        </p> */}
 
         {/* Controls Section */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">

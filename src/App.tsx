@@ -109,8 +109,6 @@
 
 // export default App;
 
-
-
 import React, { Suspense, lazy } from "react";
 import { Provider } from "react-redux";
 import { persistor, store } from "./store";
@@ -128,45 +126,70 @@ const Index = lazy(() => import("./pages/Index"));
 const OrdersPage = lazy(() => import("./pages/orders"));
 const OrderDetailsPage = lazy(() => import("./pages/order-details"));
 const CreateOrderPage = lazy(() => import("./pages/order/create"));
-const CustomersPage = lazy(() => import("./pages/customers"));
-const CustomerDetailsPage = lazy(() => import("./pages/customer-details"));
+const CustomersPage = lazy(() => import("./pages/customer/customers"));
+const CustomerDetailsPage = lazy(
+  () => import("./pages/customer/customer-details")
+);
 const CreateCustomerPage = lazy(() => import("./pages/customer/create"));
 const ServicesConfigPage = lazy(() => import("./pages/config/services"));
 const ServiceEditPage = lazy(() => import("./pages/service-config/edit"));
 const ServiceCreatePage = lazy(() => import("./pages/service-config/create"));
 const AppBannerPage = lazy(() => import("./pages/config/app-banner"));
 const BannerCreatePage = lazy(() => import("./pages/config/app-banner/create"));
-const BannerEditPage = lazy(() => import("@/pages/config/components/app-banner/BannerEditPage"));
+const BannerEditPage = lazy(
+  () => import("@/pages/config/components/app-banner/BannerEditPage")
+);
 const FCMConfigPage = lazy(() => import("./pages/config/fcm"));
 const AreaConfigPage = lazy(() => import("./pages/config/area"));
 const CategoriesConfigPage = lazy(() => import("./pages/config/categories"));
 const ProductsConfigPage = lazy(() => import("./pages/config/products"));
-const CouponsConfigPage = lazy(() => import("./pages/config/coupons"));
+const CouponsConfigPage = lazy(() => import("./pages/coupons/coupons"));
 const CreateCouponPage = lazy(() => import("./pages/config/coupons/create"));
 const LoginPage = lazy(() => import("./pages/auth/login"));
 const PaymentsPage = lazy(() => import("./pages/payments"));
 const ReviewsPage = lazy(() => import("./pages/reviews"));
 const NotificationsPage = lazy(() => import("./pages/notifications"));
-const SettingsPage = lazy(() => import("./pages/settings"));
+const SettingsPage = lazy(() => import("./pages/settings/settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const Seed = lazy(() => import("./pages/SeedPage"));
+const Seed = lazy(() => import("./pages/SeedPage/SeedPage"));
 const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
 const SuccessPage = lazy(() => import("./pages/redirect-login"));
-const AreaConfig = lazy(() => import("./pages/area-config"));
+const AreaConfig = lazy(() => import("./pages/initial/area-config"));
 const ServicePage = lazy(() => import("./pages/Service"));
-const AppBanner = lazy(() => import("./pages/AppBanner"));
+const AppBanner = lazy(() => import("./pages/initial/AppBanner"));
 const MapDemo = lazy(() => import("./pages/map-demo"));
-const Temp = lazy(() => import("./pages/Temp"));
-const SlotsConfigPage = lazy(() => import("./pages/SlotsConfigPage"));
-
+const Temp = lazy(() => import("./pages/temp/Temp"));
+const SlotsConfigPage = lazy(() => import("./pages/slots/SlotsConfigPage"));
+import LaundryPageLoader from "./PageLoading";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const routes = [
     // Public routes
-    { path: "/login", element: <PublicGuard><LoginPage /></PublicGuard> },
-    { path: "/forgot-password", element: <PublicGuard><ForgotPassword /></PublicGuard> },
-    { path: "/redirect-login", element: <PublicGuard><SuccessPage /></PublicGuard> },
+    {
+      path: "/login",
+      element: (
+        <PublicGuard>
+          <LoginPage />
+        </PublicGuard>
+      ),
+    },
+    {
+      path: "/forgot-password",
+      element: (
+        <PublicGuard>
+          <ForgotPassword />
+        </PublicGuard>
+      ),
+    },
+    {
+      path: "/redirect-login",
+      element: (
+        <PublicGuard>
+          <SuccessPage />
+        </PublicGuard>
+      ),
+    },
     { path: "/area-config", element: <AreaConfig /> },
     { path: "/AppBanner", element: <AppBanner /> },
     { path: "/Serv", element: <ServicePage /> },
@@ -174,37 +197,226 @@ const AppRoutes = () => {
     { path: "/seed", element: <Seed /> },
 
     // Protected routes
-    { path: "/", element: <AuthGuard><Index /></AuthGuard> },
-    { path: "/orders", element: <AuthGuard><OrdersPage /></AuthGuard> },
-    { path: "/order-details/:id", element: <AuthGuard><OrderDetailsPage /></AuthGuard> },
-    { path: "/order/create", element: <AuthGuard><CreateOrderPage /></AuthGuard> },
-    { path: "/customers", element: <AuthGuard><CustomersPage /></AuthGuard> },
-    { path: "/customers/create", element: <AuthGuard><CreateCustomerPage /></AuthGuard> },
-    { path: "/customer-details/:id", element: <AuthGuard><CustomerDetailsPage /></AuthGuard> },
-    { path: "/payments", element: <AuthGuard><PaymentsPage /></AuthGuard> },
-    { path: "/reviews", element: <AuthGuard><ReviewsPage /></AuthGuard> },
-    { path: "/notifications", element: <AuthGuard><NotificationsPage /></AuthGuard> },
-    { path: "/settings", element: <AuthGuard><SettingsPage /></AuthGuard> },
+    {
+      path: "/",
+      element: (
+        <AuthGuard>
+          <Index />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/orders",
+      element: (
+        <AuthGuard>
+          <OrdersPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/order-details/:id",
+      element: (
+        <AuthGuard>
+          <OrderDetailsPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/order/create",
+      element: (
+        <AuthGuard>
+          <CreateOrderPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/customers",
+      element: (
+        <AuthGuard>
+          <CustomersPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/customers/create",
+      element: (
+        <AuthGuard>
+          <CreateCustomerPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/customer-details/:id",
+      element: (
+        <AuthGuard>
+          <CustomerDetailsPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/payments",
+      element: (
+        <AuthGuard>
+          <PaymentsPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/reviews",
+      element: (
+        <AuthGuard>
+          <ReviewsPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/notifications",
+      element: (
+        <AuthGuard>
+          <NotificationsPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/settings",
+      element: (
+        <AuthGuard>
+          <SettingsPage />
+        </AuthGuard>
+      ),
+    },
 
     // Config
-    { path: "/config/services", element: <AuthGuard><ServicesConfigPage /></AuthGuard> },
-    { path: "/config/services/edit/:id", element: <AuthGuard><ServiceEditPage /></AuthGuard> },
-    { path: "/config/services/create", element: <AuthGuard><ServiceCreatePage /></AuthGuard> },
-    { path: "/config/app-banner", element: <AuthGuard><AppBannerPage /></AuthGuard> },
-    { path: "/config/app-banner/create", element: <AuthGuard><BannerCreatePage /></AuthGuard> },
-    { path: "/config/app-banner/edit/:id", element: <AuthGuard><BannerEditPage /></AuthGuard> },
-    { path: "/config/fcm", element: <AuthGuard><FCMConfigPage /></AuthGuard> },
-    { path: "/config/area", element: <AuthGuard><AreaConfigPage /></AuthGuard> },
-    { path: "/config/categories", element: <AuthGuard><CategoriesConfigPage /></AuthGuard> },
-    { path: "/config/categories/:serviceId", element: <AuthGuard><CategoriesConfigPage /></AuthGuard> },
-    { path: "/config/products", element: <AuthGuard><ProductsConfigPage /></AuthGuard> },
-    { path: "/config/products/:serviceId", element: <AuthGuard><ProductsConfigPage /></AuthGuard> },
-    { path: "/config/coupons", element: <AuthGuard><CouponsConfigPage /></AuthGuard> },
-    { path: "/config/coupons/create", element: <AuthGuard><CreateCouponPage /></AuthGuard> },
-    { path: "/config/slots", element: <AuthGuard><SlotsConfigPage /></AuthGuard> },
+    {
+      path: "/config/services",
+      element: (
+        <AuthGuard>
+          <ServicesConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/services/edit/:id",
+      element: (
+        <AuthGuard>
+          <ServiceEditPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/services/create",
+      element: (
+        <AuthGuard>
+          <ServiceCreatePage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/app-banner",
+      element: (
+        <AuthGuard>
+          <AppBannerPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/app-banner/create",
+      element: (
+        <AuthGuard>
+          <BannerCreatePage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/app-banner/edit/:id",
+      element: (
+        <AuthGuard>
+          <BannerEditPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/fcm",
+      element: (
+        <AuthGuard>
+          <FCMConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/area",
+      element: (
+        <AuthGuard>
+          <AreaConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/categories",
+      element: (
+        <AuthGuard>
+          <CategoriesConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/categories/:serviceId",
+      element: (
+        <AuthGuard>
+          <CategoriesConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/products",
+      element: (
+        <AuthGuard>
+          <ProductsConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/products/:serviceId",
+      element: (
+        <AuthGuard>
+          <ProductsConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/coupons",
+      element: (
+        <AuthGuard>
+          <CouponsConfigPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/coupons/create",
+      element: (
+        <AuthGuard>
+          <CreateCouponPage />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/config/slots",
+      element: (
+        <AuthGuard>
+          <SlotsConfigPage />
+        </AuthGuard>
+      ),
+    },
 
     // Demo
-    { path: "/map-demo", element: <AuthGuard><MapDemo /></AuthGuard> },
+    {
+      path: "/map-demo",
+      element: (
+        <AuthGuard>
+          <MapDemo />
+        </AuthGuard>
+      ),
+    },
 
     // Not found
     { path: "*", element: <NotFound /> },
@@ -221,7 +433,7 @@ const App = () => (
         <Sonner />
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
-            <Suspense fallback={<div className="p-4">Loading...</div>}>
+            <Suspense fallback={<LaundryPageLoader />}>
               <AppRoutes />
             </Suspense>
           </BrowserRouter>

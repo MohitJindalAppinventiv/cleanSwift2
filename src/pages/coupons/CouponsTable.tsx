@@ -23,24 +23,25 @@ import {
 } from "@/components/ui/dialog";
 import { useDispatch } from "react-redux";
 import { deleteCoupon, fetchCoupons } from "@/store/slices/couponSlice";
-
+import type { Coupon } from "@/store/slices/couponSlice";
+import { useAppDispatch } from "@/hooks/redux";
 interface FirestoreTimestamp {
   _seconds: number;
   _nanoseconds: number;
 }
 
-interface Coupon {
-  id: string;
-  couponCode: string;
-  couponName: string;
-  maxDiscount: string;
-  minValue: number;
-  discountPercentage?: number;
-  validFrom: FirestoreTimestamp;
-  validTill: FirestoreTimestamp;
-  isActive: boolean;
-  currentUsage?: number;
-}
+// interface Coupon {
+//   id: string;
+//   couponCode: string;
+//   couponName: string;
+//   maxDiscount: string;
+//   minValue: number;
+//   discountPercentage?: number;
+//   validFrom: FirestoreTimestamp;
+//   validTill: FirestoreTimestamp;
+//   isActive: boolean;
+//   currentUsage?: number;
+// } 
 
 interface Props {
   coupons: Coupon[];
@@ -51,7 +52,7 @@ export function CouponsCardView({ coupons, loading }: Props) {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [couponIdToDelete, setCouponIdToDelete] = useState<string | null>(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const convertFirestoreTimestamp = (ts: FirestoreTimestamp): Date =>
     new Date(ts._seconds * 1000);
@@ -62,7 +63,7 @@ export function CouponsCardView({ coupons, loading }: Props) {
       dispatch(deleteCoupon(id));
     } catch {
       setDeletingId(null);
-    } 
+    }
   };
 
   const refetchCoupon = async () => {
@@ -121,7 +122,8 @@ export function CouponsCardView({ coupons, loading }: Props) {
           No coupons available
         </h3>
         <p className="text-gray-500 text-center max-w-md">
-          Create your first coupon to start offering discounts to your customers.
+          Create your first coupon to start offering discounts to your
+          customers.
         </p>
       </div>
     );
@@ -176,7 +178,9 @@ export function CouponsCardView({ coupons, loading }: Props) {
                     </p>
                     <Badge
                       variant={
-                        coupon.isActive && !expired ? "secondary" : "destructive"
+                        coupon.isActive && !expired
+                          ? "secondary"
+                          : "destructive"
                       }
                       className={`w-fit font-medium ${
                         coupon.isActive && !expired
@@ -321,7 +325,8 @@ export function CouponsCardView({ coupons, loading }: Props) {
           </DialogHeader>
           <div className="py-4">
             <p className="text-gray-600 leading-relaxed">
-              Are you sure you want to delete this coupon? This action cannot be undone.
+              Are you sure you want to delete this coupon? This action cannot be
+              undone.
             </p>
           </div>
           <DialogFooter className="gap-2">

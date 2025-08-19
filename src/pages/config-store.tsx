@@ -1,5 +1,5 @@
-import StoreLocationPicker from '@/components/StoreLocationPicker'
-import React from 'react'
+import StoreLocationPicker from "@/pages/area/StoreLocationPicker";
+import React from "react";
 
 export default function ConfigStore() {
   return (
@@ -7,5 +7,5 @@ export default function ConfigStore() {
       <h1 className="text-2xl font-bold mb-4">Add Store Locations</h1>
       <StoreLocationPicker />
     </div>
-  )
+  );
 }

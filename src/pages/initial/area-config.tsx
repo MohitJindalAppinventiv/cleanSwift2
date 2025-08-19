@@ -1,4 +1,3 @@
-
 // import React, { useCallback, useEffect, useRef, useState } from "react";
 // import {
 //   GoogleMap,
@@ -295,7 +294,6 @@
 //   );
 // }
 
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   GoogleMap,
@@ -311,7 +309,7 @@ import { axiosInstance } from "@/api/axios/axiosInstance";
 import API from "@/api/endpoints/endpoint";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/redux";
-
+import type { Libraries } from "@react-google-maps/api";
 interface Area {
   id: string;
   locationName: string;
@@ -333,7 +331,7 @@ const defaultCenter = {
   lng: 77.209,
 };
 
-const libraries = ["places"];
+const libraries:Libraries = ["places"];
 
 export default function StoreLocationPage() {
   const profileComplete = useAppSelector((state) => state.profileStatus);
@@ -425,7 +423,9 @@ export default function StoreLocationPage() {
       setStoreName("");
       setServiceRadius("");
       await fetchAreas(); // Refresh locations list
-    } catch (error) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       console.error("Add Error", error);
       toast({ variant: "destructive", title: "Failed to add location" });
     }
@@ -433,7 +433,7 @@ export default function StoreLocationPage() {
 
   const handleSubmit = () => {
     if (profileComplete.data.configurations.service.isConfigured) {
-      console.log("location  ",profileComplete)
+      console.log("location  ", profileComplete);
       navigate("/");
     } else {
       navigate("/Serv");

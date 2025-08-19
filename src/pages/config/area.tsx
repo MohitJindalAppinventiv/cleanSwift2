@@ -1,6 +1,5 @@
-
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { AreaConfigManager } from "./components/area/AreaConfigManager";
+import { AreaConfigManager } from "../area/AreaConfigManager";
 
 export default function AreaConfigPage() {
   return (
@@ -8,4 +7,4 @@ export default function AreaConfigPage() {
       <AreaConfigManager />
     </DashboardLayout>
   );
-} 
+}
