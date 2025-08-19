@@ -574,7 +574,7 @@ export function AreaTable({
                         checked={area.isActive}
                         onCheckedChange={() => handleToggleStatus(area.id)}
                         disabled={isSubmitting || actioningId === area.id}
-                        size="sm"
+                        // size="sm"
                       />
                     </div>
                     <Button

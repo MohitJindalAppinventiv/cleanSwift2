@@ -24,7 +24,7 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage
 import couponSlice from "./slices/couponSlice";
 // import settingsReducer from "./slices/settingsSlice";
 import { combineReducers } from "redux";
-
+import OrderSlice from "./slices/orderSlice"
 const persistConfig = {
   key: "root",
   storage,
@@ -38,6 +38,7 @@ const rootReducer = combineReducers({
     profileStatus:profileStatus,
     coupons:couponSlice,
     slots:SlotSlice,
+    orders:OrderSlice
   // add other slices here if needed
 });
 

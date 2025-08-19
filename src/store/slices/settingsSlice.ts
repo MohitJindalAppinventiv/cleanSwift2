@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { axiosInstance } from '@/api/axios/axiosInstance';
-import API from '@/api/endpoints/endpoint';
-import { RootState } from '..';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { axiosInstance } from "@/api/axios/axiosInstance";
+import API from "@/api/endpoints/endpoint";
+import { RootState } from "..";
 
 // Define the profile interface
 interface Profile {
@@ -28,33 +28,42 @@ const initialState: ProfileState = {
 
 // Async thunk for fetching profile
 export const fetchProfile = createAsyncThunk(
-  'profile/fetchProfile',
+  "profile/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`${API.GET_PROFILE()}`);
-      console.log("Profile response",response);
+      console.log("Profile response", response);
       if (response.data.success) {
         return response.data.profile;
       }
-      return rejectWithValue('Failed to fetch profile');
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to load profile');
+      return rejectWithValue("Failed to fetch profile");
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to load profile"
+      );
     }
   }
 );
 
 // Async thunk for updating phone number
 export const updatePhoneNumber = createAsyncThunk(
-  'profile/updatePhoneNumber',
+  "profile/updatePhoneNumber",
   async (newPhoneNumber: string, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`${API.UPDATE_PHONE_NUMBER()}`, { 
-        newPhoneNumber 
-      });
+      const response = await axiosInstance.post(
+        `${API.UPDATE_PHONE_NUMBER()}`,
+        {
+          newPhoneNumber,
+        }
+      );
       return newPhoneNumber; // Return the new phone number on success
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to update phone number'
+        error.response?.data?.message || "Failed to update phone number"
       );
     }
   }
@@ -62,7 +71,7 @@ export const updatePhoneNumber = createAsyncThunk(
 
 // Async thunk for updating password
 export const updatePassword = createAsyncThunk(
-  'profile/updatePassword',
+  "profile/updatePassword",
   async (
     { oldPassword, newPassword }: { oldPassword: string; newPassword: string },
     { rejectWithValue }
@@ -73,16 +82,18 @@ export const updatePassword = createAsyncThunk(
         newPassword,
       });
       return response.data;
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to update password'
+        error.response?.data?.message || "Failed to update password"
       );
     }
   }
 );
 
 const profileSlice = createSlice({
-  name: 'profile',
+  name: "profile",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -100,35 +111,41 @@ const profileSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<Profile>) => {
-        state.loading = false;
-        state.profile = action.payload;
-        state.error = null;
-      })
+      .addCase(
+        fetchProfile.fulfilled,
+        (state, action: PayloadAction<Profile>) => {
+          state.loading = false;
+          state.profile = action.payload;
+          state.error = null;
+        }
+      )
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      })
-    
+      });
+
     // Update Phone Number
     builder
       .addCase(updatePhoneNumber.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updatePhoneNumber.fulfilled, (state, action: PayloadAction<string>) => {
-        state.loading = false;
-        // Update only the phone number in the existing profile
-        if (state.profile) {
-          state.profile.phoneNumber = action.payload;
+      .addCase(
+        updatePhoneNumber.fulfilled,
+        (state, action: PayloadAction<string>) => {
+          state.loading = false;
+          // Update only the phone number in the existing profile
+          if (state.profile) {
+            state.profile.phoneNumber = action.payload;
+          }
+          state.error = null;
         }
-        state.error = null;
-      })
+      )
       .addCase(updatePhoneNumber.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      })
-    
+      });
+
     // Update Password
     builder
       .addCase(updatePassword.pending, (state) => {
@@ -150,8 +167,9 @@ const profileSlice = createSlice({
 export const { clearError, clearProfile } = profileSlice.actions;
 
 // Selectors
-export const selectProfile = (state:RootState) =>state.settings.profile;
-export const selectProfileLoading = (state:RootState) => state.settings.loading;
+export const selectProfile = (state: RootState) => state.settings.profile;
+export const selectProfileLoading = (state: RootState) =>
+  state.settings.loading;
 export const selectProfileError = (state: RootState) => state.settings.error;
 
 export default profileSlice.reducer;

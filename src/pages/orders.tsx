@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { OrdersTable } from "@/components/dashboard/OrdersTable";
 import { Button } from "@/components/ui/button";
@@ -12,15 +13,152 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
+import { fetchOrders } from "@/store/slices/orderSlice";
+import { CalendarDateRangePicker } from "@/components/date-range-picker";
 
 const OrdersPage = () => {
+  const dispatch = useAppDispatch();
+  const { orders, pagination, isLoading, error } = useAppSelector(
+    (state) => state.orders
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [serviceFilter, setServiceFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+
+  const [dateRange, setDateRange] = useState<{
+    startDate?: Date;
+    endDate?: Date;
+  }>({});
+
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     setCurrentPage(1);
+  //     dispatch(
+  //       fetchOrders({
+  //         page: 1,
+  //         limit: pageSize,
+  //         status: statusFilter === "all" ? statusFilter : undefined,
+  //         search: searchQuery.trim() !== "" ? searchQuery : undefined,
+  //       })
+  //     );
+  //   }, 300);
+  //   return () => clearTimeout(timeoutId);
+  // }, [searchQuery, statusFilter, dispatch, pageSize]);
+
+  // // Effect for pagination changes
+  // useEffect(() => {
+  //   dispatch(
+  //     fetchOrders({
+  //       page: currentPage,
+  //       limit: pageSize,
+  //       status: statusFilter !== "all" ? statusFilter : undefined,
+  //       search: searchQuery.trim() !== "" ? searchQuery : undefined,
+  //     })
+  //   );
+  // }, [currentPage, dispatch, pageSize, statusFilter, searchQuery]);
+
+  // useEffect(() => {
+  //   const timeoutId = setTimeout(() => {
+  //     dispatch(
+  //       fetchOrders({
+  //         page: currentPage,
+  //         limit: pageSize,
+  //         status: statusFilter !== "all" ? statusFilter : undefined,
+  //         search: searchQuery.trim() !== "" ? searchQuery : undefined,
+  //       })
+  //     );
+  //   }, 300);
+
+  //   return () => clearTimeout(timeoutId);
+  // }, [searchQuery, statusFilter, currentPage, dispatch, pageSize]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      dispatch(
+        fetchOrders({
+          page: currentPage,
+          limit: pageSize,
+          status: statusFilter !== "all" ? statusFilter : undefined,
+          search: searchQuery.trim() !== "" ? searchQuery : undefined,
+          startDate: dateRange.startDate
+            ? dateRange.startDate.toISOString().split("T")[0] // format: 2025-01-01
+            : undefined,
+          endDate: dateRange.endDate
+            ? dateRange.endDate.toISOString().split("T")[0]
+            : undefined,
+        })
+      );
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, statusFilter, currentPage, dispatch, pageSize, dateRange]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handleServiceFilterChange = (value: string) => {
+    setServiceFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            {/* <Button
+              onClick={() =>
+                dispatch(
+                  fetchOrders({
+                    page: currentPage,
+                    limit: pageSize,
+                    status: statusFilter !== "all" ? statusFilter : undefined,
+                    search: searchQuery.trim() !== "" ? searchQuery : undefined,
+                  })
+                )
+              }
+            >
+              Try Again
+            </Button> */}
+            <Button
+              onClick={() =>
+                dispatch(
+                  fetchOrders({
+                    page: currentPage,
+                    limit: pageSize,
+                    status: statusFilter !== "all" ? statusFilter : undefined,
+                    search: searchQuery.trim() !== "" ? searchQuery : undefined,
+                    startDate: dateRange.startDate
+                      ? dateRange.startDate.toISOString().split("T")[0]
+                      : undefined,
+                    endDate: dateRange.endDate
+                      ? dateRange.endDate.toISOString().split("T")[0]
+                      : undefined,
+                  })
+                )
+              }
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -32,12 +170,14 @@ const OrdersPage = () => {
               View and manage all customer orders
             </p>
           </div>
-          <Button asChild>
+          {/* <Button asChild>
             <Link to="/order/create">
               <Plus className="mr-2 h-4 w-4" />
               New Order
             </Link>
-          </Button>
+          </Button> */}
+
+          <CalendarDateRangePicker value={dateRange} onChange={setDateRange} />
         </div>
 
         <div className="grid gap-4 md:flex md:items-center md:justify-between">
@@ -52,7 +192,10 @@ const OrdersPage = () => {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select
+              value={statusFilter}
+              onValueChange={handleStatusFilterChange}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -65,7 +208,10 @@ const OrdersPage = () => {
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={serviceFilter} onValueChange={setServiceFilter}>
+            <Select
+              value={serviceFilter}
+              onValueChange={handleServiceFilterChange}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Service Type" />
               </SelectTrigger>
@@ -79,10 +225,11 @@ const OrdersPage = () => {
           </div>
         </div>
 
-        <OrdersTable 
-          searchQuery={searchQuery} 
-          statusFilter={statusFilter}
-          serviceFilter={serviceFilter}
+        <OrdersTable
+          orders={orders}
+          pagination={pagination}
+          isLoading={isLoading}
+          onPageChange={handlePageChange}
         />
       </div>
     </DashboardLayout>

@@ -386,7 +386,9 @@ export default function SubmitDetailsPage() {
       fetchBanners();
 
 
-    } catch (error: any) {
+    } catch (err) {
+            const error = err as { response?: { data?: { message?: string } } };
+
       toast("Submission Failed", {
         description: error?.response?.data?.message || "Something went wrong",
       });

@@ -23,7 +23,7 @@ export const adminLogin = async ({
     console.log(res);
     return res.data;
   } catch (error:any) {
-    console.log(error);
+    console.log("ERROR IN INDEX.TS",error);
     if (error.response && error.response.data && error.response.data.message) {
       throw new Error(error.response.data.message);
     }

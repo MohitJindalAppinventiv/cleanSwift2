@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, RefreshCw } from "lucide-react";
-import SlotTable from "@/components/slots/SlotTable";
-import SlotFormModal from "@/components/slots/SlotFormModal";
+import SlotTable from "@/pages/slots/SlotTable";
+import SlotFormModal from "@/pages/slots/SlotFormModal";
 
 export default function SlotsConfigPage() {
   const [typeFilter, setTypeFilter] = useState<"pickup" | "delivery" | "all">(
@@ -43,7 +43,8 @@ export default function SlotsConfigPage() {
             <div className="flex items-center gap-4 flex-wrap">
               <Select
                 value={typeFilter}
-                onValueChange={(value) => setTypeFilter(value as any)}
+                // onValueChange={(value) => setTypeFilter(value as any)}
+                onValueChange={(value: "pickup" | "delivery" | "all") => setTypeFilter(value)}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Select Type" />

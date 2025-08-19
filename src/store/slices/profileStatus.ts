@@ -40,9 +40,11 @@ export const getProfileCompletionStatus = createAsyncThunk<
     } else {
       return rejectWithValue("Failed to fetch profile status");
     }
-  } catch (err: any) {
+  } catch (err) {
+        const error = err as { response?: { data?: { message?: string } } };
+
     return rejectWithValue(
-      err?.response?.data?.message || "Something went wrong"
+      error?.response?.data?.message || "Something went wrong"
     );
   }
 });

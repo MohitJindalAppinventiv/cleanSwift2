@@ -73,7 +73,9 @@ export const addSlot = createAsyncThunk(
       }
 
       return true;
-    } catch (error: AxiosError) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       console.error("Error adding slots", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to create slots"
@@ -81,7 +83,6 @@ export const addSlot = createAsyncThunk(
     }
   }
 );
-
 
 export const fetchSlots = createAsyncThunk(
   "slots/fetchSlots",
@@ -106,7 +107,9 @@ export const fetchSlots = createAsyncThunk(
         slotsByDate: response.data.slotsByDate,
         fetchParams: { type, dateRange },
       };
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       console.error("Error fetching slots", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch slots"
@@ -130,7 +133,9 @@ export const deleteSlot = createAsyncThunk(
       }
 
       return slotId;
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       console.error("Error deleting slot", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to delete slot"
@@ -158,7 +163,9 @@ export const toggleSlot = createAsyncThunk(
       }
 
       return slotId;
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+
       console.error("Error toggling slot", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to toggle slot"
@@ -174,12 +181,12 @@ export const updateSlot = createAsyncThunk(
     { rejectWithValue, getState, dispatch }
   ) => {
     try {
-      console.log(slotId,"slot ID");
-      console.log("updated data",updateData);
+      console.log(slotId, "slot ID");
+      console.log("updated data", updateData);
       const response = await axiosInstance.put("/adminUpdateSlot", updateData, {
         params: { slotId },
       });
-      console.log("slot update response",response);
+      console.log("slot update response", response);
 
       const state = getState() as { slots: SlotsState };
       if (state.slots.lastFetchParams) {
@@ -187,7 +194,8 @@ export const updateSlot = createAsyncThunk(
       }
 
       return { slotId, updateData };
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
       console.error("Error updating slot", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to update slot"

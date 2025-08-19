@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Table,
@@ -14,7 +13,7 @@ import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import { toast } from "@/components/ui/sonner";
-import { Customer } from "./types";
+import { Customer } from "../../components/customers/types";
 import {
   Dialog,
   DialogContent,
@@ -26,9 +25,9 @@ import { Loader2 } from "lucide-react";
 import axios from "axios";
 
 interface CustomerTableProps {
-  customers: Customer;
-  totalPages:number;
-    page: number;
+  customers: Customer[];
+  totalPages: number;
+  page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   fetchData: () => void;
 }
@@ -36,7 +35,7 @@ interface CustomerTableProps {
 export const CustomersTable = ({
   customers,
   totalPages,
-    page,
+  page,
   setPage,
   fetchData,
 }: CustomerTableProps) => {
@@ -63,11 +62,10 @@ export const CustomersTable = ({
       toast.success("User deleted successfully");
       fetchData();
     } catch (error) {
-      if(axios.isAxiosError(error)){
+      if (axios.isAxiosError(error)) {
         toast.error(error.message);
         console.error(error);
-      }
-      else{
+      } else {
         console.error(error);
         toast.error("Failed to delete user");
       }
@@ -79,11 +77,11 @@ export const CustomersTable = ({
   };
 
   const handlePrevious = () => {
-    if (page > 1) setPage(prev => prev - 1);
+    if (page > 1) setPage((prev) => prev - 1);
   };
 
   const handleNext = () => {
-    if (page < totalPages) setPage(prev => prev + 1);
+    if (page < totalPages) setPage((prev) => prev + 1);
   };
 
   return (
@@ -158,7 +156,7 @@ export const CustomersTable = ({
               Previous
             </Button>
             <span className="text-muted-foreground text-sm">
-              Page {totalPages==0 ? 0 :page} of {totalPages}
+              Page {totalPages == 0 ? 0 : page} of {totalPages}
             </span>
             <Button onClick={handleNext} disabled={page === totalPages}>
               Next

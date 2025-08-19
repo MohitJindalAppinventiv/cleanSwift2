@@ -12,11 +12,18 @@ export interface AreaConfig {
   isActive: boolean;
 }
 
+export interface coordinates{
+  lat:number| null;
+  lng:number|null;
+}
 
-export interface Area{
-  storeName: string;
-  serviceAreaKm?: number;
+
+export interface Area {
+  id: string;
+  locationName: string;
+  range?: number;
   address: string;
-  lat: number | null;
+  lat: number | null; // ✅ these are fine (derived from coordinates)
   lng: number | null;
+  isActive: boolean;  // ✅ use same as slice (maps from API.active)
 }

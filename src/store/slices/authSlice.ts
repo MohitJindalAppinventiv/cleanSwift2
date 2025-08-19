@@ -22,6 +22,30 @@ const initialState: AuthState = {
 };
 
 // Async thunk for login
+// export const loginUser = createAsyncThunk<
+//   string, // return type is token
+//   { email: string; password: string },
+//   { rejectValue: string }
+// >("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
+//   try {
+//     const res = await adminLogin({ email, password });
+
+//     if (!res.idToken) {
+//       return rejectWithValue("Invalid response from server. No token found");
+//     }
+//     console.log("response in slice", res);
+
+//     localStorage.setItem("authToken", res.idToken);
+//     localStorage.setItem("refreshToken", res.refreshToken);
+//     localStorage.setItem("sessionToken", res.sessionToken);
+//     return res.idToken;
+//   } catch (error) {
+//     return rejectWithValue(
+//       error instanceof Error ? error.message : "Login failed"
+//     );
+//   }
+// });
+
 export const loginUser = createAsyncThunk<
   string, // return type is token
   { email: string; password: string },
@@ -33,18 +57,22 @@ export const loginUser = createAsyncThunk<
     if (!res.idToken) {
       return rejectWithValue("Invalid response from server. No token found");
     }
-    console.log("response in slice", res);
 
     localStorage.setItem("authToken", res.idToken);
     localStorage.setItem("refreshToken", res.refreshToken);
     localStorage.setItem("sessionToken", res.sessionToken);
     return res.idToken;
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error ? error.message : "Login failed"
-    );
+  } catch (error: any) {
+    // 👇 Pass backend error message
+
+    if (error instanceof Error) {
+      console.log("error in authSlice",error);
+      return rejectWithValue(error.message);
+    }
+    return rejectWithValue("Login failed. Please try again.");
   }
 });
+
 
 export const logoutUser = createAsyncThunk<
   string, // return type is token

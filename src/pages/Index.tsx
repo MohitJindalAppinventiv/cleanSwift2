@@ -7,11 +7,26 @@ import { ServicePerformance } from "@/components/dashboard/ServicePerformance";
 import { RecentCustomers } from "@/components/dashboard/RecentCustomers";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { useEffect, useState } from "react";
+import { fetchOrders } from "@/store/slices/orderSlice";
 
 
 const Index = () => {
+  const dispatch=useAppDispatch();
   const isMobile = useIsMobile();
+  const { orders, pagination, isLoading, error } = useAppSelector(
+    (state) => state.orders
+  );
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize] = useState(10);
 
+  useEffect(()=>{
+    dispatch(fetchOrders({
+        page: currentPage,
+        limit: pageSize,
+      }));
+  },[])
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -32,7 +47,7 @@ const Index = () => {
         <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"}`}>
           <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
             <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
-            <OrdersTable />
+            <OrdersTable orders={orders} pagination={pagination} isLoading={isLoading} />
           </div>
           <div>
             <RecentCustomers />
