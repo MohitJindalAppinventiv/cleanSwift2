@@ -76,8 +76,13 @@ export default function ContentManagementPage() {
     policies: false,
     about: false
   });
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  // Separate loading states for each operation
+  const [savingFaqId, setSavingFaqId] = useState<string | null>(null);
+  const [deletingFaqId, setDeletingFaqId] = useState<string | null>(null);
+  const [savingPolicyType, setSavingPolicyType] = useState<"privacy" | "terms" | null>(null);
+  const [savingAbout, setSavingAbout] = useState(false);
+
   const [confirmDeleteFaq, setConfirmDeleteFaq] = useState<{ open: boolean; id: string | null }>({
     open: false,
     id: null,
@@ -264,7 +269,7 @@ export default function ContentManagementPage() {
     }
 
     try {
-      setUpdatingId(editingFaq ? editingFaq.id : "new-faq");
+      setSavingFaqId(editingFaq ? editingFaq.id : "new");
       if (editingFaq) {
         const res = await axiosInstance.put(`/updateFAQ?id=${editingFaq.id}`, faqForm);
         if (res.data?.data) {
@@ -283,13 +288,13 @@ export default function ContentManagementPage() {
     } catch (error) {
       handleError(error, "Failed to save FAQ");
     } finally {
-      setUpdatingId(null);
+      setSavingFaqId(null);
     }
   };
 
   const handleDeleteFaq = async (id: string) => {
     try {
-      setDeletingId(id);
+      setDeletingFaqId(id);
       await axiosInstance.delete(`/deleteFAQ?id=${id}`);
       setFaqs(prev => prev.filter(f => f.id !== id));
       toast({ title: "Success", description: "FAQ item deleted successfully" });
@@ -297,7 +302,7 @@ export default function ContentManagementPage() {
     } catch (error) {
       handleError(error, "Failed to delete FAQ");
     } finally {
-      setDeletingId(null);
+      setDeletingFaqId(null);
     }
   };
 
@@ -344,7 +349,7 @@ export default function ContentManagementPage() {
     }
 
     try {
-      setUpdatingId(`policy-${editingPolicyType}`);
+      setSavingPolicyType(editingPolicyType);
       const payload = { ...policyForm, type: editingPolicyType };
       const res = await axiosInstance.post("/createOrUpdatePolicy", payload);
       if (res.data?.data) {
@@ -356,7 +361,7 @@ export default function ContentManagementPage() {
     } catch (error) {
       handleError(error, "Failed to save policy");
     } finally {
-      setUpdatingId(null);
+      setSavingPolicyType(null);
     }
   };
 
@@ -399,7 +404,7 @@ export default function ContentManagementPage() {
     }
 
     try {
-      setUpdatingId("about");
+      setSavingAbout(true);
       const res = await axiosInstance.post("/createOrUpdateAbout", aboutForm);
       if (res.data?.data) {
         setAbout(res.data.data);
@@ -409,7 +414,7 @@ export default function ContentManagementPage() {
     } catch (error) {
       handleError(error, "Failed to save about content");
     } finally {
-      setUpdatingId(null);
+      setSavingAbout(false);
     }
   };
 
@@ -462,10 +467,6 @@ export default function ContentManagementPage() {
     setAboutForm({ ...aboutForm, sections: newSections });
   };
 
-  const isSavingFaq = updatingId?.startsWith("new-faq") || (editingFaq && updatingId === editingFaq.id);
-  const isSavingPolicy = updatingId?.startsWith("policy-");
-  const isSavingAbout = updatingId === "about";
-
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -487,10 +488,10 @@ export default function ContentManagementPage() {
               <Button
                 onClick={() => openFaqModal()}
                 className="flex items-center gap-2"
-                disabled={isSavingFaq || !!deletingId}
+                disabled={!!savingFaqId || !!deletingFaqId}
               >
                 <Plus className="h-4 w-4" />
-                {isSavingFaq ? "Saving..." : "Add New FAQ"}
+                {savingFaqId === "new" ? "Adding..." : "Add New FAQ"}
               </Button>
               
               {isLoading.faqs ? (
@@ -524,7 +525,7 @@ export default function ContentManagementPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => openFaqModal(faq)}
-                          disabled={updatingId === faq.id || deletingId === faq.id}
+                          disabled={savingFaqId === faq.id || deletingFaqId === faq.id}
                           aria-label={`Edit FAQ: ${faq.question}`}
                         >
                           <Edit className="h-4 w-4" />
@@ -533,7 +534,7 @@ export default function ContentManagementPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setConfirmDeleteFaq({ open: true, id: faq.id })}
-                          disabled={updatingId === faq.id || deletingId === faq.id}
+                          disabled={savingFaqId === faq.id || deletingFaqId === faq.id}
                           aria-label={`Delete FAQ: ${faq.question}`}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -580,8 +581,8 @@ export default function ContentManagementPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleSaveFaq} disabled={isSavingFaq}>
-                      {isSavingFaq ? "Saving..." : "Save"}
+                    <Button onClick={handleSaveFaq} disabled={!!savingFaqId}>
+                      {savingFaqId ? "Saving..." : "Save"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -602,16 +603,16 @@ export default function ContentManagementPage() {
                     <Button
                       variant="outline"
                       onClick={() => setConfirmDeleteFaq({ open: false, id: null })}
-                      disabled={!!deletingId}
+                      disabled={!!deletingFaqId}
                     >
                       Cancel
                     </Button>
                     <Button
                       variant="destructive"
                       onClick={() => confirmDeleteFaq.id && handleDeleteFaq(confirmDeleteFaq.id)}
-                      disabled={deletingId === confirmDeleteFaq.id}
+                      disabled={deletingFaqId === confirmDeleteFaq.id}
                     >
-                      {deletingId === confirmDeleteFaq.id ? "Deleting..." : "Delete"}
+                      {deletingFaqId === confirmDeleteFaq.id ? "Deleting..." : "Delete"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -640,6 +641,8 @@ export default function ContentManagementPage() {
               ) : (
                 (["privacy", "terms"] as const).map((type) => {
                   const policy = policies[type];
+                  const isSavingThisPolicy = savingPolicyType === type;
+                  
                   return (
                     <div key={type} className="border p-4 rounded-lg">
                       <div className="flex justify-between items-center mb-4">
@@ -648,12 +651,9 @@ export default function ContentManagementPage() {
                         </h3>
                         <Button
                           onClick={() => openPolicyModal(type, policy)}
-                          disabled={isSavingPolicy || !!deletingId}
+                          disabled={!!savingPolicyType || !!deletingFaqId}
                         >
-                          {isSavingPolicy && updatingId === `policy-${type}` 
-                            ? "Saving..." 
-                            : policy ? "Edit" : "Create"
-                          }
+                          {isSavingThisPolicy ? "Saving..." : policy ? "Edit" : "Create"}
                         </Button>
                       </div>
                       {policy ? (
@@ -743,9 +743,9 @@ export default function ContentManagementPage() {
                   <DialogFooter>
                     <Button 
                       onClick={handleSavePolicy} 
-                      disabled={isSavingPolicy}
+                      disabled={!!savingPolicyType}
                     >
-                      {isSavingPolicy ? "Saving..." : "Save"}
+                      {savingPolicyType ? "Saving..." : "Save"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -755,9 +755,9 @@ export default function ContentManagementPage() {
             <TabsContent value="about" className="space-y-4">
               <Button
                 onClick={() => openAboutModal(about)}
-                disabled={isSavingAbout || !!deletingId}
+                disabled={savingAbout || !!deletingFaqId}
               >
-                {isSavingAbout ? "Saving..." : about ? "Edit About Content" : "Create About Content"}
+                {savingAbout ? "Saving..." : about ? "Edit About Content" : "Create About Content"}
               </Button>
               
               {isLoading.about ? (
@@ -835,7 +835,7 @@ export default function ContentManagementPage() {
                           variant="outline"
                           onClick={() => openSectionModal()}
                           className="flex items-center gap-2"
-                          disabled={isSavingAbout || !!deletingId}
+                          disabled={savingAbout || !!deletingFaqId}
                         >
                           <Plus className="h-4 w-4" /> Add Section
                         </Button>
@@ -857,7 +857,7 @@ export default function ContentManagementPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => openSectionModal(index)}
-                                  disabled={isSavingAbout || !!deletingId}
+                                  disabled={savingAbout || !!deletingFaqId}
                                   aria-label={`Edit section: ${sec.title}`}
                                 >
                                   <Edit className="h-4 w-4" />
@@ -866,7 +866,7 @@ export default function ContentManagementPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteSection(index)}
-                                  disabled={isSavingAbout || !!deletingId}
+                                  disabled={savingAbout || !!deletingFaqId}
                                   aria-label={`Delete section: ${sec.title}`}
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
@@ -881,8 +881,8 @@ export default function ContentManagementPage() {
                     </div>
                   </div>
                   <DialogFooter className="mt-4">
-                    <Button onClick={handleSaveAbout} disabled={isSavingAbout}>
-                      {isSavingAbout ? "Saving..." : "Save"}
+                    <Button onClick={handleSaveAbout} disabled={savingAbout}>
+                      {savingAbout ? "Saving..." : "Save"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -924,7 +924,7 @@ export default function ContentManagementPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleSaveSection} disabled={isSavingAbout || !!deletingId}>
+                    <Button onClick={handleSaveSection} disabled={savingAbout || !!deletingFaqId}>
                       Save Section
                     </Button>
                   </DialogFooter>
