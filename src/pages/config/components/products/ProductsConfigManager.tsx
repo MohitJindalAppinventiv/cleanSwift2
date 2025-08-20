@@ -1,7 +1,5 @@
-// src/components/products/ProductsConfigManager.tsx
-// src/components/products/ProductsConfigManager.tsx
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { ProductModal } from "./ProductModal";
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
@@ -12,11 +10,10 @@ import { ProductCard } from "./ProductCard";
 import { ProductListItem } from "./ProductListItem";
 import { ProductCardSkeleton } from "./ProductCardSkeleton";
 import { ProductListItemSkeleton } from "./ProductListItemSkeleton";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import API from "@/api/endpoints/endpoint";
-import { ProductFormValues } from "./ProductForm"; // Add this import
-
-// ... rest of your component code remains the same
+import { ProductFormValues } from "./ProductForm";
 
 interface Product {
   id: string;
@@ -40,6 +37,13 @@ interface Category {
   serviceName: string;
 }
 
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
 export function ProductsConfigManager() {
   const { toast } = useToast();
   const { state } = useLocation();
@@ -50,7 +54,14 @@ export function ProductsConfigManager() {
   const idType = state?.idType;
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  });
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isPaginating, setIsPaginating] = useState(false); // Added for pagination loading
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [servicesLoaded, setServicesLoaded] = useState(false);
@@ -61,9 +72,8 @@ export function ProductsConfigManager() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState<"name" | "price" | "category">("name");
+  const [sortBy, setSortBy] = useState<"name" | "price">("name");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -87,44 +97,45 @@ export function ProductsConfigManager() {
     }
   }, [idType, paramServiceId, paramCategoryId, categories, services, categoriesLoaded, servicesLoaded]);
 
-  const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (product.categoryName && product.categoryName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (product.serviceName && product.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-
-    filtered.sort((a, b) => {
+  const sortedProducts = useMemo(() => {
+    const sorted = [...products];
+    sorted.sort((a, b) => {
       switch (sortBy) {
         case "name":
           return a.name.localeCompare(b.name);
         case "price":
           return (a.price || 0) - (b.price || 0);
-        case "category":
-          return (a.categoryName || "").localeCompare(b.categoryName || "");
         default:
           return 0;
       }
     });
+    return sorted;
+  }, [products, sortBy]);
 
-    return filtered;
-  }, [products, searchQuery, sortBy]);
-
-  const fetchProducts = useCallback(async () => {
-    setIsLoadingProducts(true);
+  const fetchProducts = useCallback(async (page: number, limit: number) => {
+    setIsPaginating(true);
+    setIsLoadingProducts(page === 1 && !products.length); // Only show full loading for initial fetch
     try {
       let endpoint = `${API.GET_ALL_PRODUCTS()}`;
-      let params = {};
+      let params: any = {
+        page,
+        limit,
+        offset: (page - 1) * limit,
+      };
 
       if (idType === "category" && paramCategoryId) {
         endpoint = `${API.GET_ALL_PRODUCT_BY_CATEGORY_ID()}`;
-        params = { categoryId: paramCategoryId };
+        params.categoryId = paramCategoryId;
       } else if (idType === "service" && paramServiceId) {
         endpoint = `${API.GET_ALL_PRODUCT_BY_SERVICE_ID()}`;
-        params = { serviceId: paramServiceId };
+        params.serviceId = paramServiceId;
       }
 
+      console.log("Fetching products with params:", { endpoint, params });
+
       const response = await axiosInstance.get(endpoint, { params });
+
+      console.log("API Response:", response.data);
 
       const fetchedProducts = response.data.data.map((item: any) => {
         const categoryId = item.categoryId || item.CategoryId;
@@ -177,6 +188,18 @@ export function ProductsConfigManager() {
       });
 
       setProducts(fetchedProducts);
+
+      const totalItems = response.data.pagination?.total || response.data.total || response.data.totalCount || response.data.meta?.total || fetchedProducts.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+      
+      setPagination({
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit,
+      });
+
+      console.log("Pagination updated:", { currentPage: page, totalPages, totalItems, itemsPerPage: limit });
     } catch (error) {
       console.error("Error fetching products:", error);
       toast({
@@ -191,8 +214,10 @@ export function ProductsConfigManager() {
         variant: "destructive",
       });
       setProducts([]);
+      setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1 }));
     } finally {
       setIsLoadingProducts(false);
+      setIsPaginating(false);
     }
   }, [idType, paramServiceId, paramCategoryId, toast, categories, services]);
 
@@ -235,9 +260,24 @@ export function ProductsConfigManager() {
 
   useEffect(() => {
     if (servicesLoaded && categoriesLoaded) {
-      fetchProducts();
+      console.log("Triggering fetchProducts with page:", pagination.currentPage, "limit:", pagination.itemsPerPage);
+      fetchProducts(pagination.currentPage, pagination.itemsPerPage);
     }
-  }, [servicesLoaded, categoriesLoaded, fetchProducts]);
+  }, [servicesLoaded, categoriesLoaded, fetchProducts, pagination.currentPage, pagination.itemsPerPage]);
+
+  const handlePageChange = (newPage: number) => {
+    console.log("Changing page to:", newPage);
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  const handleItemsPerPageChange = (newLimit: number) => {
+    console.log("Changing items per page to:", newLimit);
+    setPagination(prev => ({ 
+      ...prev, 
+      itemsPerPage: newLimit, 
+      currentPage: 1 
+    }));
+  };
 
   const createProduct = async (productData: ProductFormValues) => {
     setIsSubmitting(true);
@@ -284,39 +324,20 @@ export function ProductsConfigManager() {
         }
       }
 
-      const response = await axiosInstance.post(`${API.CREATE_PRODUCT()}`, {
+      await axiosInstance.post(`${API.CREATE_PRODUCT()}`, {
         name: productData.name,
         price: productData.price,
         ...(categoryIdToUse && { categoryId: categoryIdToUse }),
         ...(serviceIdToUse && { serviceId: serviceIdToUse }),
       });
 
-      const category = categoryIdToUse
-        ? categories.find((c) => c.categoryId === categoryIdToUse)
-        : null;
-      const service = serviceIdToUse
-        ? services.find((s) => s.id === serviceIdToUse)
-        : category
-        ? services.find((s) => s.name === category.serviceName)
-        : null;
-
       toast({
         title: "Success",
         description: "Product created successfully",
       });
       setCreateModalOpen(false);
-      setProducts((prevProducts) => [
-        ...prevProducts,
-        {
-          id: response.data.id,
-          name: productData.name,
-          price: productData.price,
-          categoryId: categoryIdToUse,
-          serviceId: serviceIdToUse,
-          categoryName: category?.categoryName,
-          serviceName: service?.name,
-        },
-      ]);
+      setPagination(prev => ({ ...prev, currentPage: 1 }));
+      fetchProducts(1, pagination.itemsPerPage);
     } catch (error) {
       console.error("Error creating product:", error);
       toast({
@@ -351,13 +372,7 @@ export function ProductsConfigManager() {
         description: "Product updated successfully",
       });
       setEditModalOpen(false);
-      setProducts((prevProducts) =>
-        prevProducts.map((p) =>
-          p.id === productId
-            ? { ...p, name: productData.name, price: productData.price }
-            : p
-        )
-      );
+      fetchProducts(pagination.currentPage, pagination.itemsPerPage);
     } catch (error) {
       console.error("Error updating product:", error);
       toast({
@@ -383,8 +398,13 @@ export function ProductsConfigManager() {
         title: "Success",
         description: "Product deleted successfully",
       });
-      setProducts((prevProducts) => prevProducts.filter((p) => p.id !== selectedProduct.id));
       setDeleteModalOpen(false);
+      if (products.length === 1 && pagination.currentPage > 1) {
+        setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }));
+        fetchProducts(pagination.currentPage - 1, pagination.itemsPerPage);
+      } else {
+        fetchProducts(pagination.currentPage, pagination.itemsPerPage);
+      }
     } catch (error) {
       console.error("Error deleting product:", error);
       toast({
@@ -419,10 +439,54 @@ export function ProductsConfigManager() {
   }, [idType, paramCategoryId, paramServiceId, categories, services]);
 
   const totalValue = useMemo(() => {
-    return products.reduce((sum, p) => sum + (p.price || 0), 0);
-  }, [products]);
+    return sortedProducts.reduce((sum, p) => sum + (p.price || 0), 0);
+  }, [sortedProducts]);
 
   const shouldShowSkeleton = isLoadingProducts || !servicesLoaded || !categoriesLoaded;
+
+  // Generate page numbers without duplicates
+  const pageNumbers = useMemo(() => {
+    const pages: number[] = [];
+    const maxPagesToShow = 3; // Show up to 3 pages around current page
+    const totalPages = pagination.totalPages;
+    const currentPage = pagination.currentPage;
+
+    // Always include page 1
+    pages.push(1);
+
+    if (totalPages <= 5) {
+      // Show all pages if totalPages <= 5
+      for (let i = 2; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Calculate start and end for middle pages
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+      // Adjust if near the start or end
+      if (currentPage <= 3) {
+        startPage = 2;
+        endPage = 4;
+      } else if (currentPage >= totalPages - 2) {
+        startPage = totalPages - 3;
+        endPage = totalPages - 1;
+      }
+
+      // Add middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      // Add last page if not already included
+      if (totalPages > 1 && !pages.includes(totalPages)) {
+        pages.push(totalPages);
+      }
+    }
+
+    console.log("Generated page numbers:", pages);
+    return pages;
+  }, [pagination.totalPages, pagination.currentPage]);
 
   return (
     <div className="space-y-6">
@@ -430,18 +494,18 @@ export function ProductsConfigManager() {
         breadcrumbItems={breadcrumbItems}
         title="Products"
         context={currentContext}
-        productsCount={shouldShowSkeleton ? -1 : filteredProducts.length}
+        productsCount={shouldShowSkeleton ? -1 : pagination.totalItems}
         totalValue={totalValue}
         onCreate={() => setCreateModalOpen(true)}
       />
 
       <ProductsControls
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={(value: any) => setSortBy(value)}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        itemsPerPage={pagination.itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        sortBy={sortBy}
+        onSortChange={(value: any) => setSortBy(value)}
       />
 
       {shouldShowSkeleton ? (
@@ -450,50 +514,115 @@ export function ProductsConfigManager() {
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
             : "space-y-4"
         }>
-          {Array.from({ length: 8 }).map((_, index) => 
+          {Array.from({ length: pagination.itemsPerPage }).map((_, index) => 
             viewMode === "grid" 
               ? <ProductCardSkeleton key={index} />
               : <ProductListItemSkeleton key={index} />
           )}
         </div>
-      ) : filteredProducts.length === 0 ? (
+      ) : products.length === 0 ? (
         <ProductsEmptyState
-          searchQuery={searchQuery}
+          searchQuery=""
           contextType={currentContext.type}
           onCreate={() => setCreateModalOpen(true)}
         />
       ) : (
-        <div className={
-          viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
-            : "space-y-4"
-        }>
-          {filteredProducts.map((product) => 
+        <>
+          <div className={
             viewMode === "grid" 
-              ? (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  onEdit={() => {
-                    setSelectedProduct(product);
-                    setEditModalOpen(true);
-                  }}
-                  onDelete={() => handleDeleteClick(product)}
-                />
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+              : "space-y-4"
+          }>
+            {isPaginating ? (
+              Array.from({ length: pagination.itemsPerPage }).map((_, index) => 
+                viewMode === "grid" 
+                  ? <ProductCardSkeleton key={index} />
+                  : <ProductListItemSkeleton key={index} />
               )
-              : (
-                <ProductListItem 
-                  key={product.id} 
-                  product={product} 
-                  onEdit={() => {
-                    setSelectedProduct(product);
-                    setEditModalOpen(true);
-                  }}
-                  onDelete={() => handleDeleteClick(product)}
-                />
+            ) : (
+              sortedProducts.map((product) => 
+                viewMode === "grid" 
+                  ? (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product} 
+                      onEdit={() => {
+                        setSelectedProduct(product);
+                        setEditModalOpen(true);
+                      }}
+                      onDelete={() => handleDeleteClick(product)}
+                    />
+                  )
+                  : (
+                    <ProductListItem 
+                      key={product.id} 
+                      product={product} 
+                      onEdit={() => {
+                        setSelectedProduct(product);
+                        setEditModalOpen(true);
+                      }}
+                      onDelete={() => handleDeleteClick(product)}
+                    />
+                  )
               )
-          )}
-        </div>
+            )}
+          </div>
+
+          {/* Pagination below cards */}
+          <div className="flex items-center mt-6 p-4 border-t border-gray-200">
+            <div className="text-sm text-muted-foreground">
+              Showing {pagination.totalItems > 0 ? ((pagination.currentPage - 1) * pagination.itemsPerPage) + 1 : 0} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} products
+            </div>
+            <div className="flex-1 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (pagination.currentPage > 1) {
+                          handlePageChange(pagination.currentPage - 1);
+                        }
+                      }}
+                      className={`cursor-pointer ${pagination.currentPage === 1 || isPaginating ? "pointer-events-none opacity-50" : "hover:bg-accent"}`}
+                    />
+                  </PaginationItem>
+                  
+                  {pageNumbers.map((pageNum) => (
+                    <PaginationItem key={pageNum}>
+                      {pageNum === -1 ? (
+                        <span className="px-3 py-2 text-sm">...</span>
+                      ) : (
+                        <PaginationLink
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNum);
+                          }}
+                          isActive={pagination.currentPage === pageNum}
+                          className={`cursor-pointer ${isPaginating ? "pointer-events-none opacity-50" : "hover:bg-accent"}`}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (pagination.currentPage < pagination.totalPages) {
+                          handlePageChange(pagination.currentPage + 1);
+                        }
+                      }}
+                      className={`cursor-pointer ${pagination.currentPage === pagination.totalPages || isPaginating ? "pointer-events-none opacity-50" : "hover:bg-accent"}`}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        </>
       )}
 
       <ProductModal

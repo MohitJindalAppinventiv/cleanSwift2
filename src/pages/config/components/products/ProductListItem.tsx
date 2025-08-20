@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Package, Pencil, Trash2 } from "lucide-react";
+import {  Pencil, Trash2 } from "lucide-react";
 
 interface ProductListItemProps {
   product: {
@@ -32,7 +32,6 @@ export function ProductListItem({ product, onEdit, onDelete }: ProductListItemPr
               </h3>
               <div className="flex items-center space-x-4 mt-1">
                 <div className="flex items-center space-x-1">
-                  <DollarSign className="w-4 h-4 text-green-600" />
                   <span className="font-bold text-green-600">
                     Rs. {product.price !== undefined ? product.price.toFixed(2) : "0.00"}
                   </span>

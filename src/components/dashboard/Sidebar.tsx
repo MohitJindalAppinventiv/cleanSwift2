@@ -249,6 +249,7 @@ import {
   Menu,
   X,
   Server,
+  NotebookPen,
   Smartphone,
   MessageSquare,
   Flag,
@@ -302,6 +303,7 @@ const sidebarItems: SidebarItem[] = [
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
+      {title: "Content Manager", icon :NotebookPen  , href:"/config/content"},
       {title:"Temp",icon:Eye,href:"/temp"},
       {title:"Slots Config",icon:AlarmCheck,href:"/config/slots"}
     ]

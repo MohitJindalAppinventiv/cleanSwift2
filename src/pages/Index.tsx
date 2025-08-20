@@ -10,7 +10,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { useCallback, useEffect, useState } from "react";
 import { fetchOrders } from "@/store/slices/orderSlice";
-
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const dispatch=useAppDispatch();
@@ -20,10 +21,15 @@ const Index = () => {
   );
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(5);
+    const navigate = useNavigate();
 
       const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
       }, []);
+
+  const handleViewAll = () => {
+    navigate("/orders");
+  };
 
   useEffect(()=>{
     dispatch(fetchOrders({
@@ -50,7 +56,11 @@ const Index = () => {
 
         <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"}`}>
           <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
-            <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
+            <h3 className="text-xl font-semibold mb-3 ">Recent Orders</h3> 
+          <Button onClick= {handleViewAll} className="mb-4" variant="outline" size="sm">
+          View All
+        </Button>
+        
             <OrdersTable orders={orders} pagination={pagination} isLoading={isLoading} onPageChange={handlePageChange} />
           </div>
           <div> 

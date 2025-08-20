@@ -160,6 +160,7 @@ const AppBanner = lazy(() => import("./pages/initial/AppBanner"));
 const MapDemo = lazy(() => import("./pages/map-demo"));
 const Temp = lazy(() => import("./pages/temp/Temp"));
 const SlotsConfigPage = lazy(() => import("./pages/slots/SlotsConfigPage"));
+const Content = lazy(() => import("@/pages/config/content-manager/Content"));
 import LaundryPageLoader from "./PageLoading";
 const queryClient = new QueryClient();
 
@@ -319,6 +320,15 @@ const AppRoutes = () => {
         </AuthGuard>
       ),
     },
+{
+      path: "/config/content",
+      element: (
+        <AuthGuard>
+          < Content/>
+        </AuthGuard>
+      ),
+    },
+    ,
     {
       path: "/config/app-banner/create",
       element: (
