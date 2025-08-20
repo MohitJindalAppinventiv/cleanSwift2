@@ -160,7 +160,10 @@ const AppBanner = lazy(() => import("./pages/initial/AppBanner"));
 const MapDemo = lazy(() => import("./pages/map-demo"));
 const Temp = lazy(() => import("./pages/temp/Temp"));
 const SlotsConfigPage = lazy(() => import("./pages/slots/SlotsConfigPage"));
+const Complaint = lazy(()=>import("./pages/complaint/Complaint"));
+
 import LaundryPageLoader from "./PageLoading";
+import path from "path";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -310,6 +313,14 @@ const AppRoutes = () => {
           <ServiceCreatePage />
         </AuthGuard>
       ),
+    },
+    {
+      path:"/config/complaints",
+      element:(
+        <AuthGuard>
+          <Complaint/>
+        </AuthGuard>
+      )
     },
     {
       path: "/config/app-banner",

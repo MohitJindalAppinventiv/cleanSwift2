@@ -27,7 +27,6 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { loginUser } from "@/store/slices/authSlice";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import { getProfileCompletionStatus } from "@/store/slices/profileStatus";
-import { isAxiosError } from "axios";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -132,7 +131,29 @@ export default function LoginPage() {
       setLoading(false);
 
       if (status?.isComplete === false) {
-        // handle profile completion logic...
+
+        const configs = status.configurations;
+
+        if (configs.banner?.isConfigured === false) {
+          navigate("/AppBanner");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        } else if (configs.area.isConfigured == false) {
+          navigate("/area-config");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        } else {
+          navigate("/Serv");
+          toast("Profile Incomplete", {
+            description:
+              "Please complete your Banner configuration to proceed.",
+          });
+        }
+        return;
       }
 
       toast("Login Successful", {
@@ -142,7 +163,6 @@ export default function LoginPage() {
     } catch (error: any) {
       setLoading(false);
 
-      // 👇 Show specific invalid credentials error
       const message =
         error === "INVALID_CREDENTIALS" || error?.includes("password")
           ? "Username or Password is incorrect"

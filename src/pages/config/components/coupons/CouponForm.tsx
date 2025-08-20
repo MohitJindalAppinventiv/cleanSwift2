@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import API from "@/api/endpoints/endpoint"; // Adjust this path as needed
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   code: z.string().min(3).max(20),
@@ -37,6 +37,7 @@ type FormValues = z.infer<typeof formSchema>;
 export function CouponForm() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -54,9 +55,41 @@ export function CouponForm() {
     },
   });
 
+  // const onSubmit = async (data: FormValues) => {
+  //   try {
+  //     console.log("date in creae coupon",data);
+  //     const res = await axiosInstance.post(API.CREATE_COUPON(), {
+  //       couponCode: data.code,
+  //       couponName: data.couponName,
+  //       maxDiscount: data.maxDiscount,
+  //       minValue: data.minOrderValue,
+  //       validFrom: data.validFrom,
+  //       validTill: data.validUntil,
+  //       isActive: data.isActive,
+  //       discountPercentage:data.discountPercentage
+  //       // maxUsage: data.maxUsage, // ✅ Added here
+  //     });
+  //     console.log("response in create coupon",res);
+
+  //     toast({
+  //       title: "Coupon created successfully",
+  //       description: `Coupon ${data.code} has been created.`,
+  //     });
+
+  //     navigate("/config/coupons");
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to create coupon.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
+
   const onSubmit = async (data: FormValues) => {
     try {
-      console.log("date in creae coupon",data);
+      setLoading(true);
       const res = await axiosInstance.post(API.CREATE_COUPON(), {
         couponCode: data.code,
         couponName: data.couponName,
@@ -65,10 +98,8 @@ export function CouponForm() {
         validFrom: data.validFrom,
         validTill: data.validUntil,
         isActive: data.isActive,
-        discountPercentage:data.discountPercentage
-        // maxUsage: data.maxUsage, // ✅ Added here
+        discountPercentage: data.discountPercentage,
       });
-      console.log("response in create coupon",res);
 
       toast({
         title: "Coupon created successfully",
@@ -83,9 +114,10 @@ export function CouponForm() {
         description: "Failed to create coupon.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -211,16 +243,14 @@ export function CouponForm() {
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
-                <FormDescription>
-                  Discount Percentage
-                </FormDescription>
+                <FormDescription>Discount Percentage</FormDescription>
                 <FormControl />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="flex justify-end gap-4">
+        {/* <div className="flex justify-end gap-4">
           <Button
             type="button"
             variant="outline"
@@ -229,6 +259,27 @@ export function CouponForm() {
             Cancel
           </Button>
           <Button type="submit">Save Coupon</Button>
+        </div> */}
+
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate("/config/coupons")}
+            disabled={loading} // ✅ disable cancel while loading
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Coupon"
+            )}
+          </Button>
         </div>
       </form>
     </Form>

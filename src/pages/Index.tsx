@@ -30,7 +30,7 @@ const Index = () => {
         page: currentPage,
         limit: pageSize,
       }));
-  },[currentPage])
+  },[currentPage,pageSize])
   return (
     <DashboardLayout>
       <div className="space-y-6">

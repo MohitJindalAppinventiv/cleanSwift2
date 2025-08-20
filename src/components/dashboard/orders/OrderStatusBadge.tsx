@@ -157,9 +157,9 @@ export type OrderStatus =
   | "ready"
   | "outForDelivery"
   | "delivered"
-  | "completed"
-  | "cancelled";
-
+  // | "completed"
+  | "cancelled"
+;
 export const statusConfig: Record<
   OrderStatus,
   { label: string; color: string; icon: React.ReactNode }
@@ -199,11 +199,11 @@ export const statusConfig: Record<
     color: "bg-indigo-500",
     icon: <Truck className="h-3 w-3" />,
   },
-  completed: {
-    label: "Completed",
-    color: "bg-green-500",
-    icon: <Check className="h-3 w-3" />,
-  },
+  // completed: {
+  //   label: "Completed",
+  //   color: "bg-green-500",
+  //   icon: <Check className="h-3 w-3" />,
+  // },
   cancelled: {
     label: "Cancelled",
     color: "bg-red-500",
