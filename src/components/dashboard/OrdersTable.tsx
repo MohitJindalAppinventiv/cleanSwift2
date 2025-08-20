@@ -161,12 +161,12 @@ export function OrdersTable({
   onPageChange
 }: OrdersTableProps) {
 
-  if (isLoading) {
-    return (
-      <OrdersTableSkeleton/>
-    );
-  }
-
+  // if (isLoading) {
+  //   return (
+  //     <OrdersTableSkeleton/>
+  //   );
+  // }
+ 
   return (
     <OrdersTableView 
       orders={orders} 

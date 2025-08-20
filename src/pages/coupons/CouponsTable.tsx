@@ -30,19 +30,6 @@ interface FirestoreTimestamp {
   _nanoseconds: number;
 }
 
-// interface Coupon {
-//   id: string;
-//   couponCode: string;
-//   couponName: string;
-//   maxDiscount: string;
-//   minValue: number;
-//   discountPercentage?: number;
-//   validFrom: FirestoreTimestamp;
-//   validTill: FirestoreTimestamp;
-//   isActive: boolean;
-//   currentUsage?: number;
-// } 
-
 interface Props {
   coupons: Coupon[];
   loading: boolean;
@@ -272,6 +259,8 @@ export function CouponsCardView({ coupons, loading }: Props) {
                 <div className="mt-auto p-6 pt-4 pb-6 bg-gradient-to-t from-white/90 via-white/50 to-transparent">
                   <div className="flex gap-2">
                     <Button
+                    disabled={coupon.id === deletingId}
+                    
                       size="sm"
                       variant="outline"
                       className="flex-1 bg-white/80 backdrop-blur-sm border-violet-200 text-violet-700 hover:bg-violet-50 hover:border-violet-300"

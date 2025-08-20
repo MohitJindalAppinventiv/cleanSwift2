@@ -262,6 +262,7 @@ import {
   Eye,
   AlarmCheck,
   LogOut,
+  MessageCircle
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -304,7 +305,8 @@ const sidebarItems: SidebarItem[] = [
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
       {title: "Content Manager", icon :NotebookPen  , href:"/config/content"},
-      {title:"Temp",icon:Eye,href:"/temp"},
+      {title:"Complaints",icon:MessageCircle, href:"/config/complaints"},
+      // {title:"Temp",icon:Eye,href:"/temp"},
       {title:"Slots Config",icon:AlarmCheck,href:"/config/slots"}
     ]
   },

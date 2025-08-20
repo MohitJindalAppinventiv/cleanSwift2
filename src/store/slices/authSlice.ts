@@ -62,9 +62,7 @@ export const loginUser = createAsyncThunk<
     localStorage.setItem("refreshToken", res.refreshToken);
     localStorage.setItem("sessionToken", res.sessionToken);
     return res.idToken;
-  } catch (error: any) {
-    // 👇 Pass backend error message
-
+  } catch (error) {
     if (error instanceof Error) {
       console.log("error in authSlice",error);
       return rejectWithValue(error.message);
