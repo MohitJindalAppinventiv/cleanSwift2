@@ -340,7 +340,6 @@ const AppRoutes = () => {
         </AuthGuard>
       ),
     },
-    ,
     {
       path: "/config/app-banner/create",
       element: (

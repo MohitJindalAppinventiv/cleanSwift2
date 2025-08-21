@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -49,6 +48,13 @@ export default function UpdateSlotModal({
   const [maxOrders, setMaxOrders] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+
+  // Determine if any changes were made
+  const hasChanges = slot
+    ? startTime !== slot.startTime ||
+      endTime !== slot.endTime ||
+      maxOrders !== slot.maxOrders
+    : false;
 
   useEffect(() => {
     if (slot) {
@@ -214,7 +220,6 @@ export default function UpdateSlotModal({
     clearError("timeRange");
   };
 
-
   // Handle max orders change
   const handleMaxOrdersChange = (value: string) => {
     const numValue = value === "" ? 1 : Number(value);
@@ -331,7 +336,7 @@ export default function UpdateSlotModal({
             )}
           </div>
 
-          <div className="flex gap-2 pt-4">
+          {/* <div className="flex gap-2 pt-4">
             <Button
               onClick={handleUpdate}
               disabled={loading || !isDurationValid}
@@ -340,6 +345,23 @@ export default function UpdateSlotModal({
               {loading ? "Updating..." : "Update Slot"}
             </Button>
             <Button variant="outline" onClick={onClose} disabled={loading}>
+              Cancel
+            </Button>
+          </div> */}
+
+          <div className="flex gap-2 pt-4">
+            <Button
+              onClick={handleUpdate}
+              disabled={loading || !isDurationValid || !hasChanges} // disable if no changes
+              className="flex-1"
+            >
+              {loading ? "Updating..." : "Update Slot"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={loading} // only disabled while updating
+            >
               Cancel
             </Button>
           </div>

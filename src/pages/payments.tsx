@@ -282,7 +282,7 @@ const PaymentsPage = () => {
               </div>
             </CardHeader>
             <CardContent className="pb-2">
-              <div className="text-2xl font-bold tracking-tight mb-1">${paymentStats.totalRevenue.toFixed(2)}</div>
+              <div className="text-2xl font-bold tracking-tight mb-1">&#8377;{paymentStats.totalRevenue.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <TrendingUp className="h-3 w-3 text-green-600" />
                 +20.1% from last month

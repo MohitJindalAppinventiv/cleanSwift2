@@ -20,17 +20,42 @@ import { axiosInstance } from "@/api/axios/axiosInstance";
 import API from "@/api/endpoints/endpoint"; // Adjust this path as needed
 import { Loader2 } from "lucide-react";
 
-const formSchema = z.object({
-  code: z.string().min(3).max(20),
-  couponName: z.string().min(3).max(50),
-  maxDiscount: z.coerce.number().min(1),
-  validFrom: z.string().nonempty(),
-  validUntil: z.string().nonempty(),
-  minOrderValue: z.coerce.number().min(100),
-  isActive: z.boolean().default(true),
-  discountPercentage: z.coerce.number().min(1).max(100),
-  // maxUsage: z.coerce.number().min(1, "Must allow at least 1 use"), // ✅ New field
-});
+// const formSchema = z.object({
+//   code: z.string().min(3).max(20),
+//   couponName: z.string().min(3).max(50),
+//   maxDiscount: z.coerce.number().min(1),
+//   validFrom: z.string().nonempty(),
+//   validUntil: z.string().nonempty(),
+//   minOrderValue: z.coerce.number().min(100),
+//   isActive: z.boolean().default(true),
+//   discountPercentage: z.coerce.number().min(1).max(100),
+//   // maxUsage: z.coerce.number().min(1, "Must allow at least 1 use"), // ✅ New field
+// });
+
+const formSchema = z
+  .object({
+    code: z
+      .string()
+      .min(3)
+      .max(20)
+      .regex(/^[A-Z0-9]+$/, "Coupon code must contain only uppercase letters and numbers"),
+    couponName: z.string().min(3).max(50),
+    maxDiscount: z.coerce
+      .number()
+      .min(1, "Maximum discount must be at least 1"),
+    minOrderValue: z.coerce
+      .number()
+      .min(100, "Minimum order value must be at least 100"),
+    validFrom: z.string().nonempty(),
+    validUntil: z.string().nonempty(),
+    isActive: z.boolean().default(true),
+    discountPercentage: z.coerce.number().min(1).max(100),
+  })
+  .refine((data) => data.maxDiscount <= data.minOrderValue, {
+    message: "Maximum discount cannot be greater than minimum order value",
+    path: ["maxDiscount"], // This will attach the error to maxDiscount field
+  });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -55,39 +80,7 @@ export function CouponForm() {
     },
   });
 
-  // const onSubmit = async (data: FormValues) => {
-  //   try {
-  //     console.log("date in creae coupon",data);
-  //     const res = await axiosInstance.post(API.CREATE_COUPON(), {
-  //       couponCode: data.code,
-  //       couponName: data.couponName,
-  //       maxDiscount: data.maxDiscount,
-  //       minValue: data.minOrderValue,
-  //       validFrom: data.validFrom,
-  //       validTill: data.validUntil,
-  //       isActive: data.isActive,
-  //       discountPercentage:data.discountPercentage
-  //       // maxUsage: data.maxUsage, // ✅ Added here
-  //     });
-  //     console.log("response in create coupon",res);
-
-  //     toast({
-  //       title: "Coupon created successfully",
-  //       description: `Coupon ${data.code} has been created.`,
-  //     });
-
-  //     navigate("/config/coupons");
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to create coupon.",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
-
-  const onSubmit = async (data: FormValues) => {
+    const onSubmit = async (data: FormValues) => {
     try {
       setLoading(true);
       const res = await axiosInstance.post(API.CREATE_COUPON(), {
@@ -249,18 +242,6 @@ export function CouponForm() {
             )}
           />
         </div>
-
-        {/* <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/config/coupons")}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Save Coupon</Button>
-        </div> */}
-
         <div className="flex justify-end gap-4">
           <Button
             type="button"
