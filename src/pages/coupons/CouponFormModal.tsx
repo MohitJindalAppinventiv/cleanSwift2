@@ -643,7 +643,6 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import type { Coupon } from "@/store/slices/couponSlice";
 
-// Improved schema with better validation and error messages
 const couponSchema = z.object({
   couponName: z
     .string()
@@ -651,7 +650,7 @@ const couponSchema = z.object({
     .max(50, "Coupon name must be less than 50 characters"),
   couponCode: z
     .string()
-    .min(2, "Coupon code must be at least 2 characters")
+    .min(3, "Coupon code must be at least 2 characters")
     .max(20, "Coupon code must be less than 20 characters"),
   maxDiscount: z
     .coerce
