@@ -6,7 +6,7 @@ export interface Service {
   createdAt?: {
     _seconds: number;
     _nanoseconds: number;
-  };
+  } | string;
 }
 
 export interface ServiceSpecificCategory {
@@ -14,10 +14,15 @@ export interface ServiceSpecificCategory {
   name: string;
   serviceId: string;
   isDeleted?: boolean;
+  isActive?: boolean;
   createdAt?: {
     _seconds: number;
     _nanoseconds: number;
-  };
+  } | string;
+  updatedAt?: {
+    _seconds: number;
+    _nanoseconds: number;
+  } | string;
 }
 
 export interface AllCategoriesResponse {

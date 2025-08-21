@@ -3,9 +3,18 @@ import { Category, Service, isAllCategoriesResponse } from "./types";
 export const convertFirestoreTimestamp = (timestamp: { 
   _seconds: number; 
   _nanoseconds: number 
-} | undefined): Date => {
-  if (!timestamp) return new Date();
-  return new Date(timestamp._seconds * 1000 + timestamp._nanoseconds / 1000000);
+} | string | undefined): Date => {
+  if (!timestamp) {
+    return new Date(); // Fallback to current date if timestamp is undefined
+  }
+  if (typeof timestamp === 'string') {
+    const parsedDate = new Date(timestamp);
+    return isNaN(parsedDate.getTime()) ? new Date() : parsedDate; // Fallback if invalid ISO string
+  }
+  if (typeof timestamp._seconds !== 'number' || isNaN(timestamp._seconds)) {
+    return new Date(); // Fallback if timestamp object is invalid
+  }
+  return new Date(timestamp._seconds * 1000 + Math.floor(timestamp._nanoseconds / 1000000));
 };
 
 export const getCategoryDisplayName = (category: Category): string => {

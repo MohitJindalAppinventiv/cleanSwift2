@@ -147,10 +147,10 @@ export function RevenueChart() {
             <YAxis
               stroke="#888"
               fontSize={12}
-              tickFormatter={(value: number) => `Rs. ${value}`}
+              tickFormatter={(value: number) => `Rs.${value}`}
             />
             <Tooltip
-              formatter={(value: number) => [`Rs ${value}`, 'Revenue']}
+              formatter={(value: number) => [`Rs.${value}`, 'Revenue']}
             />
             <Area
               type="monotone"
