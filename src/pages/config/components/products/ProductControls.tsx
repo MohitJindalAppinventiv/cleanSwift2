@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid3X3, List, Filter } from "lucide-react";
+import { Grid3X3, List, Filter, Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface ProductsControlsProps {
   viewMode: "grid" | "list";
@@ -17,6 +18,8 @@ interface ProductsControlsProps {
   onItemsPerPageChange: (value: number) => void;
   sortBy: "name" | "price";
   onSortChange: (value: "name" | "price") => void;
+  searchQuery: string; // Add searchQuery prop
+  onSearchChange: (query: string) => void; // Add onSearchChange prop
 }
 
 export function ProductsControls({
@@ -26,11 +29,24 @@ export function ProductsControls({
   onItemsPerPageChange,
   sortBy,
   onSortChange,
+  searchQuery,
+  onSearchChange,
 }: ProductsControlsProps) {
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-end space-x-3">
+      <CardContent className="p-4 flex items-center justify-between gap-4">
+        <div className="flex items-center space-x-3 flex-1">
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        <div className="flex items-center space-x-3">
           <Select value={sortBy} onValueChange={onSortChange}>
             <SelectTrigger className="w-40">
               <Filter className="w-4 h-4 mr-2" />

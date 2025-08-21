@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -25,14 +25,17 @@ interface BannerFormProps {
   onSave: (banner: Omit<AppBanner, "id" | "createdAt">) => void;
   isSubmitting?: boolean;
   defaultValues?: Partial<FormValues>;
+  isEdit?: boolean;
 }
 
-export function BannerForm({ onSave, isSubmitting = false, defaultValues }: BannerFormProps) {
+export function BannerForm({ onSave, isSubmitting = false, defaultValues, isEdit = false }: BannerFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [imagePreview, setImagePreview] = useState<string>(defaultValues?.imageUrl || "");
   const [isDragOver, setIsDragOver] = useState(false);
   const [isFileUpload, setIsFileUpload] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<FormValues | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -46,9 +49,36 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
     reValidateMode: "onChange",
   });
 
+  // Set initial form data when component mounts (for edit mode)
+  useEffect(() => {
+    if (isEdit && defaultValues && !initialFormData) {
+      const initialData = {
+        title: defaultValues.title || "",
+        description: defaultValues.description || "",
+        imageUrl: defaultValues.imageUrl || "",
+        isActive: defaultValues.isActive ?? true,
+      };
+      setInitialFormData(initialData);
+    }
+  }, [isEdit, defaultValues, initialFormData]);
+
+  // Check for changes whenever form values change (for edit mode)
+  useEffect(() => {
+    if (isEdit && initialFormData) {
+      const currentValues = form.getValues();
+      const hasFormChanged = 
+        currentValues.title !== initialFormData.title ||
+        currentValues.description !== initialFormData.description ||
+        currentValues.imageUrl !== initialFormData.imageUrl ||
+        currentValues.isActive !== initialFormData.isActive;
+      
+      setHasChanges(hasFormChanged);
+    }
+  }, [form.watch(), isEdit, initialFormData]);
+
   const handleImageUrlChange = (url: string) => {
     setImagePreview(url);
-    form.setValue("imageUrl", url, { shouldValidate: true }); // Trigger validation
+    form.setValue("imageUrl", url, { shouldValidate: true });
     setIsFileUpload(false);
   };
 
@@ -67,7 +97,7 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
     reader.onloadend = () => {
       const base64Data = reader.result as string;
       setImagePreview(base64Data);
-      form.setValue("imageUrl", base64Data, { shouldValidate: true }); // Trigger validation
+      form.setValue("imageUrl", base64Data, { shouldValidate: true });
       setIsFileUpload(true);
       toast({
         title: "Image selected",
@@ -106,7 +136,7 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
 
   const removeImage = () => {
     setImagePreview("");
-    form.setValue("imageUrl", "", { shouldValidate: true }); // Trigger validation
+    form.setValue("imageUrl", "", { shouldValidate: true });
     setIsFileUpload(false);
   };
 
@@ -127,6 +157,11 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
       });
     }
   };
+
+  // Determine if save button should be disabled
+  const isSaveDisabled = isSubmitting || 
+                         !form.formState.isValid || 
+                         (isEdit && !hasChanges);
 
   return (
     <Form {...form}>
@@ -176,7 +211,7 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
                       placeholder={isFileUpload ? "Image file selected" : "https://example.com/image.jpg"}
                       {...field}
                       onChange={(e) => !isFileUpload && handleImageUrlChange(e.target.value)}
-                      disabled={isFileUpload}
+                      disabled={isFileUpload || isEdit} // CHANGED: Disable in edit mode
                     />
                   </FormControl>
                   <FormMessage />
@@ -253,8 +288,12 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
                     <div className="bg-gray-100 rounded-full p-3">
                       <FileImage className="h-6 w-6 text-gray-400" />
                     </div>
-                    <p className="text-sm font-medium">Upload an image or enter a URL</p>
-                    <p className="text-xs text-gray-500">Drag and drop or click to browse</p>
+                    <p className="text-sm font-medium">
+                      {isEdit ? "Upload a new image" : "Upload an image or enter a URL"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Drag and drop or click to browse
+                    </p>
                     <Button
                       type="button"
                       variant="outline"
@@ -304,10 +343,11 @@ export function BannerForm({ onSave, isSubmitting = false, defaultValues }: Bann
             type="button"
             variant="outline"
             onClick={() => navigate("/config/app-banner")}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting || !form.formState.isValid}>
+          <Button type="submit" disabled={isSaveDisabled}>
             {isSubmitting ? "Saving..." : "Save Banner"}
           </Button>
         </div>

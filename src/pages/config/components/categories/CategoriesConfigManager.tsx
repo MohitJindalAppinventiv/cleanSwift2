@@ -29,6 +29,8 @@ export function CategoriesConfigManager() {
     categoryId: null as string | null,
     deleting: false
   });
+  const [isAdding, setIsAdding] = useState(false); // ADDED: For add loading state
+  const [isEditing, setIsEditing] = useState(false); // ADDED: For edit loading state
 
   const fetchCategories = async () => {
     try {
@@ -95,6 +97,7 @@ export function CategoriesConfigManager() {
 
   const handleAddCategory = async (formData: { name: string; serviceId?: string }) => {
     try {
+      setIsAdding(true);
       const selectedServiceId = serviceId || formData.serviceId;
       if (!selectedServiceId) {
         toast({
@@ -136,11 +139,14 @@ export function CategoriesConfigManager() {
       setAddDialogOpen(false);
     } catch (error) {
       handleError(error, "Failed to create category");
+    } finally {
+      setIsAdding(false);
     }
   };
 
   const handleEditCategory = async (categoryId: string, formData: { name: string }) => {
     try {
+      setIsEditing(true);
       const response = await axiosInstance.put(API.UPDATE_CATEGORY(), 
         { name: formData.name },
         { 
@@ -162,6 +168,8 @@ export function CategoriesConfigManager() {
       setEditDialogOpen(false);
     } catch (error) {
       handleError(error, "Failed to update category");
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -252,6 +260,7 @@ export function CategoriesConfigManager() {
             onCancel={() => setAddDialogOpen(false)}
             services={serviceId ? undefined : services.filter(s => s.pricingModel === 'per_item')}
             initialData={serviceId ? { serviceId } : undefined}
+            isSubmitting={isAdding} // ADDED: Pass loading state
           />
         </DialogContent>
       </Dialog>
@@ -272,10 +281,12 @@ export function CategoriesConfigManager() {
               onCancel={() => setEditDialogOpen(false)}
               initialData={{
                 name: getCategoryDisplayName(selectedCategory),
-                isActive: isAllCategoriesResponse(selectedCategory) 
-                  ? true 
-                  : !('isDeleted' in selectedCategory) || !selectedCategory.isDeleted,
+                serviceId: isAllCategoriesResponse(selectedCategory) 
+                  ? services.find(s => s.name === selectedCategory.serviceName)?.id
+                  : selectedCategory.serviceId,
               }}
+              services={serviceId ? undefined : services.filter(s => s.pricingModel === 'per_item')}
+              isSubmitting={isEditing} // ADDED: Pass loading state
             />
           )}
         </DialogContent>

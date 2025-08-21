@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,6 +20,7 @@ import { Service, CategoryFormValues } from "./types";
 const baseCategorySchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   description: z.string().optional(),
+  serviceId: z.string().optional(), // ADDED: serviceId to base schema
 });
 
 const categorySchemaWithService = baseCategorySchema.extend({
@@ -35,10 +36,12 @@ interface CategoryFormProps {
   onCancel: () => void;
   initialData?: Partial<CategoryFormValues>;
   services?: Service[];
+  isSubmitting?: boolean;
 }
 
-export function CategoryForm({ onSubmit, onCancel, initialData, services }: CategoryFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function CategoryForm({ onSubmit, onCancel, initialData, services, isSubmitting = false }: CategoryFormProps) {
+  const [hasChanges, setHasChanges] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<z.infer<typeof baseCategorySchema> | null>(null);
 
   const categorySchema = services && services.length > 0 ? categorySchemaWithService : categorySchemaWithoutService;
 
@@ -51,17 +54,38 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services }: Cate
     },
   });
 
-  const handleSubmit = async (data: z.infer<typeof categorySchema>) => {
-    setIsSubmitting(true);
-    try {
-      await onSubmit({
-        name: data.name,
-        serviceId: data.serviceId,
-      });
-    } finally {
-      setIsSubmitting(false);
+  // Set initial form data when component mounts
+  useEffect(() => {
+    if (initialData && !initialFormData) {
+      const initialFormValues: z.infer<typeof baseCategorySchema> = {
+        name: initialData.name || "",
+        description: "",
+        serviceId: initialData.serviceId || (services && services.length > 0 ? services[0].id : ""),
+      };
+      setInitialFormData(initialFormValues);
     }
+  }, [initialData, initialFormData, services]);
+
+  // Check for changes whenever form values change
+  useEffect(() => {
+    if (initialFormData) {
+      const currentValues = form.getValues();
+      const hasFormChanged = 
+        currentValues.name !== initialFormData.name ||
+        currentValues.serviceId !== initialFormData.serviceId;
+      
+      setHasChanges(hasFormChanged);
+    }
+  }, [form.watch(), initialFormData]);
+
+  const handleSubmit = async (data: z.infer<typeof categorySchema>) => {
+    await onSubmit({
+      name: data.name,
+      serviceId: data.serviceId,
+    });
   };
+
+  const isSaveDisabled = isSubmitting || !form.formState.isValid || !hasChanges;
 
   return (
     <Form {...form}>
@@ -122,7 +146,7 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services }: Cate
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSaveDisabled}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

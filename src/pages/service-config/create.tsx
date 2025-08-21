@@ -6,7 +6,6 @@ import ServiceForm from "./components/ServiceForm";
 const ServiceCreatePage: React.FC = () => {
   const {
     service,
-  
     fileInputKey,
     handleInputChange,
     handleStatusChange,
@@ -26,15 +25,14 @@ const ServiceCreatePage: React.FC = () => {
         </div>
 
         <ServiceForm
-          handleRemoveThumbnail={handleRemoveThumbnail}
           service={service}
-          isLoading = {isLoading}
+          isLoading={isLoading}
           fileInputKey={fileInputKey}
           handleInputChange={handleInputChange}
           handleStatusChange={handleStatusChange}
-        
-          handleFileChange={handleFileChange}
           handlePricingModelChange={handlePricingModelChange}
+          handleFileChange={handleFileChange}
+          handleRemoveThumbnail={handleRemoveThumbnail}
           handleSubmit={handleSubmit}
           handleCancel={handleCancel}
         />

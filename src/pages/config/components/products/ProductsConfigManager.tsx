@@ -47,7 +47,7 @@ interface PaginationInfo {
 export function ProductsConfigManager() {
   const { toast } = useToast();
   const { state } = useLocation();
-  const { serviceId: paramServiceId, serviceId: paramCategoryId } = useParams<{
+  const { serviceId: paramServiceId, categoryId: paramCategoryId } = useParams<{
     serviceId?: string;
     categoryId?: string;
   }>();
@@ -61,7 +61,7 @@ export function ProductsConfigManager() {
     itemsPerPage: 10,
   });
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [isPaginating, setIsPaginating] = useState(false); // Added for pagination loading
+  const [isPaginating, setIsPaginating] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [servicesLoaded, setServicesLoaded] = useState(false);
@@ -74,6 +74,7 @@ export function ProductsConfigManager() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<"name" | "price">("name");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -114,7 +115,7 @@ export function ProductsConfigManager() {
 
   const fetchProducts = useCallback(async (page: number, limit: number) => {
     setIsPaginating(true);
-    setIsLoadingProducts(page === 1 && !products.length); // Only show full loading for initial fetch
+    setIsLoadingProducts(page === 1 && !products.length);
     try {
       let endpoint = `${API.GET_ALL_PRODUCTS()}`;
       let params: any = {
@@ -122,6 +123,10 @@ export function ProductsConfigManager() {
         limit,
         offset: (page - 1) * limit,
       };
+
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
 
       if (idType === "category" && paramCategoryId) {
         endpoint = `${API.GET_ALL_PRODUCT_BY_CATEGORY_ID()}`;
@@ -131,11 +136,7 @@ export function ProductsConfigManager() {
         params.serviceId = paramServiceId;
       }
 
-      console.log("Fetching products with params:", { endpoint, params });
-
       const response = await axiosInstance.get(endpoint, { params });
-
-      console.log("API Response:", response.data);
 
       const fetchedProducts = response.data.data.map((item: any) => {
         const categoryId = item.categoryId || item.CategoryId;
@@ -198,19 +199,11 @@ export function ProductsConfigManager() {
         totalItems,
         itemsPerPage: limit,
       });
-
-      console.log("Pagination updated:", { currentPage: page, totalPages, totalItems, itemsPerPage: limit });
     } catch (error) {
       console.error("Error fetching products:", error);
       toast({
         title: "Error",
-        description: `Failed to load products for ${
-          idType === "category"
-            ? "category"
-            : idType === "service"
-            ? "service"
-            : "all products"
-        }`,
+        description: `Failed to load products`,
         variant: "destructive",
       });
       setProducts([]);
@@ -219,7 +212,7 @@ export function ProductsConfigManager() {
       setIsLoadingProducts(false);
       setIsPaginating(false);
     }
-  }, [idType, paramServiceId, paramCategoryId, toast, categories, services]);
+  }, [idType, paramServiceId, paramCategoryId, toast, categories, services, searchQuery]);
 
   useEffect(() => {
     let mounted = true;
@@ -260,23 +253,25 @@ export function ProductsConfigManager() {
 
   useEffect(() => {
     if (servicesLoaded && categoriesLoaded) {
-      console.log("Triggering fetchProducts with page:", pagination.currentPage, "limit:", pagination.itemsPerPage);
       fetchProducts(pagination.currentPage, pagination.itemsPerPage);
     }
   }, [servicesLoaded, categoriesLoaded, fetchProducts, pagination.currentPage, pagination.itemsPerPage]);
 
   const handlePageChange = (newPage: number) => {
-    console.log("Changing page to:", newPage);
     setPagination(prev => ({ ...prev, currentPage: newPage }));
   };
 
   const handleItemsPerPageChange = (newLimit: number) => {
-    console.log("Changing items per page to:", newLimit);
     setPagination(prev => ({ 
       ...prev, 
       itemsPerPage: newLimit, 
       currentPage: 1 
     }));
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const createProduct = async (productData: ProductFormValues) => {
@@ -444,27 +439,23 @@ export function ProductsConfigManager() {
 
   const shouldShowSkeleton = isLoadingProducts || !servicesLoaded || !categoriesLoaded;
 
-  // Generate page numbers without duplicates
   const pageNumbers = useMemo(() => {
-    const pages: number[] = [];
-    const maxPagesToShow = 3; // Show up to 3 pages around current page
+    const pages: (number | '...')[] = [];
     const totalPages = pagination.totalPages;
     const currentPage = pagination.currentPage;
 
-    // Always include page 1
+    if (totalPages <= 1) return [1];
+
     pages.push(1);
 
     if (totalPages <= 5) {
-      // Show all pages if totalPages <= 5
       for (let i = 2; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Calculate start and end for middle pages
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(totalPages - 1, currentPage + 1);
 
-      // Adjust if near the start or end
       if (currentPage <= 3) {
         startPage = 2;
         endPage = 4;
@@ -473,18 +464,23 @@ export function ProductsConfigManager() {
         endPage = totalPages - 1;
       }
 
-      // Add middle pages
+      if (startPage > 2) {
+        pages.push('...');
+      }
+
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
 
-      // Add last page if not already included
-      if (totalPages > 1 && !pages.includes(totalPages)) {
+      if (endPage < totalPages - 1) {
+        pages.push('...');
+      }
+
+      if (!pages.includes(totalPages)) {
         pages.push(totalPages);
       }
     }
 
-    console.log("Generated page numbers:", pages);
     return pages;
   }, [pagination.totalPages, pagination.currentPage]);
 
@@ -505,7 +501,9 @@ export function ProductsConfigManager() {
         itemsPerPage={pagination.itemsPerPage}
         onItemsPerPageChange={handleItemsPerPageChange}
         sortBy={sortBy}
-        onSortChange={(value: any) => setSortBy(value)}
+        onSortChange={setSortBy}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
       />
 
       {shouldShowSkeleton ? (
@@ -522,7 +520,7 @@ export function ProductsConfigManager() {
         </div>
       ) : products.length === 0 ? (
         <ProductsEmptyState
-          searchQuery=""
+          searchQuery={searchQuery}
           contextType={currentContext.type}
           onCreate={() => setCreateModalOpen(true)}
         />
@@ -568,7 +566,6 @@ export function ProductsConfigManager() {
             )}
           </div>
 
-          {/* Pagination below cards */}
           <div className="flex items-center mt-6 p-4 border-t border-gray-200">
             <div className="text-sm text-muted-foreground">
               Showing {pagination.totalItems > 0 ? ((pagination.currentPage - 1) * pagination.itemsPerPage) + 1 : 0} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} products
@@ -588,9 +585,9 @@ export function ProductsConfigManager() {
                     />
                   </PaginationItem>
                   
-                  {pageNumbers.map((pageNum) => (
-                    <PaginationItem key={pageNum}>
-                      {pageNum === -1 ? (
+                  {pageNumbers.map((pageNum, index) => (
+                    <PaginationItem key={`${pageNum}-${index}`}>
+                      {pageNum === '...' ? (
                         <span className="px-3 py-2 text-sm">...</span>
                       ) : (
                         <PaginationLink

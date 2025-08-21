@@ -5,13 +5,12 @@ import { useBannerEditManager } from "./BannerEditManager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { AppBanner } from "../../types/banner";
 
 export default function BannerEditPage() {
-  const { banner, isLoading, handleUpdateBanner , isSubmitting } = useBannerEditManager();
+  const { banner, isLoading, handleUpdateBanner, isSubmitting } = useBannerEditManager();
   const navigate = useNavigate();
 
-  const handleSave = async (bannerData: Omit<AppBanner, "id" | "createdAt">) => {
+  const handleSave = async (bannerData: any) => {
     const success = await handleUpdateBanner(bannerData);
     if (success) {
       navigate("/config/app-banner");
@@ -72,13 +71,14 @@ export default function BannerEditPage() {
         <div className="rounded-md border p-6">
           <BannerForm 
             onSave={handleSave}
-            isSubmitting=  {isSubmitting}
+            isSubmitting={isSubmitting}
             defaultValues={{
               title: banner.title,
               description: banner.description,
               imageUrl: banner.imageUrl,
               isActive: banner.isActive,
             }}
+            isEdit={true} // ADDED: This enables change tracking
           />
         </div>
       </div>

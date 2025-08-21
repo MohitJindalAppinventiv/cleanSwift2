@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import axios from "axios";
 import API from "@/api/endpoints/endpoint";
 import { axiosInstance } from "@/api/axios/axiosInstance";
+import { Service } from "../types";
 
 export const useCreateServiceManager = () => {
   const navigate = useNavigate();
-   const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [service, setService] = useState({
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const [service, setService] = useState<Omit<Service, 'id' | 'variants' | 'additionalService'>>({
     name: "",
     description: "",
-    pricingmodel: "",
+    pricingmodel: "per_kg",
     status: "active",
     imageBase64: "",
     thumbnail: ""
@@ -25,11 +26,11 @@ export const useCreateServiceManager = () => {
     setService(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleStatusChange = (value: string) => {
-    setService(prev => ({ ...prev, status: value as "active" | "inactive" }));
+  const handleStatusChange = (value: "active" | "inactive") => {
+    setService(prev => ({ ...prev, status: value }));
   };
 
-  const handlePricingModelChange = (value: string) => {
+  const handlePricingModelChange = (value: "per_kg" | "per_item") => {
     setService(prev => ({ ...prev, pricingmodel: value }));
   };
 
@@ -59,21 +60,20 @@ export const useCreateServiceManager = () => {
     reader.readAsDataURL(file);
   };
 
-
   const handleRemoveThumbnail = () => {
     setService(prev => ({
       ...prev,
       imageBase64: "",
       thumbnail: ""
     }));
-    setFileInputKey(Date.now()); // Reset file input
+    setFileInputKey(Date.now());
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-     setIsLoading(true); // Set loading to true when submission starts
+    setIsLoading(true);
+    
     try {
-      // Create payload with only the required fields
       const payload = {
         name: service.name,
         description: service.description,
@@ -90,18 +90,20 @@ export const useCreateServiceManager = () => {
           },
         }
       );
- if(service.status && service.status !== "active"){
-     await axiosInstance.patch(
-        `${API.TOGGLE_SERVICE_STATUS()}?serviceId=${res.data.id}`
-      );
-  }
+      
+      if (service.status && service.status !== "active") {
+        await axiosInstance.patch(
+          `${API.TOGGLE_SERVICE_STATUS()}?serviceId=${res.data.id}`
+        );
+      }
+      
       toast.success("Service created successfully");
       navigate("/config/services");
-    } catch (error) {
-      console.error("Error creating service:", error.response.data.message);
-      toast.error(error.response.data.message);
-    }finally {
-      setIsLoading(false); // Reset loading state whether success or error
+    } catch (error: any) {
+      console.error("Error creating service:", error.response?.data?.message || error.message);
+      toast.error(error.response?.data?.message || "Failed to create service");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,7 +115,7 @@ export const useCreateServiceManager = () => {
     service,
     selectedVariants,
     fileInputKey,
-    isLoading, // Expose loading state
+    isLoading,
     handleInputChange,
     handleStatusChange,
     handleVariantToggle,

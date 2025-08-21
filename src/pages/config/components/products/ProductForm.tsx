@@ -37,7 +37,10 @@ export function ProductForm({
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: initialData,
+    mode: "onChange", // Enable validation on change for real-time isValid updates
   });
+
+  const { isDirty, isValid } = form.formState;
 
   return (
     <Form {...form}>
@@ -88,7 +91,10 @@ export function ProductForm({
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={!isDirty || !isValid || isSubmitting}
+          >
             {isSubmitting ? "Saving..." : "Save Product"}
           </Button>
         </div>
