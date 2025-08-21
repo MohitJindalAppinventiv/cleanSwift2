@@ -19,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			      animation: {
+        "spin-slow": "spin 6s linear infinite",
+      },
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

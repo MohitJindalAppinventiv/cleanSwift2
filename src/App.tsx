@@ -165,6 +165,7 @@ const Complaint = lazy(()=>import("./pages/complaint/Complaint"));
 
 import LaundryPageLoader from "./PageLoading";
 import path from "path";
+import BucketLoader from "./BucketLoader";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -454,7 +455,7 @@ const App = () => (
         <Sonner />
         <PersistGate loading={null} persistor={persistor}>
           <BrowserRouter>
-            <Suspense fallback={<div>loading..</div>}>
+            <Suspense >
               <AppRoutes />
             </Suspense>
           </BrowserRouter>
