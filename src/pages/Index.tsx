@@ -84,24 +84,20 @@ const Index = () => {
             />
           </div> */}
           <div className={`${isMobile ? "" : "lg:col-span-2"} `}>
-  <div className="flex items-center justify-between mb-3">
-    <h3 className="text-xl font-semibold">Recent Orders</h3>
-    <Button
-      onClick={handleViewAll}
-      variant="outline"
-      size="sm"
-    >
-      View All
-    </Button>
-  </div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xl font-semibold">Recent Orders</h3>
+              <Button onClick={handleViewAll} variant="outline" size="sm">
+                View All
+              </Button>
+            </div>
 
-  <OrdersTable
-    orders={orders}
-    pagination={pagination}
-    isLoading={isLoading}
-    onPageChange={handlePageChange}
-  />
-</div>
+            <OrdersTable
+              orders={orders}
+              pagination={pagination}
+              isLoading={isLoading}
+              onPageChange={handlePageChange}
+            />
+          </div>
 
           <div>
             <RecentCustomers />

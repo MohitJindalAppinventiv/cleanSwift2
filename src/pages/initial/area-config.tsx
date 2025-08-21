@@ -310,6 +310,7 @@ import API from "@/api/endpoints/endpoint";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/redux";
 import type { Libraries } from "@react-google-maps/api";
+import { googleMapAPi } from "@/constants";
 interface Area {
   id: string;
   locationName: string;
@@ -347,8 +348,9 @@ export default function StoreLocationPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: googleMapAPi,
     libraries,
   });
 

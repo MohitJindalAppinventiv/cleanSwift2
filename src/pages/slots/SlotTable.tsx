@@ -210,7 +210,7 @@ export default function SlotTable({ type, dateRange }: SlotTableProps) {
       </div>
     );
   }
-
+ 
   return (
     <div className="space-y-6">
       {Object.entries(slotsByDate).map(([date, slots]) => {

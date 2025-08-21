@@ -61,7 +61,7 @@ export default function SlotsConfigPage() {
               <CalendarDateRangePicker
                 value={dateRange}
                 onChange={setDateRange}
-              />
+              /> 
 
 
               {(dateRange?.startDate || dateRange?.endDate) && (

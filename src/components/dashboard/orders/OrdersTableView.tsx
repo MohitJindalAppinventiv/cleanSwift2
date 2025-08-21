@@ -810,7 +810,7 @@
 
 
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
+import { useNavigate, useLocation, Link } from "react-router-dom"; // Add useLocation
 import {
   Table,
   TableBody,
@@ -1088,6 +1088,9 @@ export function OrdersTableView({
           validStatuses.find((s) => s.value === status)?.label
         }`
       );
+
+          // await new Promise((res) => setTimeout(res, 1000));
+
       await dispatch(
         fetchOrders({ page: pagination?.page, limit: pagination?.limit })
       );
@@ -1423,7 +1426,9 @@ export function OrdersTableView({
                   }`}
                 >
                   <TableCell className="font-medium text-gray-900">
+                    <Link to={`order-details/${order.id}`}>
                     {order.orderId}
+                    </Link>
                   </TableCell>
                   <TableCell className="text-gray-700">
                     {order.customerName}
