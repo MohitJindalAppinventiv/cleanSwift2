@@ -81,55 +81,6 @@ export const useBannerEditManager = () => {
     fetchBanner();
   }, [id, navigate]);
 
-//  const handleUpdateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt">) => {
-//   try {
-//     if (!id) throw new Error("Missing banner ID");
-//     setIsSubmitting(true);
-    
-//     const payload : any = {
-//       title: bannerData.title,
-//       description: bannerData.description,
-//     };
-//       if (bannerData.imageUrl.startsWith('data:image')) {
-//       payload.fileBase64Image = bannerData.imageUrl;
-//     } 
-//      else {
-//        payload.fileBase64Image =  bannerData.imageUrl;
-//      }
-
-//     const response = await axios.put(
-//       "https://us-central1-laundry-app-dee6a.cloudfunctions.net/updateAppBanner",
-//       payload,
-//       {
-//         params: { bannerId: id },
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-
-//     if (response.data.success) {
-//       toast({
-//         title: "Success",
-//         description: "Banner updated successfully",
-//       });
-//       navigate("/config/app-banner");
-//       return true;
-//     } else {
-//       throw new Error(response.data.message || "Failed to update banner");
-//     }
-//   } catch (error) {
-//     console.error("Error updating banner:", error);
-//     toast({
-//       title: "Error",
-//       description: error instanceof Error ? error.message : "Failed to update banner",
-//       variant: "destructive",
-//     });
-//     return false;
-//   } finally {
-//     setIsSubmitting(false);
-//   }
-// };
 const handleUpdateBanner = async (bannerData: Omit<AppBanner, "id" | "createdAt">) => {
   try {
     if (!id) throw new Error("Missing banner ID");

@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 interface ServiceTableProps {
   services: Service[];
@@ -53,8 +54,8 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
   const deleteService = async (serviceId: string) => {
     try {
       setDeletingServiceId(serviceId);
-      await axios.delete(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/deleteService",
+      await axiosInstance.delete(
+        "/deleteService",
         { params: { serviceId } }
       );
       toast({ title: "Success", description: "Service deleted successfully" });
@@ -78,8 +79,8 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
 
     try {
       setUpdatingStatus(serviceId);
-      await axios.patch(
-        `https://us-central1-laundry-app-dee6a.cloudfunctions.net/changeStatusOfService?serviceId=${serviceId}`
+      await axiosInstance.patch(
+        `/changeStatusOfService?serviceId=${serviceId}`
       );
       setLocalServices((prev) =>
         prev.map((service) =>

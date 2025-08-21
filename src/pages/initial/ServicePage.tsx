@@ -23,6 +23,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -85,8 +86,8 @@ export default function SubmitDetailsPage() {
         imageBase64: base64Image
       };
 
-      await axios.post(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createService",
+      await axiosInstance.post(
+        "/createService",
         payload,
         {
           headers: {

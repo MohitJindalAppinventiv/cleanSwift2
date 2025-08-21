@@ -30,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
@@ -84,8 +85,8 @@ export default function SubmitDetailsPage() {
   const fetchServices = async () => {
     try {
       setLoadingServices(true);
-      const res = await axios.get(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/getAllServices"
+      const res = await axiosInstance.get(
+        "/getAllServices"
       );
       console.log("result ", res);
       setServices(res.data.data || []);
@@ -113,8 +114,8 @@ export default function SubmitDetailsPage() {
         imageBase64: base64Image,
       };
 
-      await axios.post(
-        "https://us-central1-laundry-app-dee6a.cloudfunctions.net/createService",
+      await axiosInstance.post(
+        "/createService",
         payload,
         {
           headers: { "Content-Type": "application/json" },

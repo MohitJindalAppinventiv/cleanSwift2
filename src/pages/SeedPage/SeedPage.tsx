@@ -260,8 +260,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
-const API_URL = "https://us-central1-laundry-app-dee6a.cloudfunctions.net/seedAdmin";
+const API_URL = "/seedAdmin";
 
 const adminSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -291,47 +292,79 @@ export default function AdminCreationPage() {
   });
 
   const onSubmit = async (data: AdminFormValues) => {
-    try {
-      setIsLoading(true);
-      console.log("Data in form: ", data);
-      
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          role:data.role,
-          displayName: data.displayName,
-          phoneNumber: data.phoneNumber,
-          secret: data.secret,
-        }),
-      });
-      console.log("response",response);
+  try {
+    setIsLoading(true);
+    console.log("Data in form: ", data);
 
-      const result = await response.json();
-    console.log(result);
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to create admin user");
-      }
+    const response = await axiosInstance.post("/admins", {
+      email: data.email,
+      password: data.password,
+      role: data.role,
+      displayName: data.displayName,
+      phoneNumber: data.phoneNumber,
+      secret: data.secret,
+    });
 
-    //   toast("Admin Created", {
-    //     description: "Admin account has been successfully created.",
-    //   });
+    console.log("response", response.data);
+
+    // toast("Admin Created", {
+    //   description: "Admin account has been successfully created.",
+    // });
+
+    form.reset();
+  } catch (error: any) {
+    console.error("Error:", error);
+    // toast("Error", {
+    //   description: error.response?.data?.message || error.message || "Failed to create admin user",
+    //   variant: "destructive",
+    // });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  // const onSubmit = async (data: AdminFormValues) => {
+  //   try {
+  //     setIsLoading(true);
+  //     console.log("Data in form: ", data);
       
-      form.reset();
-    } catch (error) {
-      console.error("Error:", error);
-    //   toast("Error", {
-    //     description: error instanceof Error ? error.message : "Failed to create admin user",
-    //     variant: "destructive",
-    //   });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     const response = await fetch(API_URL, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         email: data.email,
+  //         password: data.password,
+  //         role:data.role,
+  //         displayName: data.displayName,
+  //         phoneNumber: data.phoneNumber,
+  //         secret: data.secret,
+  //       }),
+  //     });
+  //     console.log("response",response);
+
+  //     const result = await response.json();
+  //   console.log(result);
+  //     if (!response.ok) {
+  //       throw new Error(result.message || "Failed to create admin user");
+  //     }
+
+  //   //   toast("Admin Created", {
+  //   //     description: "Admin account has been successfully created.",
+  //   //   });
+      
+  //     form.reset();
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   //   toast("Error", {
+  //   //     description: error instanceof Error ? error.message : "Failed to create admin user",
+  //   //     variant: "destructive",
+  //   //   });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
