@@ -449,7 +449,7 @@ const PaymentsPage = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-semibold">
-                          ${(payment.amount || 0).toFixed(2)}
+                          Rs. {(payment.amount || 0).toFixed(2)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">

@@ -47,7 +47,7 @@ interface PaginationInfo {
 export function ProductsConfigManager() {
   const { toast } = useToast();
   const { state } = useLocation();
-  const { serviceId: paramServiceId, categoryId: paramCategoryId } = useParams<{
+  const { serviceId: paramServiceId, serviceId: paramCategoryId } = useParams<{
     serviceId?: string;
     categoryId?: string;
   }>();
