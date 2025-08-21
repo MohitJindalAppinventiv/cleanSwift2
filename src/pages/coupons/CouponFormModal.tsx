@@ -652,8 +652,7 @@ const couponSchema = z.object({
   couponCode: z
     .string()
     .min(2, "Coupon code must be at least 2 characters")
-    .max(20, "Coupon code must be less than 20 characters")
-    .regex(/^[A-Z0-9_-]+$/, "Coupon code can only contain uppercase letters, numbers, hyphens, and underscores"),
+    .max(20, "Coupon code must be less than 20 characters"),
   maxDiscount: z
     .coerce
     .number({
