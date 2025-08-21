@@ -181,10 +181,7 @@ const CustomerDetailsPage = () => {
                       <span>{customer.alternateNumber}</span>
                     </div>
                   )}
-                  {/* <div className="flex items-center gap-2 text-gray-600">
-                    <Mail className="h-4 w-4" />
-                    <span>{customer.email || "N/A"}</span>
-                  </div> */}
+ 
                 </div>
               </div>
 
@@ -199,27 +196,17 @@ const CustomerDetailsPage = () => {
                   </h4>
                   <p className="text-sm text-gray-500">Total Orders</p>
                 </div>
-                {/* <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    $120.50
-                  </h4>
-                  <p className="text-sm text-gray-500">Total Spent</p>
-                </div> */}
+
                 <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
                   <h4 className="text-lg font-semibold text-gray-900">
-                    $
+                    &#8377;
                     {orders
                       .reduce((sum, order) => sum + order.finalTotal, 0)
                       .toFixed(2)}
                   </h4>
                   <p className="text-sm text-gray-500">Total Spent</p>
                 </div>
-                {/* <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    July 2024
-                  </h4>
-                  <p className="text-sm text-gray-500">Last Order</p>
-                </div> */}
+
                 <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
                   <h4 className="text-lg font-semibold text-gray-900">
                     {orders.length > 0
@@ -391,7 +378,7 @@ const CustomerDetailsPage = () => {
                             {new Date(order.createdAt).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-gray-600">
-                            ${order.finalTotal.toFixed(2)}
+                            &#8377;{order.finalTotal.toFixed(2)}
                           </TableCell>
                           <TableCell className="text-gray-600">
                             {order.totalItems}

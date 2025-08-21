@@ -75,29 +75,114 @@ axiosInstance.interceptors.request.use(
 
 
 
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
+
+//       try {
+//         const refreshToken = localStorage.getItem("refreshToken");
+//         const res = await axiosInstance.post("/refreshToken", {
+//           refreshToken,
+//         });
+
+//         const { id_token: authToken } = res.data;
+//         localStorage.setItem("authToken", authToken);
+
+//         // Retry original request
+//         originalRequest.headers.Authorization = `Bearer ${authToken}`;
+//         return axiosInstance(originalRequest);
+//       } catch (err) {
+//         localStorage.removeItem("authToken");
+//         localStorage.removeItem("refreshToken");
+//         return Promise.reject(err);
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+
+
+// axiosInstance.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
+
+//       try {
+//         const refreshToken = localStorage.getItem("refreshToken");
+//         if (!refreshToken) {
+//           handleLogout();
+//           return Promise.reject(error);
+//         }
+
+//         const res = await axiosInstance.post("/refreshToken", { refreshToken });
+
+//         const { id_token: authToken } = res.data;
+//         localStorage.setItem("authToken", authToken);
+
+//         // retry original request with new token
+//         originalRequest.headers.Authorization = `Bearer ${authToken}`;
+//         return axiosInstance(originalRequest);
+//       } catch (err) {
+//         handleLogout();
+//         return Promise.reject(err);
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// function handleLogout() {
+//   localStorage.removeItem("authToken");
+//   localStorage.removeItem("refreshToken");
+//   // redirect user to login page
+//   window.location.href = "/login";
+// }
+
+
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // if unauthorized
+    if (error.response?.status === 401) {
+      // if already retried once -> logout
+      if (originalRequest._retry) {
+        handleLogout();
+        return Promise.reject(error);
+      }
+
+      // first retry attempt
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const res = await axiosInstance.post("/refreshToken", {
-          refreshToken,
-        });
+        if (!refreshToken) {
+          handleLogout();
+          return Promise.reject(error);
+        }
+
+        const res = await axiosInstance.post("/refreshToken", { refreshToken });
 
         const { id_token: authToken } = res.data;
         localStorage.setItem("authToken", authToken);
 
-        // Retry original request
+        // retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${authToken}`;
         return axiosInstance(originalRequest);
       } catch (err) {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("refreshToken");
+        handleLogout();
         return Promise.reject(err);
       }
     }
@@ -105,3 +190,9 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+function handleLogout() {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("refreshToken");
+  window.location.href = "/login"; // redirect to login
+}

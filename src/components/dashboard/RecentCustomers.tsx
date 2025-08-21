@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { axiosInstance } from "@/api/axios/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface Customer {
   id: string;
@@ -99,6 +99,7 @@ export function RecentCustomers() {
               key={customer.id}
               className="flex items-center justify-between space-x-4"
             >
+              <Link to={`/customer-details/${customer.id}`}>
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarImage src={customer.avatarUrl} />
@@ -116,6 +117,8 @@ export function RecentCustomers() {
                   </div>
                 </div>
               </div>
+                      </Link>
+
               <div className="flex items-center space-x-2">
                 <Badge
                   variant="outline"

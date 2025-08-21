@@ -20,6 +20,7 @@ import {
   CheckCircle,
   XCircle,
   Users,
+  RefreshCw,
 } from "lucide-react";
 import { fetchOrders } from "@/store/slices/orderSlice";
 import { CalendarDateRangePicker } from "@/components/date-range-picker";
@@ -254,13 +255,6 @@ const OrdersPage = () => {
                 </p>
               </div>
             </div>
-
-            <div className="flex justify-end">
-              <CalendarDateRangePicker
-                value={dateRange}
-                onChange={handleDateRangeChange}
-              />
-            </div>
           </div>
 
           {/* Analytics Cards */}
@@ -390,6 +384,20 @@ const OrdersPage = () => {
                       <SelectItem value="delivered">Delivered</SelectItem>
                     </SelectContent>
                   </Select>
+                  <CalendarDateRangePicker
+                    value={dateRange}
+                    onChange={handleDateRangeChange}
+                  />
+                  {(dateRange?.startDate || dateRange?.endDate) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setDateRange({})}
+                      className="flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Clear
+                    </Button>
+                  )}
                 </div>
 
                 {/* Right Side: Page Size Selector */}
