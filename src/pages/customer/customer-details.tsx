@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockOrders } from "@/components/dashboard/orders/types";
 import { OrderStatusBadge } from "@/components/dashboard/orders/OrderStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { axiosInstance } from "@/api/axios/axiosInstance";
@@ -21,48 +20,93 @@ import { ArrowLeft, Mail, Phone, MapPin, User } from "lucide-react";
 import axios from "axios";
 import CustomerDetailsSkeleton from "./customerDetailsSkeleton";
 
+// types.ts
+
+export interface Customer {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  alternateNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
+  profilePictureUrl?: string | null;
+  isActive: boolean;
+  readableUserId: string;
+  profileCreated: boolean;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
+  deletedByAdmin?: boolean;
+  profileCreatedAt?: { _seconds: number; _nanoseconds: number };
+  profileUpdatedAt?: { _seconds: number; _nanoseconds: number };
+}
+
+export interface Order {
+  id: string;
+  orderId: string;
+  createdAt: string;
+  updatedAt: string;
+  finalTotal: number;
+  status: "pending" | "confirmed" | "outForPickup" | "delivered" | "cancelled"; // adapt to your enum
+  totalItems: number;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  totalPages: number;
+  totalItems: number;
+}
+
 const CustomerDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("details");
-  const [customer, setCustomer] = useState<any>(null);
+  const [customer, setCustomer] = useState<Customer>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const customerOrders = mockOrders.filter(
-    (order) => order.customer === customer?.fullName
-  );
+  const [orders, setOrders] = useState<Order[]>([]); // ✅ real orders
+  const [pagination, setPagination] = useState<Pagination>(null);
 
   useEffect(() => {
-    const fetchCustomer = async () => {
+    const fetchCustomerAndOrders = async () => {
       setLoading(true);
       setError("");
       try {
-        const res = await axiosInstance.get(`/getUserProfileById`, {
-          params: { userId: `${id}` },
+        // ✅ Fetch customer details
+        const profileRes = await axiosInstance.get(`/getUserProfileById`, {
+          params: { userId: id },
         });
-        console.log("response",res);
-        setCustomer(res.data.data);
-      } catch (err: any) {
-        if(axios.isAxiosError(err)){
-          setError(err.message);
-        }
-        setError("Failed to load customer details");
+        console.log("profile Response", profileRes);
+        setCustomer(profileRes.data.data);
 
+        // ✅ Fetch orders
+        const ordersRes = await axiosInstance.get(`/getUserOrderAdmin`, {
+          params: { userId: id, limit: 10, page: 1 }, // pagination support
+        });
+        console.log("customer order response", ordersRes);
+
+        if (ordersRes.data.success) {
+          setOrders(ordersRes.data.data.orders || []);
+          setPagination(ordersRes.data.data.pagination);
+        }
+      } catch (err: any) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.message || err.message);
+        } else {
+          setError("Failed to load customer details");
+        }
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchCustomer();
+    if (id) fetchCustomerAndOrders();
   }, [id]);
 
   if (loading) {
-    return (
-          <CustomerDetailsSkeleton/>
-      );
+    return <CustomerDetailsSkeleton />;
   }
 
   if (error || !customer) {
@@ -137,10 +181,10 @@ const CustomerDetailsPage = () => {
                       <span>{customer.alternateNumber}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-gray-600">
+                  {/* <div className="flex items-center gap-2 text-gray-600">
                     <Mail className="h-4 w-4" />
                     <span>{customer.email || "N/A"}</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -151,16 +195,49 @@ const CustomerDetailsPage = () => {
               >
                 <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
                   <h4 className="text-lg font-semibold text-gray-900">
-                    {customerOrders.length}
+                    {orders.length}
                   </h4>
                   <p className="text-sm text-gray-500">Total Orders</p>
                 </div>
+                {/* <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    $120.50
+                  </h4>
+                  <p className="text-sm text-gray-500">Total Spent</p>
+                </div> */}
                 <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
-                  <h4 className="text-lg font-semibold text-gray-900">$120.50</h4>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    $
+                    {orders
+                      .reduce((sum, order) => sum + order.finalTotal, 0)
+                      .toFixed(2)}
+                  </h4>
                   <p className="text-sm text-gray-500">Total Spent</p>
                 </div>
+                {/* <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    July 2024
+                  </h4>
+                  <p className="text-sm text-gray-500">Last Order</p>
+                </div> */}
                 <div className="text-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors duration-200">
-                  <h4 className="text-lg font-semibold text-gray-900">July 2024</h4>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    {orders.length > 0
+                      ? new Date(
+                          orders
+                            .slice() // copy
+                            .sort(
+                              (a, b) =>
+                                new Date(b.createdAt).getTime() -
+                                new Date(a.createdAt).getTime()
+                            )[0].createdAt
+                        ).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "N/A"}
+                  </h4>
                   <p className="text-sm text-gray-500">Last Order</p>
                 </div>
               </div>
@@ -285,30 +362,39 @@ const CustomerDetailsPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {customerOrders.length > 0 ? (
+                {orders.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-gray-700">Order ID</TableHead>
+                        <TableHead className="text-gray-700">
+                          Order ID
+                        </TableHead>
                         <TableHead className="text-gray-700">Date</TableHead>
                         <TableHead className="text-gray-700">Amount</TableHead>
+                        <TableHead className="text-gray-700">
+                          Total Items
+                        </TableHead>
+
                         <TableHead className="text-gray-700">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customerOrders.map((order) => (
+                      {orders.map((order) => (
                         <TableRow
                           key={order.id}
                           className="hover:bg-gray-50 transition-colors duration-200"
                         >
                           <TableCell className="font-medium text-gray-900">
-                            {order.id}
+                            {order.orderId}
                           </TableCell>
                           <TableCell className="text-gray-600">
-                            {order.date}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </TableCell>
                           <TableCell className="text-gray-600">
-                            ${order.total.toFixed(2)}
+                            ${order.finalTotal.toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {order.totalItems}
                           </TableCell>
                           <TableCell>
                             <OrderStatusBadge status={order.status} />

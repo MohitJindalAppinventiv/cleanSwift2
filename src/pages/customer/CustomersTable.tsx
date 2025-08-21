@@ -192,7 +192,6 @@
 //   );
 // };
 
-
 import { useState } from "react";
 import {
   Table,
@@ -231,6 +230,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import {
+  Pagination as PaginationComponent,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -316,12 +324,12 @@ export const CustomersTable = ({
     const half = Math.floor(maxVisiblePages / 2);
     let start = Math.max(1, page - half);
     const end = Math.min(totalPages, start + maxVisiblePages - 1);
-    
+
     // Adjust if we're near the end
     if (end - start + 1 < maxVisiblePages) {
       start = Math.max(1, end - maxVisiblePages + 1);
     }
-    
+
     const pages = [];
     for (let i = start; i <= end; i++) {
       pages.push(i);
@@ -410,7 +418,7 @@ export const CustomersTable = ({
           </Table>
 
           {/* Enhanced Pagination Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+          {/* <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-700">Rows per page:</span>
               <Select
@@ -487,6 +495,90 @@ export const CustomersTable = ({
                 <ChevronsRight className="h-4 w-4" />
               </Button>
             </div>
+          </div> */}
+
+          {/* <div className="flex items-center gap-2 mt-6 justify-center">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={page === 1}
+              className="h-8"
+            >
+              Previous
+            </Button>
+
+            {getVisiblePages().map((pageNum) => (
+              <Button
+                key={pageNum}
+                variant={page === pageNum ? "default" : "outline"}
+                size="icon"
+                onClick={() => goToPage(pageNum)}
+                className="h-8 w-8"
+              >
+                {pageNum}
+              </Button>
+            ))}
+
+            <Button
+              variant="outline"
+              onClick={handleNext}
+              disabled={page === totalPages || totalPages === 0}
+              className="h-8"
+            >
+              Next
+            </Button>
+          </div> */}
+
+        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-6">
+
+
+          <div className="flex justify-center mt-6">
+            <PaginationComponent className="mx-0 w-auto">
+              <PaginationContent className="gap-1">
+                {/* Previous */}
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePrevious()}
+                    className={`${
+                      page === 1
+                        ? "pointer-events-none opacity-50 bg-gray-100"
+                        : "cursor-pointer bg-white hover:bg-[#9B87F5] hover:text-white transition-colors"
+                    } border rounded-md px-3 py-2`}
+                  />
+                </PaginationItem>
+
+                {/* Page Numbers */}
+                {getVisiblePages().map((pageNumber, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      isActive={page === pageNumber}
+                      onClick={() => goToPage(pageNumber)}
+                      className={`h-9 w-9 flex items-center justify-center border rounded-md text-sm transition-colors
+              ${
+                page === pageNumber
+                  ? "bg-[#9B87F5] text-white border-[#9B87F5]"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-[#9B87F5] hover:text-white"
+              }`}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                {/* Next */}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => handleNext()}
+                    className={`${
+                      page === totalPages || totalPages === 0
+                        ? "pointer-events-none opacity-50 bg-gray-100"
+                        : "cursor-pointer bg-white hover:bg-[#9B87F5] hover:text-white transition-colors"
+                    } border rounded-md px-3 py-2`}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </PaginationComponent>
+          </div>
           </div>
         </>
       )}

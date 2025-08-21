@@ -35,7 +35,7 @@ export default function SlotsConfigPage() {
             <h2 className="text-3xl font-bold tracking-tight">
               Slot Configuration
             </h2>
-            <br/>
+            <br />
             <p className="text-muted-foreground">Configure your slots.</p>
           </div>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -44,7 +44,9 @@ export default function SlotsConfigPage() {
               <Select
                 value={typeFilter}
                 // onValueChange={(value) => setTypeFilter(value as any)}
-                onValueChange={(value: "pickup" | "delivery" | "all") => setTypeFilter(value)}
+                onValueChange={(value: "pickup" | "delivery" | "all") =>
+                  setTypeFilter(value)
+                } 
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Select Type" />
@@ -61,14 +63,26 @@ export default function SlotsConfigPage() {
                 onChange={setDateRange}
               />
 
-              <Button onClick={handleAddSlot}>
+
+              {(dateRange?.startDate || dateRange?.endDate) && (
+                <Button
+                  variant="outline"
+                  onClick={() => setDateRange({})}
+                  className="flex items-center gap-1"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Clear
+                </Button>
+              )}
+
+              <Button className="fixed bottom-6 right-6 rounded-full shadow-lg px-5 py-5 z-50" onClick={handleAddSlot}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Slot
               </Button>
             </div>
           </div>
         </div>
-        <br/>
+        <br />
 
         <SlotTable type={typeFilter} dateRange={dateRange} />
         <SlotFormModal open={showModal} onClose={() => setShowModal(false)} />

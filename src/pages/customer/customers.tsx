@@ -126,6 +126,7 @@ import { getAllUsers } from "@/api/customers/index";
 import { Customer } from "@/components/customers/types";
 import { Button } from "@/components/ui/button";
 import { CustomersTableSkeleton } from "@/pages/customer/CustomerTableSkeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CustomersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -174,7 +175,7 @@ const CustomersPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <CustomersHeader />
-        <div className="flex gap-2 items-center">
+        {/* <div className="flex gap-2 items-center">
           <Button
             variant={status === "all" ? "default" : "outline"}
             onClick={() => {
@@ -212,7 +213,75 @@ const CustomersPage = () => {
             value={searchQuery}
             onChange={handleSearchChange}
           />
-        </div>
+        </div> */}
+
+        <div className="flex gap-2 items-center">
+    <Button
+      variant={status === "all" ? "default" : "outline"}
+      onClick={() => {
+        setStatus("all");
+        setPage(1);
+      }}
+    >
+      All
+    </Button>
+    <Button
+      variant={status === "active" ? "default" : "outline"}
+      onClick={() => {
+        setStatus("active");
+        setPage(1);
+      }}
+    >
+      Active
+    </Button>
+    <Button
+      variant={status === "inactive" ? "default" : "outline"}
+      onClick={() => {
+        setStatus("inactive");
+        setPage(1);
+      }}
+    >
+      Inactive
+    </Button>
+  </div>
+
+  {/* Right side (search + rows per page) */}
+  <div className="flex items-center justify-between gap-4">
+    <div className="relative">
+      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        type="search"
+        placeholder="Search customers..."
+        className="pl-8 w-[300px]"
+        value={searchQuery}
+        onChange={handleSearchChange}
+      />
+    </div>
+
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-gray-700">Rows per page:</span>
+      <Select
+        value={limit.toString()}
+        onValueChange={(newLimit) => {
+          const limitValue = parseInt(newLimit, 10);
+          setLimit(limitValue);
+          setPage(1);
+          fetchUsers(1, limitValue);
+        }}
+      >
+        <SelectTrigger className="w-20">
+          <SelectValue placeholder={limit} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="10">10</SelectItem>
+          <SelectItem value="15">15</SelectItem>
+          <SelectItem value="20">20</SelectItem>
+          <SelectItem value="25">25</SelectItem>
+          <SelectItem value="50">50</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  </div>
         {loading ? (
           <CustomersTableSkeleton />
         ) : (

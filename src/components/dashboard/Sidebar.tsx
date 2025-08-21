@@ -1,4 +1,3 @@
-
 // import React, { useState } from "react";
 // import { Link } from "react-router-dom";
 // import { cn } from "@/lib/utils";
@@ -48,9 +47,9 @@
 //   { title: "Payments", icon: CreditCard, href: "/payments" },
 //   { title: "Reviews", icon: Star, href: "/reviews" },
 //   { title: "Notifications", icon: Bell, href: "/notifications" },
-//   { 
-//     title: "Config Management", 
-//     icon: Settings, 
+//   {
+//     title: "Config Management",
+//     icon: Settings,
 //     href: "/config",
 //     subItems: [
 //       { title: "Services", icon: Server, href: "/config/services" },
@@ -78,9 +77,9 @@
 //   };
 
 //   const toggleSubMenu = (title: string) => {
-//     setExpandedItems(prev => 
-//       prev.includes(title) 
-//         ? prev.filter(item => item !== title) 
+//     setExpandedItems(prev =>
+//       prev.includes(title)
+//         ? prev.filter(item => item !== title)
 //         : [...prev, title]
 //     );
 //   };
@@ -233,8 +232,6 @@
 //   );
 // }
 
-
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -262,7 +259,7 @@ import {
   Eye,
   AlarmCheck,
   LogOut,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -292,9 +289,9 @@ const sidebarItems: SidebarItem[] = [
   { title: "Payments", icon: CreditCard, href: "/payments" },
   { title: "Reviews", icon: Star, href: "/reviews" },
   { title: "Notifications", icon: Bell, href: "/notifications" },
-  { 
-    title: "Config Management", 
-    icon: Settings, 
+  {
+    title: "Config Management",
+    icon: Settings,
     href: "/config",
     subItems: [
       { title: "Services", icon: Server, href: "/config/services" },
@@ -304,11 +301,10 @@ const sidebarItems: SidebarItem[] = [
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },
       { title: "Coupons", icon: Ticket, href: "/config/coupons" },
-      {title: "Content Manager", icon :NotebookPen  , href:"/config/content"},
-      {title:"Complaints",icon:MessageCircle, href:"/config/complaints"},
-      // {title:"Temp",icon:Eye,href:"/temp"},
-      {title:"Slots Config",icon:AlarmCheck,href:"/config/slots"}
-    ]
+      { title: "Content Manager", icon: NotebookPen, href: "/config/content" },
+      { title: "Complaints", icon: MessageCircle, href: "/config/complaints" },
+      { title: "Slots Config", icon: AlarmCheck, href: "/config/slots" },
+    ],
   },
   { title: "Settings", icon: Settings, href: "/settings" },
 ];
@@ -318,7 +314,8 @@ export function Sidebar() {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const dispatch=useAppDispatch();
+  const [loading, setLoading] = useState(false); // Add loading state
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -326,24 +323,37 @@ export function Sidebar() {
   };
 
   const toggleSubMenu = (title: string) => {
-    setExpandedItems(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title) 
+    setExpandedItems((prev) =>
+      prev.includes(title)
+        ? prev.filter((item) => item !== title)
         : [...prev, title]
     );
   };
 
-  const handleLogout =async () => {
-    // Add your logout logic here
-        await dispatch(logoutUser());
-        const response =  dispatch(clearProfile());
-        // console.log("clear profile response",response);
+  const handleLogout = async () => {
+    setLoading(true); // Start loading
+    try {
+      const res = await dispatch(logoutUser());
+      if (res.payload?.success) {
+        await dispatch(clearProfile());
         navigate("/login");
         toast("Logged out successfully", {
           description: "You have been logged out of your account.",
         });
         console.log("navigating");
-    console.log("Logout clicked");
+      } else {
+        toast("Logout failed", {
+          description: "An error occurred while logging out.",
+        });
+      }
+    } catch (error) {
+      toast("Logout failed", {
+        description: "An unexpected error occurred.",
+      });
+      console.error("Logout error:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   if (isMobile) {
@@ -359,13 +369,25 @@ export function Sidebar() {
         </Button>
 
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-            <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div
+              className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center justify-between p-4 border-b">
                 <div className="flex items-center">
-                  <span className="text-xl font-bold text-primary">CleanSwift</span>
+                  <span className="text-xl font-bold text-primary">
+                    CleanSwift
+                  </span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <X size={20} />
                 </Button>
               </div>
@@ -382,7 +404,9 @@ export function Sidebar() {
                             <item.icon size={20} />
                             <span>{item.title}</span>
                           </div>
-                          <span>{expandedItems.includes(item.title) ? '−' : '+'}</span>
+                          <span>
+                            {expandedItems.includes(item.title) ? "−" : "+"}
+                          </span>
                         </div>
                         {expandedItems.includes(item.title) && (
                           <div className="ml-8 mt-1 space-y-1">
@@ -413,7 +437,7 @@ export function Sidebar() {
                   </div>
                 ))}
               </nav>
-              
+
               {/* Logout Button for Mobile */}
               <div className="p-2 border-t">
                 <button
@@ -422,9 +446,14 @@ export function Sidebar() {
                     setMobileMenuOpen(false);
                   }}
                   className="flex items-center gap-3 px-3 py-2 rounded-md w-full text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                  disabled={loading}
                 >
-                  <LogOut size={20} /> 
-                  <span>Logout</span>
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-600" />
+                  ) : (
+                    <LogOut size={20} />
+                  )}
+                  <span>{loading ? "Logging out..." : "Logout"}</span>
                 </button>
               </div>
             </div>
@@ -470,7 +499,9 @@ export function Sidebar() {
                   {!collapsed && (
                     <>
                       <span className="flex-1">{item.title}</span>
-                      <span>{expandedItems.includes(item.title) ? '−' : '+'}</span>
+                      <span>
+                        {expandedItems.includes(item.title) ? "−" : "+"}
+                      </span>
                     </>
                   )}
                 </div>
@@ -504,7 +535,7 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
-      
+
       {/* Logout Button for Desktop */}
       <div className="p-2 border-t">
         <button
@@ -513,9 +544,14 @@ export function Sidebar() {
             "flex items-center gap-3 px-3 py-2 rounded-md w-full text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors",
             collapsed && "justify-center"
           )}
+          disabled={loading}
         >
-          <LogOut size={20} />
-          {!collapsed && <span>Logout</span>}
+          {loading ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-600" />
+          ) : (
+            <LogOut size={20} />
+          )}
+          {!collapsed && <span>{loading ? "Logging out..." : "Logout"}</span>}
         </button>
       </div>
     </div>

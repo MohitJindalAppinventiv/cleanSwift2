@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
 import { OrdersTable } from "@/components/dashboard/OrdersTable";
@@ -14,56 +13,97 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const dispatch=useAppDispatch();
+  const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
   const { orders, pagination, isLoading, error } = useAppSelector(
     (state) => state.orders
   );
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(5);
-    const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
+  const navigate = useNavigate();
 
-      const handlePageChange = useCallback((page: number) => {
-        setCurrentPage(page);
-      }, []);
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
 
   const handleViewAll = () => {
     navigate("/orders");
   };
 
-  useEffect(()=>{
-    dispatch(fetchOrders({
+  useEffect(() => {
+    dispatch(
+      fetchOrders({
         page: currentPage,
         limit: pageSize,
-      }));
-  },[currentPage,pageSize])
+      })
+    );
+  }, [currentPage, pageSize]);
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <p className="text-muted-foreground">
-          Welcome to CleanSwift Admin. View your business metrics and manage operations.
+          Welcome to CleanSwift Admin. View your business metrics and manage
+          operations.
         </p>
 
         <DashboardOverview />
-        
+
         <DashboardMetrics />
 
-        <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"}`}>
+        <div
+          className={`grid gap-6 ${
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+          }`}
+        >
           <RevenueChart />
           <ServicePerformance />
         </div>
 
-        <div className={`grid gap-6 ${isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"}`}>
-          <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
-            <h3 className="text-xl font-semibold mb-3 ">Recent Orders</h3> 
-          <Button onClick= {handleViewAll} className="mb-4" variant="outline" size="sm">
-          View All
-        </Button>
-        
-            <OrdersTable orders={orders} pagination={pagination} isLoading={isLoading} onPageChange={handlePageChange} />
-          </div>
-          <div> 
+        <div
+          className={`grid gap-6 ${
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
+          }`}
+        >
+          {/* <div className={`${isMobile ? "" : "lg:col-span-2"} `}>
+            <h3 className="text-xl font-semibold mb-3 ">Recent Orders</h3>
+            <Button
+              onClick={handleViewAll}
+              className="mb-4"
+              variant="outline"
+              size="sm"
+            >
+              View All
+            </Button>
+
+            <OrdersTable
+              orders={orders}
+              pagination={pagination}
+              isLoading={isLoading}
+              onPageChange={handlePageChange}
+            />
+          </div> */}
+          <div className={`${isMobile ? "" : "lg:col-span-2"} `}>
+  <div className="flex items-center justify-between mb-3">
+    <h3 className="text-xl font-semibold">Recent Orders</h3>
+    <Button
+      onClick={handleViewAll}
+      variant="outline"
+      size="sm"
+    >
+      View All
+    </Button>
+  </div>
+
+  <OrdersTable
+    orders={orders}
+    pagination={pagination}
+    isLoading={isLoading}
+    onPageChange={handlePageChange}
+  />
+</div>
+
+          <div>
             <RecentCustomers />
           </div>
         </div>

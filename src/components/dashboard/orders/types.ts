@@ -12,12 +12,9 @@ export interface OrderItem {
   price: number;
 }
 
-// interface AddressDetails {
-//   addressLabel: string;
-// }
+
 
 export interface Order {
-  // addressDetails: AddressDetails;
   addressLabel: string;
   createdAt: Date;
   customerName: string;
