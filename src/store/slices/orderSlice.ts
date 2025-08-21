@@ -313,6 +313,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import { Order, Pagination } from "../../components/dashboard/orders/types";
+import { OrderStatus } from "@/components/dashboard/orders/OrderStatusBadge";
 
 interface Analytics {
   totalProcessingOrder: number;
@@ -453,9 +454,37 @@ export const getOrderByIdAdmin = createAsyncThunk<
 });
 
 // Async thunk for updating order status
+// export const updateOrderStatus = createAsyncThunk<
+//   { orderId: string; status: string },
+//   { orderId: string; status: string },
+//   { rejectValue: string }
+// >(
+//   "orders/updateOrderStatus",
+//   async ({ orderId, status }, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.post("/updateOrderStatus", {
+//         orderId,
+//         status,
+//       });
+
+//       if (response.data.success) {
+//         return { orderId, status };
+//       } else {
+//         return rejectWithValue(
+//           response.data.message || "Failed to update status"
+//         );
+//       }
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error?.response?.data?.message || "Failed to update status"
+//       );
+//     }
+//   }
+// );
+
 export const updateOrderStatus = createAsyncThunk<
-  { orderId: string; status: string },
-  { orderId: string; status: string },
+  { orderId: string; status: OrderStatus },  // ✅ use OrderStatus here
+  { orderId: string; status: OrderStatus },  // ✅ and here
   { rejectValue: string }
 >(
   "orders/updateOrderStatus",

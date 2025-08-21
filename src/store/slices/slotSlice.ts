@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/api/axios/axiosInstance";
 import { AxiosError } from "axios";
-
+import { format } from "date-fns";
 export interface Slot {
   id: string;
   type: "pickup" | "delivery";
@@ -30,11 +30,14 @@ export interface SlotsState {
   lastFetchParams: FetchSlotsParams | null;
 }
 
-const formatDate = (date: Date, formatStr: string) =>
-  formatStr === "yyyy-MM-dd"
-    ? date.toISOString().split("T")[0]
-    : date.toLocaleDateString();
+// const formatDate = (date: Date, formatStr: string) =>
+//   formatStr === "yyyy-MM-dd"
+//     ? date.toISOString().split("T")[0]
+//     : date.toLocaleDateString();
 
+const formatDate = (date: Date, formatStr: string) => {
+  return format(date, formatStr, { timeZone: "UTC" });
+};
 const initialState: SlotsState = {
   slotsByDate: {},
   loading: false,
@@ -84,6 +87,40 @@ export const addSlot = createAsyncThunk(
   }
 );
 
+// export const fetchSlots = createAsyncThunk(
+//   "slots/fetchSlots",
+//   async ({ type, dateRange }: FetchSlotsParams, { rejectWithValue }) => {
+//     try {
+//       const params: Record<string, any> = {};
+
+//       if (dateRange.startDate) {
+//         params.startDate = formatDate(dateRange.startDate, "yyyy-MM-dd");
+//       }
+//       if (dateRange.endDate) {
+//         params.endDate = formatDate(dateRange.endDate, "yyyy-MM-dd");
+//       }
+//       if (type && type !== "all") {
+//         params.type = type;
+//       }
+
+//       const response = await axiosInstance.get("/adminListSlots", { params });
+
+//       console.log("fetch slots response", response.data);
+//       return {
+//         slotsByDate: response.data.slotsByDate,
+//         fetchParams: { type, dateRange },
+//       };
+//     } catch (err) {
+//       const error = err as { response?: { data?: { message?: string } } };
+
+//       console.error("Error fetching slots", error);
+//       return rejectWithValue(
+//         error.response?.data?.message || "Failed to fetch slots"
+//       );
+//     }
+//   }
+// );
+
 export const fetchSlots = createAsyncThunk(
   "slots/fetchSlots",
   async ({ type, dateRange }: FetchSlotsParams, { rejectWithValue }) => {
@@ -100,6 +137,8 @@ export const fetchSlots = createAsyncThunk(
         params.type = type;
       }
 
+      console.log("API params:", params); // Debug the parameters
+
       const response = await axiosInstance.get("/adminListSlots", { params });
 
       console.log("fetch slots response", response.data);
@@ -109,7 +148,6 @@ export const fetchSlots = createAsyncThunk(
       };
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
-
       console.error("Error fetching slots", error);
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch slots"
