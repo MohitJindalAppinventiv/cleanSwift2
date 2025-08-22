@@ -358,31 +358,61 @@ export function Sidebar() {
     );
   };
 
+  // const handleLogout = async () => {
+  //   setLoading(true); // Start loading
+  //   try {
+  //     const res = await dispatch(logoutUser());
+  //     console.log("logout data in sidebar",res);
+  //     const payload=res.payload
+      
+  //     if (payload?.success) {
+  //       await dispatch(clearProfile());
+  //       navigate("/login");
+  //       toast("Logged out successfully", {
+  //         description: "You have been logged out of your account.",
+  //       });
+  //       // console.log("navigating");
+  //     } else {
+  //       toast("Logout failed", {
+  //         description: "An error occurred while logging out.",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast("Logout failed", {
+  //       description: "An unexpected error occurred.",
+  //     });
+  //     console.error("Logout error:", error);
+  //   } finally {
+  //     setLoading(false); // Stop loading
+  //   }
+  // };
+
   const handleLogout = async () => {
-    setLoading(true); // Start loading
-    try {
-      const res = await dispatch(logoutUser());
-      if (res.payload?.success) {
-        await dispatch(clearProfile());
-        navigate("/login");
-        toast("Logged out successfully", {
-          description: "You have been logged out of your account.",
-        });
-        console.log("navigating");
-      } else {
-        toast("Logout failed", {
-          description: "An error occurred while logging out.",
-        });
-      }
-    } catch (error) {
-      toast("Logout failed", {
-        description: "An unexpected error occurred.",
+  setLoading(true);
+  try {
+    const payload = await dispatch(logoutUser()).unwrap();
+
+    if (payload.success) {
+      await dispatch(clearProfile());
+      navigate("/login");
+      toast("Logged out successfully", {
+        description: payload.message,
       });
-      console.error("Logout error:", error);
-    } finally {
-      setLoading(false); // Stop loading
+    } else {
+      toast("Logout failed", {
+        description: payload.message,
+      });
     }
-  };
+  } catch (error) {
+    toast("Logout failed", {
+      description:
+        error instanceof Error ? error.message : "An unexpected error occurred.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
 

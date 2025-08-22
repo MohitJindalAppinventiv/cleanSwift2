@@ -631,7 +631,7 @@ export function OrdersTableView({
                     {new Date(order.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="font-semibold text-gray-900">
-                    ${order.finalTotal?.toFixed(2) || "0.00"}
+                    &#8377;{order.finalTotal?.toFixed(2) || "0.00"}
                   </TableCell>
                   <TableCell>
                     <span className="capitalize text-gray-600">

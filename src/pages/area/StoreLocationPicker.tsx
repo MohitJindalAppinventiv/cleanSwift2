@@ -247,134 +247,251 @@ const onLoadMap = useCallback((map: google.maps.Map) => {
   if (loadError) return <div>Error loading maps</div>;
 
   return (
-    <div className="p-4 max-w-3xl mx-auto space-y-4">
-      <h2 className="text-2xl font-semibold mb-2">
-        {areaToEdit ? "Edit Store Location" : "Add New Store Location"}
-      </h2>
+  //   <div className="p-4 max-w-3xl mx-auto space-y-4">
+  //     <h2 className="text-2xl font-semibold mb-2">
+  //       {areaToEdit ? "Edit Store Location" : "Add New Store Location"}
+  //     </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">Store Name: *</label>
-          <input
-            type="text"
-            value={storeData.storeName}
-            onChange={(e) =>
-              setStoreData({ ...storeData, storeName: e.target.value })
-            }
-            className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your store name"
-            required
-          />
+  //     <form onSubmit={handleSubmit} className="space-y-4">
+  //       <div className="space-y-2">
+  //         <label className="block text-sm font-medium">Store Name: *</label>
+  //         <input
+  //           type="text"
+  //           value={storeData.storeName}
+  //           onChange={(e) =>
+  //             setStoreData({ ...storeData, storeName: e.target.value })
+  //           }
+  //           className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+  //           placeholder="Enter your store name"
+  //           required
+  //         />
 
-          <label className="block text-sm font-medium">Detected Address:</label>
-          <div className="border rounded px-3 py-2 bg-gray-100 text-sm min-h-[40px]">
-            {storeData.address || "No address detected yet"}
-          </div>
+  //         <label className="block text-sm font-medium">Detected Address:</label>
+  //         <div className="border rounded px-3 py-2 bg-gray-100 text-sm min-h-[40px]">
+  //           {storeData.address || "No address detected yet"}
+  //         </div>
 
-          <label className="block text-sm font-medium">
-            Service Area (in KM): *
-          </label>
-          <input
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={storeData.serviceAreaKm || ""}
-            onChange={(e) =>
-              setStoreData({
-                ...storeData,
-                serviceAreaKm: Number(e.target.value),
-              })
-            }
-            className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Service Area in Kilometers"
-            required
-          />
-        </div>
+  //         <label className="block text-sm font-medium">
+  //           Service Area (in KM): *
+  //         </label>
+  //         <input
+  //           type="number"
+  //           min="0.1"
+  //           step="0.1"
+  //           value={storeData.serviceAreaKm || ""}
+  //           onChange={(e) =>
+  //             setStoreData({
+  //               ...storeData,
+  //               serviceAreaKm: Number(e.target.value),
+  //             })
+  //           }
+  //           className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+  //           placeholder="Service Area in Kilometers"
+  //           required
+  //         />
+  //       </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">
-            Location (Click on map or search to select):
-          </label>
+  //       <div className="space-y-2">
+  //         <label className="block text-sm font-medium">
+  //           Location (Click on map or search to select):
+  //         </label>
           
-          <div style={{ position: 'relative', height: '400px' }}>
-            {isLoaded ? (
-              <>
-                <StandaloneSearchBox
-                  onLoad={onLoadSearchBox}
-                  onPlacesChanged={onPlacesChanged}
-                >
-                  <input
-                    type="text"
-                    placeholder="Search for a location..."
-                    style={{
-                      boxSizing: `border-box`,
-                      border: `1px solid transparent`,
-                      width: `240px`,
-                      height: `32px`,
-                      padding: `0 12px`,
-                      borderRadius: `3px`,
-                      boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
-                      fontSize: `14px`,
-                      outline: `none`,
-                      textOverflow: `ellipses`,
-                      position: 'absolute',
-                      top: '10px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      zIndex: '10',
-                    }}
-                  />
-                </StandaloneSearchBox>
-                <GoogleMap
-                  mapContainerStyle={containerStyle}
-                  center={markerPosition}
-                  zoom={15}
-                  onLoad={onLoadMap}
-                  onClick={handleMapClick}
-                >
-                  <Marker position={markerPosition} />
-                </GoogleMap>
-              </>
-            ) : (
-              <div className="flex items-center justify-center h-[400px] border rounded bg-gray-100">
-                <span>Loading map...</span>
-              </div>
-            )}
-          </div>
-        </div>
+  //         <div style={{ position: 'relative', height: '400px' }}>
+  //           {isLoaded ? (
+  //             <>
+  //               <StandaloneSearchBox
+  //                 onLoad={onLoadSearchBox}
+  //                 onPlacesChanged={onPlacesChanged}
+  //               >
+  //                 <input
+  //                   type="text"
+  //                   placeholder="Search for a location..."
+  //                   style={{
+  //                     boxSizing: `border-box`,
+  //                     border: `1px solid transparent`,
+  //                     width: `240px`,
+  //                     height: `32px`,
+  //                     padding: `0 12px`,
+  //                     borderRadius: `3px`,
+  //                     boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+  //                     fontSize: `14px`,
+  //                     outline: `none`,
+  //                     textOverflow: `ellipses`,
+  //                     position: 'absolute',
+  //                     top: '10px',
+  //                     left: '50%',
+  //                     transform: 'translateX(-50%)',
+  //                     zIndex: '10',
+  //                   }}
+  //                 />
+  //               </StandaloneSearchBox>
+  //               <GoogleMap
+  //                 mapContainerStyle={containerStyle}
+  //                 center={markerPosition}
+  //                 zoom={15}
+  //                 onLoad={onLoadMap}
+  //                 onClick={handleMapClick}
+  //               >
+  //                 <Marker position={markerPosition} />
+  //               </GoogleMap>
+  //             </>
+  //           ) : (
+  //             <div className="flex items-center justify-center h-[400px] border rounded bg-gray-100">
+  //               <span>Loading map...</span>
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+  //       {error && (
+  //         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+  //           {error}
+  //         </div>
+  //       )}
+
+  //       <div className="flex gap-3 pt-4">
+  //         <button
+  //           type="submit"
+  //           disabled={isSubmitting}
+  //           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+  //         >
+  //           {isSubmitting && (
+  //             <span className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent border-white"></span>
+  //           )}
+  //           {isSubmitting
+  //             ? (areaToEdit ? "Updating..." : "Creating...")
+  //             : (areaToEdit ? "Update Store" : "Create Store")
+  //           }
+  //         </button>
+  //         <button
+  //           type="button"
+  //           onClick={close}
+  //           disabled={isSubmitting}
+  //           className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 disabled:opacity-50"
+  //         >
+  //           Cancel
+  //         </button>
+  //       </div>
+  //     </form>
+  //   </div>
+  // );
+
+  <div className="p-6 max-w-3xl mx-auto space-y-6">
+  <h2 className="text-2xl font-semibold text-gray-800">
+    {areaToEdit ? "Edit Store Location" : "Add New Store Location"}
+  </h2>
+
+  <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Store Name: *</label>
+        <input
+          type="text"
+          value={storeData.storeName}
+          onChange={(e) =>
+            setStoreData({ ...storeData, storeName: e.target.value })
+          }
+          className="border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="Enter your store name"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Detected Address:</label>
+        <div className="border rounded-md px-3 py-2 bg-gray-100 text-sm min-h-[40px]">
+          {storeData.address || "No address detected yet"}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Service Area (in KM): *
+        </label>
+        <input
+          type="number"
+          min="0.1"
+          step="0.1"
+          value={storeData.serviceAreaKm || ""}
+          onChange={(e) =>
+            setStoreData({ ...storeData, serviceAreaKm: Number(e.target.value) })
+          }
+          className="border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+          placeholder="Service Area in Kilometers"
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        Location (Click on map or search to select):
+      </label>
+
+      <div className="relative h-[400px]">
+        {isLoaded ? (
+          <>
+            <StandaloneSearchBox
+              onLoad={onLoadSearchBox}
+              onPlacesChanged={onPlacesChanged}
+            >
+              <input
+                type="text"
+                placeholder="Search for a location..."
+                className="absolute top-2 left-1/2 -translate-x-1/2 z-10 w-60 h-8 px-3 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+              />
+            </StandaloneSearchBox>
+
+            <GoogleMap
+              mapContainerStyle={containerStyle}
+              center={markerPosition}
+              zoom={15}
+              onLoad={onLoadMap}
+              onClick={handleMapClick}
+            >
+              <Marker position={markerPosition} />
+            </GoogleMap>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-[400px] border rounded-md bg-gray-100">
+            <span>Loading map...</span>
           </div>
         )}
-
-        <div className="flex gap-3 pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isSubmitting && (
-              <span className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent border-white"></span>
-            )}
-            {isSubmitting
-              ? (areaToEdit ? "Updating..." : "Creating...")
-              : (areaToEdit ? "Update Store" : "Create Store")
-            }
-          </button>
-          <button
-            type="button"
-            onClick={close}
-            disabled={isSubmitting}
-            className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
-  );
+
+    {error && (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
+        {error}
+      </div>
+    )}
+
+    <div className="flex justify-between pt-4">
+      <button
+        type="button"
+        onClick={close}
+        disabled={isSubmitting}
+        className="bg-gray-500 text-white px-5 py-2 rounded-md hover:bg-gray-600 disabled:opacity-50"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="h-11 bg-purple-600 text-white px-5 py-2 rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+      >
+        {isSubmitting && (
+          <span className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent border-white"></span>
+        )}
+        {isSubmitting
+          ? (areaToEdit ? "Updating..." : "Creating...")
+          : (areaToEdit ? "Update Store" : "Create Store")}
+      </button>
+    </div>
+  </form>
+</div>
+  )
 };
 
 export default StoreLocationPicker;

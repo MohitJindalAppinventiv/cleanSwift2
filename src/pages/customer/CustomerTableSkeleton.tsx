@@ -55,19 +55,6 @@ export const CustomersTableSkeleton = ({ rows = 5 }: CustomersTableSkeletonProps
           ))}
         </TableBody>
       </Table>
-
-      {/* Pagination Skeleton */}
-      <div className="flex justify-center gap-6 items-center mt-4">
-        <Button disabled variant="outline">
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Previous
-        </Button>
-        <Skeleton className="h-4 w-24" />
-        <Button disabled variant="outline">
-          Next
-          <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
     </div>
   );
 };

@@ -19,6 +19,7 @@ import {
   ArrowUp,
   ArrowDown,
   X,
+  PlusCircle,
 } from "lucide-react";
 import { AreaTable } from "./AreaTable";
 import Modal from "@/pages/area/modal";
@@ -225,9 +226,12 @@ export function AreaConfigManager() {
         <Button
           size="sm"
           onClick={() => setIsDialogOpen(true)}
-          className="bg-purple-600 text-white hover:bg-purple-700"
+          className="h-11 bg-purple-600 hover:bg-purple-700 text-white"
         >
+          <div className="flex items-center gap-2">
+          <PlusCircle className="h-4 w-4" />
           Add Service Area
+          </div>
         </Button>
       </div>
       <Modal isOpen={isDialogOpen} onClose={handleModalClose}>
@@ -355,128 +359,126 @@ export function AreaConfigManager() {
           )}
         </div>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex justify-between">
+            <TabsList>
+              <TabsTrigger value="all">
+                All Areas ({filteredAreas.all.length})
+              </TabsTrigger>
+              <TabsTrigger value="active">
+                Active ({filteredAreas.active.length})
+              </TabsTrigger>
+              <TabsTrigger value="inactive">
+                Inactive ({filteredAreas.inactive.length})
+              </TabsTrigger>
+            </TabsList>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="flex justify-between">
-                <TabsList>
-                  <TabsTrigger value="all">
-                    All Areas ({filteredAreas.all.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="active">
-                    Active ({filteredAreas.active.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="inactive">
-                    Inactive ({filteredAreas.inactive.length})
-                  </TabsTrigger>
-                </TabsList>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-700">Rows per page:</span>
-                  <Select
-                    value={limit.toString()}
-                    onValueChange={handleLimitChange}
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue placeholder={limit} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="15">15</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <TabsContent value="all">
-                <AreaTable
-                  areas={filteredAreas.all}
-                  onEditClick={openEditModal}
-                  sortField={sortField}
-                  sortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TabsContent>
-              <TabsContent value="active">
-                <AreaTable
-                  areas={filteredAreas.active}
-                  onEditClick={openEditModal}
-                  sortField={sortField}
-                  sortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TabsContent>
-              <TabsContent value="inactive">
-                <AreaTable
-                  areas={filteredAreas.inactive}
-                  onEditClick={openEditModal}
-                  sortField={sortField}
-                  sortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-              </TabsContent>
-            </Tabs>
-
-            {processedAreas.length === 0 && areas.length > 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg font-medium">No areas found</p>
-                <p className="text-sm">
-                  Try adjusting your search or filter criteria
-                </p>
-              </div>
-            )}
-
-            {/* Pagination + Rows per page */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 relative">
-              {/* Page info at center */}
-              <div className="absolute left-1/2 -translate-x-1/2">
-                <span className="text-sm text-gray-700">
-                  Page {currentPage} of {totalPages || 1}
-                </span>
-              </div>
-
-              {/* Pagination on right */}
-              <div className="ml-auto flex items-center gap-2">
-                {/* Previous Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-
-                {/* Page Numbers */}
-                {getVisiblePages().map((page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="icon"
-                    onClick={() => setCurrentPage(page)}
-                    className="h-8 w-8"
-                  >
-                    {page}
-                  </Button>
-                ))}
-
-                {/* Next Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(p + 1, totalPages || p + 1))
-                  }
-                  disabled={currentPage === totalPages || totalPages === 0}
-                >
-                  Next
-                </Button>
-              </div>
+            <div className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-md border">
+              <span className="text-sm text-gray-700">Show:</span>
+              <Select
+                value={limit.toString()}
+                onValueChange={handleLimitChange}
+              >
+                <SelectTrigger className="w-[70px] h-8 border-0 bg-transparent">
+                  <SelectValue placeholder={limit} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="15">15</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
+          <TabsContent value="all">
+            <AreaTable
+              areas={filteredAreas.all}
+              onEditClick={openEditModal}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+            />
+          </TabsContent>
+          <TabsContent value="active">
+            <AreaTable
+              areas={filteredAreas.active}
+              onEditClick={openEditModal}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+            />
+          </TabsContent>
+          <TabsContent value="inactive">
+            <AreaTable
+              areas={filteredAreas.inactive}
+              onEditClick={openEditModal}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onSort={handleSort}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {processedAreas.length === 0 && areas.length > 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-lg font-medium">No areas found</p>
+            <p className="text-sm">
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        )}
+
+        {/* Pagination + Rows per page */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 relative">
+          {/* Page info at center */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <span className="text-sm text-gray-700">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+          </div>
+
+          {/* Pagination on right */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Previous Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+
+            {/* Page Numbers */}
+            {getVisiblePages().map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="icon"
+                onClick={() => setCurrentPage(page)}
+                className="h-8 w-8"
+              >
+                {page}
+              </Button>
+            ))}
+
+            {/* Next Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages || p + 1))
+              }
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </CardContent>
       <CardFooter />
     </div>

@@ -11,7 +11,7 @@
 //   search?: string;
 //   status?: "all" | "active" | "inactive";
 // }) => {
-//   const res = await axiosInstance.get("/getAllUser", 
+//   const res = await axiosInstance.get("/getAllUser",
 //     {
 //     headers: {
 //       Authorization: `Bearer ${localStorage.getItem("firebase-token")}`,
@@ -25,7 +25,7 @@
 // };
 
 import { axiosInstance } from "../axios/axiosInstance";
-
+import { isAxiosError } from "axios";
 export const getAllUsers = async ({
   page = 1,
   limit = 20,
@@ -38,21 +38,17 @@ export const getAllUsers = async ({
   status?: "all" | "active" | "inactive";
 }) => {
   try {
-    const res = await axiosInstance.get("/getAllUser", 
-        {
+    const res = await axiosInstance.get("/getAllUser", {
       params: { page, limit, search, status },
-   }
-);
-    console.log(res);
+    });
+    // console.log(res);
 
     return res.data.data;
-  } catch (error: any) {
-    console.error("Error fetching users:", error);
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
 
-    // Optional: You can throw a specific error to handle it in your UI
-    throw new Error(
-      error?.response?.data?.message ||
-      "Failed to fetch users. Please try again later."
-    );
+    throw new Error("Failed to fetch users. Please try again later.");
   }
 };

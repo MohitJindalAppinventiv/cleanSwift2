@@ -134,8 +134,8 @@ const PaymentsPage = () => {
     if (totalPages > 0) pages.push(1);
     
     // Calculate range around current page
-    let start = Math.max(2, currentPage - 2);
-    let end = Math.min(totalPages - 1, currentPage + 2);
+    const start = Math.max(2, currentPage - 2);
+    const end = Math.min(totalPages - 1, currentPage + 2);
     
     // Add ellipsis if needed
     if (start > 2) {
@@ -376,7 +376,6 @@ const PaymentsPage = () => {
                     <SelectItem value="100">100</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-sm text-muted-foreground">entries</span>
               </div>
             </div>
 

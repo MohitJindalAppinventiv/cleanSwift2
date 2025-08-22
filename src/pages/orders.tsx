@@ -370,7 +370,7 @@ const OrdersPage = () => {
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="outForPickup">
                         Out for Pickup
@@ -401,8 +401,8 @@ const OrdersPage = () => {
                 </div>
 
                 {/* Right Side: Page Size Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                <div className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-md border">
+                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
                     Show:
                   </span>
                   <Select
@@ -411,10 +411,10 @@ const OrdersPage = () => {
                       handlePageSizeChange(Number(value))
                     }
                   >
-                    <SelectTrigger className="w-[80px] h-11 bg-white border-gray-300 text-gray-900">
+                    <SelectTrigger className="w-[70px] h-8 bg-white border-0 bg-transparent">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
+                    <SelectContent>
                       <SelectItem value="5">5</SelectItem>
                       <SelectItem value="10">10</SelectItem>
                       <SelectItem value="15">15</SelectItem>

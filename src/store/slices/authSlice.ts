@@ -46,6 +46,11 @@ const initialState: AuthState = {
 //   }
 // });
 
+interface LogoutResponse {
+  success: boolean;
+  message: string;
+}
+
 export const loginUser = createAsyncThunk<
   string, // return type is token
   { email: string; password: string },
@@ -73,12 +78,11 @@ export const loginUser = createAsyncThunk<
 
 
 export const logoutUser = createAsyncThunk<
-  string, // return type is token
-  void,
-  { rejectValue: string }
+  LogoutResponse
 >("auth/logoutUser", async (_, { rejectWithValue }) => {
   try {
     const res = await logoutAPI();
+    console.log("response in logout slice",res);
 
     console.log("response in slice", res);
 

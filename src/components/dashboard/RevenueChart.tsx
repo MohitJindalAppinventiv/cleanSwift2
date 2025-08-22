@@ -66,7 +66,7 @@ export function RevenueChart() {
         setLoading(true);
         // Replace mockApiCall with actual axios.get when using real API
         const response = await axiosInstance.get('/getMonthlyRevenueTrend');
-        console.log(response);
+        // console.log(response);
         // For real API, use: const response = await axios.get<ApiResponse>('https://api.example.com/revenue-data');
         setData(response.data.data.revenueChart);
         setLoading(false);

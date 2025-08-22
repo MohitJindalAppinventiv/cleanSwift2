@@ -113,7 +113,7 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
       toast.success("Coupon updated successfully");
       onUpdateSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       // ✅ Handle coupon name uniqueness
       if (error?.response?.status === 400 && error?.response?.data?.message) {
         const message: string = error.response.data.message;

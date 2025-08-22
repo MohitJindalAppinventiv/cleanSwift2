@@ -688,8 +688,8 @@ const CustomersPage = () => {
                 </div>
 
                 {/* Right Side: Page Size Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                <div className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-md border">
+                  <span className="text-sm font-medium whitespace-nowrap text-muted-foreground">
                     Show:
                   </span>
                   <Select
@@ -701,10 +701,10 @@ const CustomersPage = () => {
                       fetchUsers(1, limitValue);
                     }}
                   >
-                    <SelectTrigger className="w-[80px] h-11 bg-white border-gray-300 text-gray-900">
+                    <SelectTrigger className="w-[70px] h-8 bg-transparent border-0">
                       <SelectValue placeholder={limit.toString()} />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
+                    <SelectContent >
                       <SelectItem value="10">10</SelectItem>
                       <SelectItem value="15">15</SelectItem>
                       <SelectItem value="20">20</SelectItem>

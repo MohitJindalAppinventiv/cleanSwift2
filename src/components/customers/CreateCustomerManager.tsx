@@ -16,7 +16,7 @@ export const CreateCustomerManager = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
       // In a real application, you would make an API call here to create the customer
-      console.log("Creating customer:", data);
+      // console.log("Creating customer:", data);
       
       toast({
         title: "Success",
