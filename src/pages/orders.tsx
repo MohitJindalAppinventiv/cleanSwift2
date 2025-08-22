@@ -25,6 +25,7 @@ import {
 import { fetchOrders } from "@/store/slices/orderSlice";
 import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface DateRange {
   startDate?: Date;
@@ -58,7 +59,7 @@ const OrdersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [dateRange, setDateRange] = useState<DateRange>({});
   const [pageSize, setPageSize] = useState<number>(10);
-
+  const [refreshLoading,setRefreshLoading]=useState<boolean>(false);
   // Use analytics from API if available, otherwise fallback to client-side calculation
   const stats = useMemo(() => {
     if (analytics) {
@@ -168,6 +169,12 @@ const OrdersPage = () => {
   const handleRetry = useCallback(() => {
     dispatch(fetchOrders(fetchParams));
   }, [dispatch, fetchParams]);
+
+  const refeshOrder = async () => {
+    await dispatch(fetchOrders(fetchParams));
+     toast.success("Data refreshed successfully");
+
+  };
 
   const filterBadges = useMemo(
     () => (
@@ -398,6 +405,18 @@ const OrdersPage = () => {
                       Clear
                     </Button>
                   )}
+                  <div className="rounded-md p-3 flex justify-center">
+                    <button
+                      onClick={refeshOrder}
+                      className="px-4 py-2 rounded-lg bg-white text-gray-900 font-medium border border-gray-200 shadow-sm hover:bg-purple-50 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 "
+                    >
+                                            <RefreshCw
+                        className={`h-5 w-5 text-gray-600 ${
+                          refreshLoading ? "animate-spin" : ""
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Right Side: Page Size Selector */}

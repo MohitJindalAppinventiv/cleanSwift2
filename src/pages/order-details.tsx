@@ -597,10 +597,10 @@ const OrderDetailsPage = () => {
                         {item.qty}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${item.price.toFixed(2)}
+                        &#8377;{item.price.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right">
-                        ${item.qty * item.price}
+                        &#8377;{item.qty * item.price}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -612,7 +612,7 @@ const OrderDetailsPage = () => {
                       Total
                     </TableCell>
                     <TableCell className="text-right font-semibold text-lg">
-                      ${order.finalTotal.toFixed(2)}
+                      &#8377;{order.finalTotal.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

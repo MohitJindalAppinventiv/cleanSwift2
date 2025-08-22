@@ -288,6 +288,7 @@ import {
   AlarmCheck,
   LogOut,
   MessageCircle,
+  Sliders,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -319,7 +320,7 @@ const sidebarItems: SidebarItem[] = [
   { title: "Notifications", icon: Bell, href: "/notifications" },
   {
     title: "Config Management",
-    icon: Settings,
+    icon: Sliders,
     href: "/config",
     subItems: [
       { title: "Services", icon: Server, href: "/config/services" },

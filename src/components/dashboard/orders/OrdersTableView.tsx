@@ -47,6 +47,7 @@ import {
   CheckSquare,
   XCircle,
 } from "lucide-react";
+import { axiosInstance } from "@/api/axios/axiosInstance";
 
 interface OrdersTableViewProps {
   orders: Order[];
@@ -271,14 +272,28 @@ export function OrdersTableView({
   const handleUpdateStatus = async (orderId: string, status: OrderStatus) => {
     try {
       setLoadingOrderId(orderId);
-      await dispatch(updateOrderStatus({ orderId, status })).unwrap();
-      toast.success(
-        `Order status updated to ${
-          validStatuses.find((s) => s.value === status)?.label
-        }`
-      );
 
-          // await new Promise((res) => setTimeout(res, 1000));
+      if(status==="cancelled"){
+        const res=await axiosInstance.post("/cancelOrderAdmin",{
+          orderId,
+          cancellationReason:"Customer changed mind"
+        });
+
+        const result=res.data;
+        if(!result.success){
+          throw new Error(result.message || "cancellation failed");
+        }
+        toast.success(result.message);
+      }
+      else{
+
+        await dispatch(updateOrderStatus({ orderId, status })).unwrap();
+        toast.success(
+          `Order status updated to ${
+            validStatuses.find((s) => s.value === status)?.label
+          }`
+        );
+      }
 
       await dispatch(
         fetchOrders({ page: pagination?.page, limit: pagination?.limit })
@@ -289,6 +304,7 @@ export function OrdersTableView({
       setLoadingOrderId(null);
     }
   };
+
 
   const getStatusHoverColor = (status: string) => {
     const colorMap = {
@@ -616,7 +632,7 @@ export function OrdersTableView({
                 >
                   <TableCell className="font-medium text-gray-900">
                     <Link to={`order-details/${order.id}`}>
-                    {order.orderId}
+                      {order.orderId}
                     </Link>
                   </TableCell>
                   <TableCell className="text-gray-700">
@@ -752,7 +768,10 @@ export function OrdersTableView({
             ) : (
               <TableRow>
                 {/* Adjust colSpan based on whether Actions column is shown */}
-                <TableCell colSpan={isHomePage ? 8 : 9} className="text-center py-12">
+                <TableCell
+                  colSpan={isHomePage ? 8 : 9}
+                  className="text-center py-12"
+                >
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
                       <svg
