@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -60,7 +59,7 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
   const dispatch = useDispatch<AppDispatch>();
   const loading = useSelector(selectSlotsLoading);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setType("pickup");
       setWeekDay(0);
@@ -71,17 +70,20 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
   }, [open]);
 
   // Helper function to calculate duration in hours
-  const calculateDurationInHours = (startTime: string, endTime: string): number => {
+  const calculateDurationInHours = (
+    startTime: string,
+    endTime: string
+  ): number => {
     if (!startTime || !endTime) return 0;
-    
+
     const start = new Date(`2000-01-01T${startTime}`);
     const end = new Date(`2000-01-01T${endTime}`);
-    
+
     // Handle next day scenarios (e.g., 23:00 to 01:00)
     if (end <= start) {
       end.setDate(end.getDate() + 1);
     }
-    
+
     const diffMs = end.getTime() - start.getTime();
     return diffMs / (1000 * 60 * 60); // Convert to hours
   };
@@ -91,11 +93,11 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
     if (hours === 0) return "";
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
-    
+
     if (minutes === 0) {
-      return `${wholeHours} hour${wholeHours !== 1 ? 's' : ''}`;
+      return `${wholeHours} hour${wholeHours !== 1 ? "s" : ""}`;
     }
-    
+
     return `${wholeHours}h ${minutes}m`;
   };
 
@@ -123,23 +125,31 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
       if (range.startTime && range.endTime) {
         const startTime = new Date(`2000-01-01T${range.startTime}`);
         const endTime = new Date(`2000-01-01T${range.endTime}`);
-        
+
         // Handle next day scenarios
         if (endTime <= startTime) {
           endTime.setDate(endTime.getDate() + 1);
         }
-        
-        const durationHours = calculateDurationInHours(range.startTime, range.endTime);
-        
+
+        const durationHours = calculateDurationInHours(
+          range.startTime,
+          range.endTime
+        );
+
         // Validate 2-hour maximum duration
         if (durationHours > 2) {
-          newErrors.timeRanges[index].duration = `Duration cannot exceed 2 hours (current: ${formatDuration(durationHours)})`;
+          newErrors.timeRanges[
+            index
+          ].duration = `Duration cannot exceed 2 hours (current: ${formatDuration(
+            durationHours
+          )})`;
           hasErrors = true;
         }
-        
+
         // Validate minimum duration (optional - you can remove this if not needed)
         if (durationHours < 0.5) {
-          newErrors.timeRanges[index].duration = "Duration must be at least 30 minutes";
+          newErrors.timeRanges[index].duration =
+            "Duration must be at least 30 minutes";
           hasErrors = true;
         }
       }
@@ -162,8 +172,13 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
       for (let j = i + 1; j < timeRanges.length; j++) {
         const range1 = timeRanges[i];
         const range2 = timeRanges[j];
-        
-        if (range1.startTime && range1.endTime && range2.startTime && range2.endTime) {
+
+        if (
+          range1.startTime &&
+          range1.endTime &&
+          range2.startTime &&
+          range2.endTime
+        ) {
           const start1 = new Date(`2000-01-01T${range1.startTime}`);
           const end1 = new Date(`2000-01-01T${range1.endTime}`);
           const start2 = new Date(`2000-01-01T${range2.startTime}`);
@@ -225,13 +240,56 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
     }
   };
 
+  // const updateTimeRange = (
+  //   index: number,
+  //   field: keyof TimeRange,
+  //   value: string | number
+  // ) => {
+  //   const newRanges = [...timeRanges];
+  //   newRanges[index] = { ...newRanges[index], [field]: value };
+  //   setTimeRanges(newRanges);
+
+  //   // Clear errors for this field when user starts typing
+  //   const newErrors = { ...errors };
+  //   if (field === "startTime") {
+  //     delete newErrors.timeRanges[index].startTime;
+  //   } else if (field === "endTime") {
+  //     delete newErrors.timeRanges[index].endTime;
+  //   } else if (field === "maxOrders") {
+  //     delete newErrors.timeRanges[index].maxOrders;
+  //   }
+  //   // Clear time range and duration errors when either time is updated
+  //   if (field === "startTime" || field === "endTime") {
+  //     delete newErrors.timeRanges[index].timeRange;
+  //     delete newErrors.timeRanges[index].duration;
+  //   }
+  //   setErrors(newErrors);
+  // };
+
   const updateTimeRange = (
     index: number,
     field: keyof TimeRange,
     value: string | number
   ) => {
     const newRanges = [...timeRanges];
-    newRanges[index] = { ...newRanges[index], [field]: value };
+
+    if (field === "maxOrders") {
+      // Handle maxOrders input
+      const inputValue = value as string; // Input value is a string from the event
+      const parsedValue = inputValue === "" ? 5 : Number(inputValue); // Fallback to 5 if empty
+
+      // Only update if the value is valid (positive number or empty)
+      if (
+        inputValue === "" ||
+        (!isNaN(parsedValue) && parsedValue >= 1 && parsedValue <= 100)
+      ) {
+        newRanges[index] = { ...newRanges[index], [field]: parsedValue };
+      }
+    } else {
+      // Handle startTime and endTime
+      newRanges[index] = { ...newRanges[index], [field]: value };
+    }
+
     setTimeRanges(newRanges);
 
     // Clear errors for this field when user starts typing
@@ -250,7 +308,6 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
     }
     setErrors(newErrors);
   };
-
   const addTimeRange = () => {
     setTimeRanges([
       ...timeRanges,
@@ -352,10 +409,13 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
               Each slot duration must not exceed 2 hours.
             </p>
             {timeRanges.map((range, i) => {
-              const duration = calculateDurationInHours(range.startTime, range.endTime);
+              const duration = calculateDurationInHours(
+                range.startTime,
+                range.endTime
+              );
               const durationText = duration > 0 ? formatDuration(duration) : "";
               const isDurationValid = duration > 0 && duration <= 2;
-              
+
               return (
                 <div key={i} className="border p-4 rounded-lg mb-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -368,7 +428,11 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
                         onChange={(e) =>
                           updateTimeRange(i, "startTime", e.target.value)
                         }
-                        className={errors.timeRanges[i]?.startTime ? "border-red-500" : ""}
+                        className={
+                          errors.timeRanges[i]?.startTime
+                            ? "border-red-500"
+                            : ""
+                        }
                       />
                       {errors.timeRanges[i]?.startTime && (
                         <p className="text-red-500 text-xs mt-1">
@@ -386,7 +450,9 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
                         onChange={(e) =>
                           updateTimeRange(i, "endTime", e.target.value)
                         }
-                        className={errors.timeRanges[i]?.endTime ? "border-red-500" : ""}
+                        className={
+                          errors.timeRanges[i]?.endTime ? "border-red-500" : ""
+                        }
                       />
                       {errors.timeRanges[i]?.endTime && (
                         <p className="text-red-500 text-xs mt-1">
@@ -399,11 +465,13 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
                   {/* Duration Display */}
                   {durationText && (
                     <div className="mt-2">
-                      <div className={`text-xs px-2 py-1 rounded inline-block ${
-                        isDurationValid 
-                          ? "bg-green-50 text-green-700 border border-green-200" 
-                          : "bg-red-50 text-red-700 border border-red-200"
-                      }`}>
+                      <div
+                        className={`text-xs px-2 py-1 rounded inline-block ${
+                          isDurationValid
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : "bg-red-50 text-red-700 border border-red-200"
+                        }`}
+                      >
                         Duration: {durationText}
                         {duration > 2 && " (exceeds 2-hour limit)"}
                       </div>
@@ -428,7 +496,7 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
                   <div className="flex gap-2 mt-4 items-end">
                     <div className="flex-1">
                       <Label className="text-sm">Max Orders</Label>
-                      <Input
+                      {/* <Input
                         type="number"
                         min="1"
                         max="100"
@@ -437,6 +505,26 @@ export default function SlotFormModal({ open, onClose }: SlotFormModalProps) {
                           updateTimeRange(i, "maxOrders", Number(e.target.value))
                         }
                         className={errors.timeRanges[i]?.maxOrders ? "border-red-500" : ""}
+                      /> */}
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={range.maxOrders}
+                        onChange={(e) =>
+                          updateTimeRange(i, "maxOrders", e.target.value)
+                        }
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value === "" || Number(value) < 1) {
+                            updateTimeRange(i, "maxOrders", 5); // Reset to default on blur if invalid
+                          }
+                        }}
+                        className={
+                          errors.timeRanges[i]?.maxOrders
+                            ? "border-red-500"
+                            : ""
+                        }
                       />
                       {errors.timeRanges[i]?.maxOrders && (
                         <p className="text-red-500 text-xs mt-1">

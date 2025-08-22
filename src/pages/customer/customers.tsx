@@ -158,7 +158,6 @@
 
 // // // export default CustomersPage;
 
-
 // // import { useEffect, useState } from "react";
 // // import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 // // import { Input } from "@/components/ui/input";
@@ -343,9 +342,6 @@
 // // };
 
 // // export default CustomersPage;
-
-
-
 
 // import { useEffect, useState } from "react";
 // import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -549,7 +545,6 @@
 
 // export default CustomersPage;
 
-
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Input } from "@/components/ui/input";
@@ -704,7 +699,8 @@ const CustomersPage = () => {
                     <SelectTrigger className="w-[70px] h-8 bg-transparent border-0">
                       <SelectValue placeholder={limit.toString()} />
                     </SelectTrigger>
-                    <SelectContent >
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
                       <SelectItem value="10">10</SelectItem>
                       <SelectItem value="15">15</SelectItem>
                       <SelectItem value="20">20</SelectItem>

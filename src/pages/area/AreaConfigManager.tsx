@@ -229,8 +229,8 @@ export function AreaConfigManager() {
           className="h-11 bg-purple-600 hover:bg-purple-700 text-white"
         >
           <div className="flex items-center gap-2">
-          <PlusCircle className="h-4 w-4" />
-          Add Service Area
+            <PlusCircle className="h-4 w-4" />
+            Add Service Area
           </div>
         </Button>
       </div>
@@ -383,6 +383,7 @@ export function AreaConfigManager() {
                   <SelectValue placeholder={limit} />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="15">15</SelectItem>
                   <SelectItem value="20">20</SelectItem>
