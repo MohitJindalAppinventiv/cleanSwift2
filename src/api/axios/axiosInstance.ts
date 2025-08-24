@@ -313,6 +313,9 @@ import axios from "axios";
 import { toast } from "sonner";
 const apiUrl = import.meta.env.VITE_API_URL;
 
+if(!apiUrl){
+  throw new Error("Backend Url not found")
+}
 export const axiosInstance = axios.create({
   baseURL: `${apiUrl}`,
 });

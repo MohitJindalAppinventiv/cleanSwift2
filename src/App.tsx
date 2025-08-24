@@ -123,46 +123,85 @@ import { PersistGate } from "redux-persist/integration/react";
 import {ErrorBoundary} from 'react-error-boundary';
 import { useEffect } from "react";
 // Lazy imports
-const Index = lazy(() => import("./pages/Index"));
-const OrdersPage = lazy(() => import("./pages/orders"));
-const OrderDetailsPage = lazy(() => import("./pages/order-details"));
-const CreateOrderPage = lazy(() => import("./pages/order/create"));
-const CustomersPage = lazy(() => import("./pages/customer/customers"));
-const CustomerDetailsPage = lazy(
-  () => import("./pages/customer/customer-details")
-);
-const CreateCustomerPage = lazy(() => import("./pages/customer/create"));
-const ServicesConfigPage = lazy(() => import("./pages/config/services"));
-const ServiceEditPage = lazy(() => import("./pages/service-config/edit"));
-const ServiceCreatePage = lazy(() => import("./pages/service-config/create"));
-const AppBannerPage = lazy(() => import("./pages/config/app-banner"));
-const BannerCreatePage = lazy(() => import("./pages/config/app-banner/create"));
-const BannerEditPage = lazy(
-  () => import("@/pages/config/components/app-banner/BannerEditPage")
-);
-const FCMConfigPage = lazy(() => import("./pages/config/fcm"));
-const AreaConfigPage = lazy(() => import("./pages/config/area"));
-const CategoriesConfigPage = lazy(() => import("./pages/config/categories"));
-const ProductsConfigPage = lazy(() => import("./pages/config/products"));
-const CouponsConfigPage = lazy(() => import("./pages/coupons/coupons"));
-const CreateCouponPage = lazy(() => import("./pages/config/coupons/create"));
-const LoginPage = lazy(() => import("./pages/auth/login"));
-const PaymentsPage = lazy(() => import("./pages/payments"));
-const ReviewsPage = lazy(() => import("./pages/reviews"));
-const NotificationsPage = lazy(() => import("./pages/notifications"));
-const SettingsPage = lazy(() => import("./pages/settings/settings"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Seed = lazy(() => import("./pages/SeedPage/SeedPage"));
-const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
-const SuccessPage = lazy(() => import("./pages/redirect-login"));
-const AreaConfig = lazy(() => import("./pages/initial/area-config"));
-const ServicePage = lazy(() => import("./pages/Service"));
-const AppBanner = lazy(() => import("./pages/initial/AppBanner"));
-const MapDemo = lazy(() => import("./pages/map-demo"));
-const Temp = lazy(() => import("./pages/temp/Temp"));
-const SlotsConfigPage = lazy(() => import("./pages/slots/SlotsConfigPage"));
-const Content = lazy(() => import("@/pages/config/content-manager/Content"));
-const Complaint = lazy(()=>import("./pages/complaint/Complaint"));
+// const Index = lazy(() => import("./pages/Index"));
+// const OrdersPage = lazy(() => import("./pages/orders"));
+// const OrderDetailsPage = lazy(() => import("./pages/order-details"));
+// const CreateOrderPage = lazy(() => import("./pages/order/create"));
+// const CustomersPage = lazy(() => import("./pages/customer/customers"));
+// const CustomerDetailsPage = lazy(
+//   () => import("./pages/customer/customer-details")
+// );
+// const CreateCustomerPage = lazy(() => import("./pages/customer/create"));
+// const ServicesConfigPage = lazy(() => import("./pages/config/services"));
+// const ServiceEditPage = lazy(() => import("./pages/service-config/edit"));
+// const ServiceCreatePage = lazy(() => import("./pages/service-config/create"));
+// const AppBannerPage = lazy(() => import("./pages/config/app-banner"));
+// const BannerCreatePage = lazy(() => import("./pages/config/app-banner/create"));
+// const BannerEditPage = lazy(
+//   () => import("@/pages/config/components/app-banner/BannerEditPage")
+// );
+// const FCMConfigPage = lazy(() => import("./pages/config/fcm"));
+// const AreaConfigPage = lazy(() => import("./pages/config/area"));
+// const CategoriesConfigPage = lazy(() => import("./pages/config/categories"));
+// const ProductsConfigPage = lazy(() => import("./pages/config/products"));
+// const CouponsConfigPage = lazy(() => import("./pages/coupons/coupons"));
+// const CreateCouponPage = lazy(() => import("./pages/config/coupons/create"));
+// const LoginPage = lazy(() => import("./pages/auth/login"));
+// const PaymentsPage = lazy(() => import("./pages/payments"));
+// const ReviewsPage = lazy(() => import("./pages/reviews"));
+// const NotificationsPage = lazy(() => import("./pages/notifications"));
+// const SettingsPage = lazy(() => import("./pages/settings/settings"));
+// const NotFound = lazy(() => import("./pages/NotFound"));
+// const Seed = lazy(() => import("./pages/SeedPage/SeedPage"));
+// const ForgotPassword = lazy(() => import("./pages/auth/forgot-password"));
+// const SuccessPage = lazy(() => import("./pages/redirect-login"));
+// const AreaConfig = lazy(() => import("./pages/initial/area-config"));
+// const ServicePage = lazy(() => import("./pages/Service"));
+// const AppBanner = lazy(() => import("./pages/initial/AppBanner"));
+// const MapDemo = lazy(() => import("./pages/map-demo"));
+// const Temp = lazy(() => import("./pages/temp/Temp"));
+// const SlotsConfigPage = lazy(() => import("./pages/slots/SlotsConfigPage"));
+// const Content = lazy(() => import("@/pages/config/content-manager/Content"));
+// const Complaint = lazy(()=>import("./pages/complaint/Complaint"));
+
+
+import Index from "./pages/Index";
+import OrdersPage from "./pages/orders";
+import OrderDetailsPage from "./pages/order-details";
+import CreateOrderPage from "./pages/order/create";
+import CustomersPage from "./pages/customer/customers";
+import CustomerDetailsPage from "./pages/customer/customer-details";
+import CreateCustomerPage from "./pages/customer/create";
+import ServicesConfigPage from "./pages/config/services";
+import ServiceEditPage from "./pages/service-config/edit";
+import ServiceCreatePage from "./pages/service-config/create";
+import AppBannerPage from "./pages/config/app-banner";
+import BannerCreatePage from "./pages/config/app-banner/create";
+import BannerEditPage from "@/pages/config/components/app-banner/BannerEditPage";
+import FCMConfigPage from "./pages/config/fcm";
+import AreaConfigPage from "./pages/config/area";
+import CategoriesConfigPage from "./pages/config/categories";
+import ProductsConfigPage from "./pages/config/products";
+import CouponsConfigPage from "./pages/coupons/coupons";
+import CreateCouponPage from "./pages/config/coupons/create";
+import LoginPage from "./pages/auth/login";
+import PaymentsPage from "./pages/payments";
+import ReviewsPage from "./pages/reviews";
+import NotificationsPage from "./pages/notifications";
+import SettingsPage from "./pages/settings/settings";
+import NotFound from "./pages/NotFound";
+import Seed from "./pages/SeedPage/SeedPage";
+import ForgotPassword from "./pages/auth/forgot-password";
+import SuccessPage from "./pages/redirect-login";
+import AreaConfig from "./pages/initial/area-config";
+import ServicePage from "./pages/Service";
+import AppBanner from "./pages/initial/AppBanner";
+import MapDemo from "./pages/map-demo";
+import Temp from "./pages/temp/Temp";
+import SlotsConfigPage from "./pages/slots/SlotsConfigPage";
+import Content from "@/pages/config/content-manager/Content";
+import Complaint from "./pages/complaint/Complaint";
+
 
 import LaundryPageLoader from "./PageLoading";
 import path from "path";

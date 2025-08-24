@@ -446,7 +446,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({
 
   return (
     <TableHead 
-      className={`font-semibold text-gray-700 cursor-pointer hover:bg-purple-100 transition-colors ${className}`}
+      className={`font-semibold text-gray-700 cursor-pointer transition-colors ${className}`}
       onClick={() => onSort?.(field)}
     >
       <div className="flex items-center justify-between group">
@@ -533,7 +533,7 @@ export function AreaTable({
                 key={area.id}
                 className={`transition-colors ${
                   index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                } hover:bg-purple-50`}
+                }`}
               >
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
@@ -549,7 +549,7 @@ export function AreaTable({
                   </span>
                 </TableCell>
                 <TableCell className="text-gray-600">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center align px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                     {area.range} km
                   </span>
                 </TableCell>
