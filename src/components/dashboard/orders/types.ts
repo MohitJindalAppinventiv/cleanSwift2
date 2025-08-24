@@ -24,6 +24,7 @@ export interface Order {
   paymentMethod: string;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
+  userId:string;
 }
 
 export interface Pagination {

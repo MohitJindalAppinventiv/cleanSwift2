@@ -35,6 +35,8 @@ import { z } from "zod";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "@/api/axios/axiosInstance";
+import { useAppDispatch } from "@/store/hooks";
+import { updateConfigStatus } from "@/store/slices/profileStatus";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
@@ -75,6 +77,7 @@ export default function SubmitDetailsPage() {
 
   const [services, setServices] = useState<any[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
+  const dispatch=useAppDispatch();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -141,6 +144,12 @@ export default function SubmitDetailsPage() {
       });
     }
   };
+
+  const handleNavigate=()=>{
+    dispatch(updateConfigStatus({key:"service",value:true}))
+    navigate("/");
+
+  }
 
 
   return (
@@ -245,7 +254,7 @@ export default function SubmitDetailsPage() {
                   <Button
                     type="button"
                     disabled={services.length === 0}
-                    onClick={() => navigate("/")}
+                    onClick={handleNavigate}
                     variant="secondary"
                     className="w-full"
                   >

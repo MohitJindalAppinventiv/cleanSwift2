@@ -316,6 +316,8 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/redux";
 import type { Libraries } from "@react-google-maps/api";
 import { googleMapAPi } from "@/constants";
+import { useAppDispatch } from "@/store/hooks";
+import { updateConfigStatus } from "@/store/slices/profileStatus";
 
 interface Area {
   id: string;
@@ -352,6 +354,7 @@ export default function StoreLocationPage() {
   const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const dispatch=useAppDispatch();
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: googleMapAPi,
@@ -436,6 +439,8 @@ export default function StoreLocationPage() {
   };
 
   const handleSubmit = () => {
+    dispatch(updateConfigStatus({ key: "area", value: true }));
+
     if (profileComplete.data.configurations.service.isConfigured) {
       navigate("/");
     } else {

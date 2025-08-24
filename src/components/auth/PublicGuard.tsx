@@ -13,15 +13,6 @@ export const PublicGuard= ({ children }: PublicGuardProps) => {
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   
 
-  
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-  //     </div>
-  //   );
-  // }
-  
   if (isAuthenticated) {
     // Redirect to login if not authenticated
     return <Navigate to="/" replace />;

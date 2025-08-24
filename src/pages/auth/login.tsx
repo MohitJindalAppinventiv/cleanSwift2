@@ -60,31 +60,31 @@ export default function LoginPage() {
       const status = await dispatch(getProfileCompletionStatus()).unwrap();
       setLoading(false);
 
-      if (status?.isComplete === false) {
+      // if (status?.isComplete === false) {
 
-        const configs = status.configurations;
+      //   const configs = status.configurations;
 
-        if (configs.banner?.isConfigured === false) {
-          navigate("/AppBanner");
-          toast("Profile Incomplete", {
-            description:
-              "Please complete your Banner configuration to proceed.",
-          });
-        } else if (configs.area.isConfigured == false) {
-          navigate("/area-config");
-          toast("Profile Incomplete", {
-            description:
-              "Please complete your Banner configuration to proceed.",
-          });
-        } else {
-          navigate("/Serv");
-          toast("Profile Incomplete", {
-            description:
-              "Please complete your Banner configuration to proceed.",
-          });
-        }
-        return;
-      }
+      //   if (configs.banner?.isConfigured === false) {
+      //     navigate("/AppBanner");
+      //     toast("Profile Incomplete", {
+      //       description:
+      //         "Please complete your Banner configuration to proceed.",
+      //     });
+      //   } else if (configs.area.isConfigured == false) {
+      //     navigate("/area-config");
+      //     toast("Profile Incomplete", {
+      //       description:
+      //         "Please complete your Banner configuration to proceed.",
+      //     });
+      //   } else {
+      //     navigate("/Serv");
+      //     toast("Profile Incomplete", {
+      //       description:
+      //         "Please complete your Banner configuration to proceed.",
+      //     });
+      //   }
+      //   return;
+      // }
 
       toast("Login Successful", {
         description: "Welcome back! You have been logged in successfully.",

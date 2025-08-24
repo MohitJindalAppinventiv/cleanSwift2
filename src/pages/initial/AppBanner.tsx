@@ -291,6 +291,8 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/hooks/redux";
 import { axiosInstance } from "@/api/axios/axiosInstance";
+import { useAppDispatch } from "@/store/hooks";
+import { updateConfigStatus } from "@/store/slices/profileStatus";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -335,6 +337,7 @@ export default function SubmitDetailsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [banners, setBanners] = useState<Banner[]>([]);
+  const dispatch=useAppDispatch();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -371,11 +374,12 @@ export default function SubmitDetailsPage() {
       await axiosInstance.post("/createAppBanner", payload, {
         headers: { "Content-Type": "application/json" },
       });
-
+      
+      
       toast("✅ Submission Successful", {
         description: "Your banner was added successfully!",
       });
-
+      
       form.reset();
       if (fileInputRef.current) fileInputRef.current.value = "";
       fetchBanners();
@@ -386,8 +390,9 @@ export default function SubmitDetailsPage() {
       });
     }
   };
-
+  
   const handleNavigate = () => {
+    dispatch(updateConfigStatus({ key: "banner", value: true }));
     if (
       profileComplete.configurations.area.isConfigured &&
       profileComplete.configurations.service.isConfigured

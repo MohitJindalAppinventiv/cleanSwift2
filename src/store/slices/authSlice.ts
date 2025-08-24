@@ -21,31 +21,6 @@ const initialState: AuthState = {
   error: null,
 };
 
-// Async thunk for login
-// export const loginUser = createAsyncThunk<
-//   string, // return type is token
-//   { email: string; password: string },
-//   { rejectValue: string }
-// >("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
-//   try {
-//     const res = await adminLogin({ email, password });
-
-//     if (!res.idToken) {
-//       return rejectWithValue("Invalid response from server. No token found");
-//     }
-//     console.log("response in slice", res);
-
-//     localStorage.setItem("authToken", res.idToken);
-//     localStorage.setItem("refreshToken", res.refreshToken);
-//     localStorage.setItem("sessionToken", res.sessionToken);
-//     return res.idToken;
-//   } catch (error) {
-//     return rejectWithValue(
-//       error instanceof Error ? error.message : "Login failed"
-//     );
-//   }
-// });
-
 interface LogoutResponse {
   success: boolean;
   message: string;
@@ -54,7 +29,7 @@ interface LogoutResponse {
 export const loginUser = createAsyncThunk<
   string, // return type is token
   { email: string; password: string },
-  { rejectValue: string }
+  { rejectValue: string } 
 >("auth/loginUser", async ({ email, password }, { rejectWithValue }) => {
   try {
     const res = await adminLogin({ email, password });
@@ -97,6 +72,8 @@ export const logoutUser = createAsyncThunk<
     );
   }
 });
+
+
 
 // Check for saved user on app start
 export const checkAuthStatus = createAsyncThunk(

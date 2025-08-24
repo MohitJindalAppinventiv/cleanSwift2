@@ -22,7 +22,7 @@ export const adminLogin = async ({
     );
     // console.log(res);
     return res.data;
-  } catch (error:any) {
+  } catch (error) {
     // console.log("ERROR IN INDEX.TS",error);
     if (error.response && error.response.data && error.response.data.message) {
       throw new Error(error.response.data.message);
@@ -38,7 +38,7 @@ export const forgotPassword = async ({ email }: { email: string }) => {
     const res = await axiosInstance.post(`${API.RESET_PASSWORD()}`, { email });
     // console.log("response data", res.data);
     return res.data;
-  } catch (error:any) {
+  } catch (error) {
     // console.log("Error in forgotPassword API", error);
     throw error?.response?.data || error.message;
   }

@@ -260,8 +260,8 @@
 //   );
 // }
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -333,6 +333,7 @@ const sidebarItems: SidebarItem[] = [
       { title: "Content Manager", icon: NotebookPen, href: "/config/content" },
       { title: "Complaints", icon: MessageCircle, href: "/config/complaints" },
       { title: "Slots Config", icon: AlarmCheck, href: "/config/slots" },
+      {title:"Temp",icon:NotebookPen,href:"/temp"}
     ],
   },
   { title: "Settings", icon: Settings, href: "/settings" },
@@ -346,6 +347,17 @@ export function Sidebar() {
   const [loading, setLoading] = useState(false); // Add loading state
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+useEffect(() => {
+  if (location.pathname.startsWith("/config")) {
+    if (!expandedItems.includes("Config Management")) {
+      setExpandedItems((prev) => [...prev, "Config Management"]);
+    }
+  }
+}, [location.pathname]);
+
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);

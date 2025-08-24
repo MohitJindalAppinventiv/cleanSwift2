@@ -48,7 +48,7 @@ export const getProfileCompletionStatus = createAsyncThunk<
     );
   }
 });
-
+ 
 const profileSlice = createSlice({
   name: "profile",
   initialState,
@@ -58,6 +58,21 @@ const profileSlice = createSlice({
       state.error = null;
       state.isLoading = false;
     },
+      updateConfigStatus: (
+    state,
+    action: { payload: { key: string; value: boolean } }
+  ) => {
+    if (state.data?.configurations[action.payload.key]) {
+      state.data.configurations[action.payload.key] = {
+        isConfigured: action.payload.value,
+      };
+    }
+    // also update overall isComplete if all configs are true
+    const allConfigured = Object.values(state.data?.configurations || {}).every(
+      (c) => c?.isConfigured
+    );
+    state.data!.isComplete = allConfigured;
+  },
   },
   extraReducers: (builder) => {
     builder
@@ -76,7 +91,7 @@ const profileSlice = createSlice({
   },
 });
 
-export const { resetProfileStatus } = profileSlice.actions;
+export const { resetProfileStatus,updateConfigStatus } = profileSlice.actions;
 
 export const selectProfile = (state: RootState) => state.profileStatus;
 

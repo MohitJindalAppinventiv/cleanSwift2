@@ -314,7 +314,7 @@ export function CouponsHeader({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search coupons..."
-          className="pl-10 pr-8 h-11 w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="pl-10 pr-8 h-11 w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-700"
         />
         {searchTerm && (
           <button

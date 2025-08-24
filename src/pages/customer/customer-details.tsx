@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,13 +22,28 @@ import CustomerDetailsSkeleton from "./customerDetailsSkeleton";
 
 // types.ts
 
+export interface Address{
+  id:string;
+  addressLabel:string;
+  streetAddress:string;
+  apartmentSuite?:string;
+  city:string;
+  state:string;
+  zipCode:string;
+}
+
+const showAddress=(address:Address)=>{
+  const add=`${address?.apartmentSuite} ${address?.streetAddress}, ${address?.city}, ${address?.state}, ${address?.zipCode}`;
+  return add;
+}
+
 export interface Customer {
   id: string;
   fullName: string;
   phoneNumber: string;
   alternateNumber?: string | null;
   email?: string | null;
-  address?: string | null;
+  addresses?: Address[];
   profilePictureUrl?: string | null;
   isActive: boolean;
   readableUserId: string;
@@ -79,6 +94,7 @@ const CustomerDetailsPage = () => {
         });
         console.log("profile Response", profileRes);
         setCustomer(profileRes.data.data);
+        console.log("customer data",customer);
 
         // ✅ Fetch orders
         const ordersRes = await axiosInstance.get(`/getUserOrderAdmin`, {
@@ -144,7 +160,7 @@ const CustomerDetailsPage = () => {
                 : "text-red-600 border-red-600"
             }`}
           >
-            {customer.isActive ? "Active" : "Inactive"}
+            {customer.isActive ? "Active" : "Deleted"}
           </Badge>
         </div>
 
@@ -171,16 +187,15 @@ const CustomerDetailsPage = () => {
                   <h3 className="text-2xl font-semibold text-gray-900">
                     {customer.fullName}
                   </h3>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{customer.addresses[0].city}</span>
+                    </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Phone className="h-4 w-4" />
                     <span>{customer.phoneNumber}</span>
                   </div>
-                  {customer.alternateNumber && (
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Phone className="h-4 w-4" />
-                      <span>{customer.alternateNumber}</span>
-                    </div>
-                  )}
+            
  
                 </div>
               </div>
@@ -302,7 +317,7 @@ const CustomerDetailsPage = () => {
                         Address
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {customer.address || "N/A"}
+                        {showAddress(customer.addresses[0]) || "N/A"}
                       </dd>
                     </div>
                   </div>
@@ -331,7 +346,7 @@ const CustomerDetailsPage = () => {
                               : "text-red-600 border-red-600"
                           }`}
                         >
-                          {customer.isActive ? "Active" : "Inactive"}
+                          {customer.isActive ? "Active" : "Deleted"}
                         </Badge>
                       </dd>
                     </div>
@@ -371,8 +386,10 @@ const CustomerDetailsPage = () => {
                           key={order.id}
                           className="hover:bg-gray-50 transition-colors duration-200"
                         >
-                          <TableCell className="font-medium text-gray-900">
+                          <TableCell className="font-medium text-blue-600">
+                            <Link to={`../../order-details/${order.id}`}>
                             {order.orderId}
+                            </Link>
                           </TableCell>
                           <TableCell className="text-gray-600">
                             {new Date(order.createdAt).toLocaleDateString()}

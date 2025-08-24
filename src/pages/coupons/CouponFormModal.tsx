@@ -30,7 +30,10 @@ const couponSchema = z
       .string()
       .min(2, "Coupon code must be at least 2 characters")
       .max(20, "Coupon code must be less than 20 characters")
-      .regex(/^[A-Z0-9]+$/, "Coupon code can only contain uppercase letters and numbers"),
+      .regex(
+        /^[A-Z0-9]+$/,
+        "Coupon code can only contain uppercase letters and numbers"
+      ),
     maxDiscount: z.coerce
       .number({ required_error: "Max discount is required" })
       .positive("Max discount must be greater than 0"),
@@ -41,13 +44,13 @@ const couponSchema = z
       .number({ required_error: "Discount percentage is required" })
       .min(1, "Discount percentage must be at least 1%")
       .max(100, "Discount percentage cannot exceed 100%"),
-    validFrom: z.string().min(1, "Valid from date is required"),
-    validTill: z.string().min(1, "Valid till date is required"),
+    validTill: z
+      .string()
+      .min(1, "Valid till date is required")
+      .refine((val) => new Date(val) >= new Date(new Date().toDateString()), {
+        message: "Valid till date cannot be in the past",
+      }),
     isActive: z.boolean(),
-  })
-  .refine((data) => new Date(data.validFrom) < new Date(data.validTill), {
-    message: "Valid till date must be after valid from date",
-    path: ["validTill"],
   })
   .refine((data) => data.maxDiscount <= data.minValue, {
     message: "Max discount cannot be greater than minimum order value",
@@ -72,6 +75,7 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
     setValue,
     watch,
     setError,
+    setFocus
   } = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
     mode: "onChange",
@@ -81,14 +85,17 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
       maxDiscount: coupon.maxDiscount,
       minValue: coupon.minValue,
       discountPercentage: coupon.discountPercentage,
-      validFrom: format(new Date(coupon.validFrom._seconds * 1000), "yyyy-MM-dd"),
-      validTill: format(new Date(coupon.validTill._seconds * 1000), "yyyy-MM-dd"),
+      validTill: format(
+        new Date(coupon.validTill._seconds * 1000),
+        "yyyy-MM-dd"
+      ),
       isActive: coupon.isActive,
     },
   });
 
   const watchedValues = watch();
   const isActive = watch("isActive");
+
 
   // ✅ Check if form values have changed
   const hasChanges = React.useMemo(() => {
@@ -98,8 +105,8 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
       watchedValues.maxDiscount !== coupon.maxDiscount ||
       watchedValues.minValue !== coupon.minValue ||
       watchedValues.discountPercentage !== coupon.discountPercentage ||
-      watchedValues.validFrom !== format(new Date(coupon.validFrom._seconds * 1000), "yyyy-MM-dd") ||
-      watchedValues.validTill !== format(new Date(coupon.validTill._seconds * 1000), "yyyy-MM-dd") ||
+      watchedValues.validTill !==
+        format(new Date(coupon.validTill._seconds * 1000), "yyyy-MM-dd") ||
       watchedValues.isActive !== coupon.isActive
     );
   }, [watchedValues, coupon]);
@@ -124,6 +131,15 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
           toast.error(message);
         }
       } else {
+        if (
+          error.response.data.message === "Coupon with this code already exists"
+        ) {
+          setFocus("couponCode");
+        } else if (
+          error.response.data.message === "Coupon with this name already exists"
+        ) {
+          setFocus("couponName");
+        }
         toast.error("Failed to update coupon");
       }
     } finally {
@@ -136,36 +152,53 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Coupon</DialogTitle>
-          <DialogDescription>Update your coupon details below.</DialogDescription>
+          <DialogDescription>
+            Update your coupon details below.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Coupon Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Coupon Name</label>
-            <Input {...register("couponName")} placeholder="Enter coupon name" />
+            <label className="block text-sm font-medium mb-1">
+              Coupon Name
+            </label>
+            <Input
+              {...register("couponName")}
+              placeholder="Enter coupon name"
+            />
             {errors.couponName && (
-              <p className="text-red-500 text-sm mt-1">{errors.couponName.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.couponName.message}
+              </p>
             )}
           </div>
 
           {/* Coupon Code */}
           <div>
-            <label className="block text-sm font-medium mb-1">Coupon Code</label>
+            <label className="block text-sm font-medium mb-1">
+              Coupon Code
+            </label>
             <Input
               {...register("couponCode")}
               placeholder="e.g., SAVE20"
               style={{ textTransform: "uppercase" }}
-              onChange={(e) => setValue("couponCode", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                setValue("couponCode", e.target.value.toUpperCase())
+              }
             />
             {errors.couponCode && (
-              <p className="text-red-500 text-sm mt-1">{errors.couponCode.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.couponCode.message}
+              </p>
             )}
           </div>
 
           {/* Max Discount */}
           <div>
-            <label className="block text-sm font-medium mb-1">Max Discount (₹)</label>
+            <label className="block text-sm font-medium mb-1">
+              Max Discount (₹)
+            </label>
             <Input
               type="number"
               step="0.01"
@@ -174,13 +207,17 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
               placeholder="Maximum discount amount"
             />
             {errors.maxDiscount && (
-              <p className="text-red-500 text-sm mt-1">{errors.maxDiscount.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.maxDiscount.message}
+              </p>
             )}
           </div>
 
           {/* Discount Percentage */}
           <div>
-            <label className="block text-sm font-medium mb-1">Discount Percentage (%)</label>
+            <label className="block text-sm font-medium mb-1">
+              Discount Percentage (%)
+            </label>
             <Input
               type="number"
               step="0.01"
@@ -190,13 +227,17 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
               placeholder="1-100"
             />
             {errors.discountPercentage && (
-              <p className="text-red-500 text-sm mt-1">{errors.discountPercentage.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.discountPercentage.message}
+              </p>
             )}
           </div>
 
           {/* Minimum Order Value */}
           <div>
-            <label className="block text-sm font-medium mb-1">Minimum Order Value (₹)</label>
+            <label className="block text-sm font-medium mb-1">
+              Minimum Order Value (₹)
+            </label>
             <Input
               type="number"
               step="0.01"
@@ -205,20 +246,9 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
               placeholder="Minimum order amount"
             />
             {errors.minValue && (
-              <p className="text-red-500 text-sm mt-1">{errors.minValue.message}</p>
-            )}
-          </div>
-
-          {/* Valid From */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Valid From</label>
-            <Input
-              type="date"
-              {...register("validFrom")}
-              min={format(new Date(), "yyyy-MM-dd")}
-            />
-            {errors.validFrom && (
-              <p className="text-red-500 text-sm mt-1">{errors.validFrom.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.minValue.message}
+              </p>
             )}
           </div>
 
@@ -227,11 +257,14 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
             <label className="block text-sm font-medium mb-1">Valid Till</label>
             <Input
               type="date"
+              min={format(new Date(), "yyyy-MM-dd")} // ✅ Prevents past dates
               {...register("validTill")}
-              min={watch("validFrom") || format(new Date(), "yyyy-MM-dd")}
             />
+
             {errors.validTill && (
-              <p className="text-red-500 text-sm mt-1">{errors.validTill.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.validTill.message}
+              </p>
             )}
           </div>
 
@@ -240,12 +273,21 @@ export function CouponFormModal({ coupon, onClose, onUpdateSuccess }: Props) {
             <label htmlFor="isActive" className="text-sm font-medium">
               Active Status
             </label>
-            <Switch id="isActive" checked={isActive} onCheckedChange={(val) => setValue("isActive", val)} />
+            <Switch
+              id="isActive"
+              checked={isActive}
+              onCheckedChange={(val) => setValue("isActive", val)}
+            />
           </div>
 
           {/* Buttons */}
           <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !hasChanges}>

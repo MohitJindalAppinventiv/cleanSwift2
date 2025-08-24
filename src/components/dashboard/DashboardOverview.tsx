@@ -45,7 +45,7 @@ export function DashboardOverview() {
     console.log("overview response",response);
     setUsers(response.data.data.totalUsers);
     setTotalOrders(response.data.data.totalOrders);
-    setProcessingOrders(response.data.data.processedOrders)
+    setProcessingOrders(response.data.data.processingOrders)
     setPendingOrders(response.data.data.pendingOrders);
     setCancelledOrders(response.data.data.cancelledOrders);
     setDeliveredOrders(response.data.data.deliveredOrders);

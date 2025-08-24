@@ -270,10 +270,10 @@ const CustomersPage = () => {
     try {
       setRefreshing(true);
       await fetchUsers(page, limit);
-      toast.success("Data refreshed successfully");
+      toast.success("Customer Data refreshed successfully");
     } catch (err) {
-      console.error("Failed to refresh data", err);
-      toast.error("Failed to refresh data");
+      console.error("Failed to refresh Customer data", err);
+      toast.error("Failed to refresh Customer data");
     } finally {
       setRefreshing(false);
     }

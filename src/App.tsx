@@ -116,11 +116,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, useRoutes } from "react-router-dom";
+import { BrowserRouter, useNavigate, useRoutes } from "react-router-dom";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { PublicGuard } from "@/components/auth/PublicGuard";
 import { PersistGate } from "redux-persist/integration/react";
-
+import {ErrorBoundary} from 'react-error-boundary';
+import { useEffect } from "react";
 // Lazy imports
 const Index = lazy(() => import("./pages/Index"));
 const OrdersPage = lazy(() => import("./pages/orders"));
@@ -166,6 +167,7 @@ const Complaint = lazy(()=>import("./pages/complaint/Complaint"));
 import LaundryPageLoader from "./PageLoading";
 import path from "path";
 import BucketLoader from "./BucketLoader";
+import { setNavigate } from "./utils/navigation";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
@@ -198,7 +200,7 @@ const AppRoutes = () => {
     { path: "/area-config", element: <AreaConfig /> },
     { path: "/AppBanner", element: <AppBanner /> },
     { path: "/Serv", element: <ServicePage /> },
-    { path: "/temp", element: <Temp /> },
+    {path:"/temp",element:<ServicePage/>},
     { path: "/seed", element: <Seed /> },
 
     // Protected routes
@@ -446,7 +448,12 @@ const AppRoutes = () => {
   return useRoutes(routes);
 };
 
-const App = () => (
+const App = () => {
+
+
+  return(
+  <ErrorBoundary fallbackRender={fallbackRender}>
+
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -462,6 +469,17 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </Provider>
-);
+  </ErrorBoundary>
+)};
+function fallbackRender({ error, resetErrorBoundary }) {
+  // Call resetErrorBoundary() to reset the error boundary and retry the render.
+  console.log(error);
 
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{ color: "red" }}>{error.message}</pre>
+    </div>
+  );
+}
 export default App;

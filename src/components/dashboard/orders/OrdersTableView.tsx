@@ -69,6 +69,44 @@ interface FilterConfig {
   paymentMethod: string[];
   paymentStatus: string[];
 }
+// const paymentStatusStyles: Record<string, { label: string; classes: string }> =
+//   {
+//     pending: {
+//       label: "Pending",
+//       classes: "bg-yellow-100 text-yellow-800",
+//     },
+//     paid: {
+//       label: "Paid",
+//       classes: "bg-green-100 text-green-800",
+//     },
+//     refunded: {
+//       label: "Refunded",
+//       classes: "bg-blue-100 text-blue-800",
+//     },
+//   };
+
+
+const paymentStatusStyles: Record<
+  string,
+  { label: string; classes: string }
+> = {
+  pending: {
+    label: "Pending",
+    classes: "bg-yellow-100 text-yellow-800",
+  },
+  paid: {
+    label: "Paid",
+    classes: "bg-green-100 text-green-800",
+  },
+  refunded: {
+    label: "Refunded",
+    classes: "bg-blue-100 text-blue-800",
+  },
+  cancelled: {
+    label: "Cancelled",
+    classes: "bg-red-100 text-red-800",
+  },
+};
 
 const validStatuses = [
   {
@@ -273,20 +311,18 @@ export function OrdersTableView({
     try {
       setLoadingOrderId(orderId);
 
-      if(status==="cancelled"){
-        const res=await axiosInstance.post("/cancelOrderAdmin",{
+      if (status === "cancelled") {
+        const res = await axiosInstance.post("/cancelOrderAdmin", {
           orderId,
-          cancellationReason:"Customer changed mind"
+          cancellationReason: "Customer changed mind",
         });
 
-        const result=res.data;
-        if(!result.success){
+        const result = res.data;
+        if (!result.success) {
           throw new Error(result.message || "cancellation failed");
         }
         toast.success(result.message);
-      }
-      else{
-
+      } else {
         await dispatch(updateOrderStatus({ orderId, status })).unwrap();
         toast.success(
           `Order status updated to ${
@@ -304,7 +340,6 @@ export function OrdersTableView({
       setLoadingOrderId(null);
     }
   };
-
 
   const getStatusHoverColor = (status: string) => {
     const colorMap = {
@@ -631,12 +666,14 @@ export function OrdersTableView({
                   }`}
                 >
                   <TableCell className="font-medium text-gray-900">
-                    <Link to={`order-details/${order.id}`}>
+                    <Link to={`../order-details/${order.id}`}>
                       {order.orderId}
                     </Link>
                   </TableCell>
                   <TableCell className="text-gray-700">
+                    <Link to={`../customer-details/${order.userId}`}>
                     {order.customerName}
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <div className="max-w-[200px] truncate text-gray-600">
@@ -659,6 +696,24 @@ export function OrdersTableView({
                     </span>
                   </TableCell>
                   <TableCell>
+                    {order.paymentStatus ? (
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          paymentStatusStyles[order.paymentStatus]?.classes ||
+                          "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {paymentStatusStyles[order.paymentStatus]?.label ||
+                          order.paymentStatus}
+                      </span>
+                    ) : (
+                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-medium">
+                        Pending
+                      </span>
+                    )}
+                  </TableCell>
+
+                  {/* <TableCell>
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors
                         ${
@@ -671,7 +726,7 @@ export function OrdersTableView({
                     >
                       {order.paymentStatus || "pending"}
                     </span>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>
                     <OrderStatusBadge status={order.status} />
                   </TableCell>
