@@ -305,7 +305,7 @@ export function CouponsHeader({
       <Filter className="h-4 w-4 text-gray-600" /> Filters
     </h2>
 
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
       {/* Search input */}
       <div className="relative max-w-md w-full">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

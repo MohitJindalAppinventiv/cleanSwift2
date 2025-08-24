@@ -718,7 +718,7 @@ export function AreaConfigManager() {
         <Button
           size="sm"
           onClick={() => setIsDialogOpen(true)}
-          className="h-11 bg-purple-600 hover:bg-purple-700 text-white"
+          className="h-11 text-white"
         >
           <div className="flex items-center gap-2">
             <PlusCircle className="h-4 w-4" />
