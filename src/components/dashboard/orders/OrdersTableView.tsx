@@ -85,28 +85,25 @@ interface FilterConfig {
 //     },
 //   };
 
-
-const paymentStatusStyles: Record<
-  string,
-  { label: string; classes: string }
-> = {
-  pending: {
-    label: "Pending",
-    classes: "bg-yellow-100 text-yellow-800",
-  },
-  paid: {
-    label: "Paid",
-    classes: "bg-green-100 text-green-800",
-  },
-  refunded: {
-    label: "Refunded",
-    classes: "bg-blue-100 text-blue-800",
-  },
-  cancelled: {
-    label: "Cancelled",
-    classes: "bg-red-100 text-red-800",
-  },
-};
+const paymentStatusStyles: Record<string, { label: string; classes: string }> =
+  {
+    pending: {
+      label: "Pending",
+      classes: "bg-yellow-100 text-yellow-800",
+    },
+    paid: {
+      label: "Paid",
+      classes: "bg-green-100 text-green-800",
+    },
+    refunded: {
+      label: "Refunded",
+      classes: "bg-blue-100 text-blue-800",
+    },
+    cancelled: {
+      label: "Cancelled",
+      classes: "bg-red-100 text-red-800",
+    },
+  };
 
 const validStatuses = [
   {
@@ -665,14 +662,14 @@ export function OrdersTableView({
                     index % 2 === 0 ? "bg-white" : "bg-gray-50"
                   }`}
                 >
-                  <TableCell className="font-medium text-gray-900">
+                  <TableCell className="font-medium text-gray-900 hover:text-blue-800">
                     <Link to={`../order-details/${order.id}`}>
                       {order.orderId}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-gray-700">
+                  <TableCell className="text-gray-700 hover:text-blue-800">
                     <Link to={`../customer-details/${order.userId}`}>
-                    {order.customerName}
+                      {order.customerName}
                     </Link>
                   </TableCell>
                   <TableCell>
@@ -712,21 +709,6 @@ export function OrdersTableView({
                       </span>
                     )}
                   </TableCell>
-
-                  {/* <TableCell>
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors
-                        ${
-                          order.paymentStatus === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : order.paymentStatus === "refunded"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                    >
-                      {order.paymentStatus || "pending"}
-                    </span>
-                  </TableCell> */}
                   <TableCell>
                     <OrderStatusBadge status={order.status} />
                   </TableCell>
@@ -767,6 +749,53 @@ export function OrdersTableView({
                               Change Status
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator className="border-gray-200/60" />
+                            {/* <div className="p-1">
+                              {order.status === "pending" ? (
+                                <div className="p-3 text-center text-gray-500 text-sm">
+                                  <Clock className="w-5 h-5 mx-auto mb-2 text-yellow-500" />
+                                  Order is pending. Cannot update status at this
+                                  time.
+                                </div>
+                              ) : order.status === "delivered" ? (
+                                <div className="p-3 text-center text-gray-500 text-sm">
+                                  <CheckSquare className="w-5 h-5 mx-auto mb-2 text-green-500" />
+                                  Order has been delivered. No further status
+                                  updates available.
+                                </div>
+                              ) : (
+                                validStatuses
+                                  .filter((statusItem) =>
+                                    getAllowedStatuses(order.status).includes(
+                                      statusItem.value
+                                    )
+                                  )
+                                  .map((statusItem) => (
+                                    <DropdownMenuItem
+                                      key={statusItem.value}
+                                      onClick={() =>
+                                        handleUpdateStatus(
+                                          order.id,
+                                          statusItem.value as OrderStatus
+                                        )
+                                      }
+                                      disabled={loadingOrderId === order.id}
+                                      className={`cursor-pointer transition-all duration-200 rounded-lg mx-1 mb-1 p-3 flex items-center gap-2 ${getStatusHoverColor(
+                                        statusItem.value
+                                      )}`}
+                                    >
+                                      <span
+                                        className={`flex items-center justify-center w-6 h-6 rounded-full ${statusItem.color}`}
+                                      >
+                                        {statusItem.icon}
+                                      </span>
+                                      <span className="font-medium text-sm">
+                                        {statusItem.label}
+                                      </span>
+                                    </DropdownMenuItem>
+                                  ))
+                              )}
+                            </div> */}
+
                             <div className="p-1">
                               {order.status === "pending" ? (
                                 <div className="p-3 text-center text-gray-500 text-sm">
@@ -778,6 +807,12 @@ export function OrdersTableView({
                                 <div className="p-3 text-center text-gray-500 text-sm">
                                   <CheckSquare className="w-5 h-5 mx-auto mb-2 text-green-500" />
                                   Order has been delivered. No further status
+                                  updates available.
+                                </div>
+                              ) : order.status === "cancelled" ? (
+                                <div className="p-3 text-center text-gray-500 text-sm">
+                                  <XCircle className="w-5 h-5 mx-auto mb-2 text-red-500" />
+                                  Order has been cancelled. No further status
                                   updates available.
                                 </div>
                               ) : (
