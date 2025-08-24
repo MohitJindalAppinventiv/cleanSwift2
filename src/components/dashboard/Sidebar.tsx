@@ -333,7 +333,7 @@ const sidebarItems: SidebarItem[] = [
       { title: "Content Manager", icon: NotebookPen, href: "/config/content" },
       { title: "Complaints", icon: MessageCircle, href: "/config/complaints" },
       { title: "Slots Config", icon: AlarmCheck, href: "/config/slots" },
-      {title:"Temp",icon:NotebookPen,href:"/temp"}
+      // {title:"Temp",icon:NotebookPen,href:"/temp"}
     ],
   },
   { title: "Settings", icon: Settings, href: "/settings" },
