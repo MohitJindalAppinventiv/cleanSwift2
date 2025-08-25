@@ -53,16 +53,10 @@ export function ProductsHeader({
           )}
           <div className="flex items-center space-x-6 mt-2 text-sm text-muted-foreground">
             <div className="flex items-center space-x-2">
-              <Package className="w-4 h-4" />
-              <span>{productsCount === -1 ? "Loading..." : `${productsCount} Products`}</span>
+              
+              <span>Total Products : {productsCount === -1 ? "Loading..." : `${productsCount} Products`}</span>
             </div>
-            {productsCount > 0 && (
-              <div className="flex items-center space-x-2">
-                <span>
-                  Total Value: Rs. {totalValue.toFixed(2)}
-                </span>
-              </div>
-            )}
+            
           </div>
         </div>
         <Button onClick={onCreate} className="bg-primary hover:bg-primary/90">

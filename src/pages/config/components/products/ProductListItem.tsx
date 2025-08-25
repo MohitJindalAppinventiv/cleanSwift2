@@ -23,9 +23,9 @@ export function ProductListItem({ product, onEdit, onDelete }: ProductListItemPr
       <CardContent className="p-4">
         <div className="group flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground font-semibold">
+            {/* <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-primary-foreground font-semibold">
               {product.name.charAt(0).toUpperCase()}
-            </div>
+            </div> */}
             <div className="flex-1">
               <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                 {product.name}

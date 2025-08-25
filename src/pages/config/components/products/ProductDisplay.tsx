@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DollarSign, Package, Pencil, Plus, Settings, Tag, Trash2 } from "lucide-react";
+import {  Package, Pencil, Plus, Settings, Tag, Trash2 } from "lucide-react";
 
 interface ProductsDisplayProps {
   viewMode: "grid" | "list";
@@ -161,7 +161,6 @@ const ProductListItem = ({ product, setSelectedProduct, setEditModalOpen, handle
             </h3>
             <div className="flex items-center space-x-4 mt-1">
               <div className="flex items-center space-x-1">
-                <DollarSign className="w-4 h-4 text-green-600" />
                 <span className="font-bold text-green-600">
                   Rs. {product.price !== undefined ? product.price.toFixed(2) : "0.00"}
                 </span>
