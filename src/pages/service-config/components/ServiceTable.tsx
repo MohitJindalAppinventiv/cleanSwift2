@@ -21,7 +21,10 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [localServices, setLocalServices] = useState<Service[]>(services);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{
+    imageUrl: string;
+    title: string;
+  } | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     serviceId: string | null;
@@ -99,9 +102,9 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
     }
   };
 
-  const handleImageClick = (e: React.MouseEvent, imageUrl: string) => {
+  const handleImageClick = (e: React.MouseEvent, imageUrl: string, title: string) => {
     e.stopPropagation();
-    setSelectedImage(imageUrl);
+    setSelectedImage({ imageUrl, title });
   };
 
   const filteredServices = localServices.filter(service => {
@@ -127,7 +130,7 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
             <Button
               variant="outline"
               onClick={() => setConfirmDialog({ open: false, serviceId: null })}
-              disabled={!!deletingServiceId} // Disable during deletion
+              disabled={!!deletingServiceId}
             >
               Cancel
             </Button>
@@ -138,7 +141,7 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
                   deleteService(confirmDialog.serviceId);
                 }
               }}
-              disabled={!!deletingServiceId} // Disable during deletion
+              disabled={!!deletingServiceId}
             >
               {deletingServiceId === confirmDialog.serviceId ? (
                 <>
@@ -174,11 +177,11 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
 
       {/* Image Preview Modal */}
       {selectedImage && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center"
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
           onClick={() => setSelectedImage(null)}
         >
-          <div className="relative">
+          <div className="relative max-w-[90vw] max-h-[90vh]">
             <Button
               variant="ghost"
               size="icon"
@@ -187,12 +190,22 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
             >
               <X className="h-5 w-5" />
             </Button>
-            <img
-              src={selectedImage}
-              alt="Service preview"
-              className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            />
+            <div className="max-h-[80vh] max-w-[80vw] flex items-center justify-center">
+              <img
+                src={selectedImage.imageUrl}
+                alt={selectedImage.title}
+                className="max-h-[70vh] max-w-[70vw] min-h-[30vh] min-w-[30vw] object-contain rounded-lg shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxHeight: "70vh",
+                  maxWidth: "70vw",
+                  minHeight: "30vh",
+                  minWidth: "30vw",
+                  width: "auto",
+                  height: "auto",
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -273,10 +286,10 @@ export function ServiceTable({ services, fetchServices, isLoading }: ServiceTabl
                         src={service.thumbnail}
                         alt={service.name}
                         className="w-full h-40 object-cover rounded-t-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={(e) => handleImageClick(e, service.thumbnail)}
+                        onClick={(e) => handleImageClick(e, service.thumbnail, service.name)}
                       />
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg cursor-pointer"
-                           onClick={(e) => handleImageClick(e, service.thumbnail)}>
+                           onClick={(e) => handleImageClick(e, service.thumbnail, service.name)}>
                         <span className="text-white text-sm font-medium px-3 py-1 bg-black/30 rounded-md">
                           Click to view
                         </span>
