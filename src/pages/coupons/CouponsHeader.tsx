@@ -289,7 +289,7 @@ export function CouponsHeader({
     {/* Action Button */}
     <Button
       asChild
-      className="h-11 bg-purple-600 hover:bg-purple-700 text-white shadow-md"
+      className="h-11 text-white shadow-md"
     >
       <Link to="/config/coupons/create" className="flex items-center gap-2">
         <PlusCircle className="h-4 w-4" />

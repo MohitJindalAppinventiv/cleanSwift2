@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation} from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -83,6 +83,10 @@ const CustomerDetailsPage = () => {
   const [orders, setOrders] = useState<Order[]>([]); // ✅ real orders
   const [pagination, setPagination] = useState<Pagination>(null);
 
+    const location = useLocation();
+      const from = location.state?.from;
+
+
   useEffect(() => {
     const fetchCustomerAndOrders = async () => {
       setLoading(true);
@@ -121,6 +125,17 @@ const CustomerDetailsPage = () => {
     if (id) fetchCustomerAndOrders();
   }, [id]);
 
+  const handleBack=()=>{
+        if (from === "orders") {
+      navigate("/orders"); // 👈 go back to orders if that's where we came from
+    } else if (from==="/") {
+      navigate("/"); // 👈 default
+    }
+    else{
+      navigate("/customers");
+    }
+}
+
   if (loading) {
     return <CustomerDetailsSkeleton />;
   }
@@ -142,7 +157,7 @@ const CustomerDetailsPage = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate("/customers")}
+              onClick={() => handleBack()}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -422,5 +437,6 @@ const CustomerDetailsPage = () => {
     </DashboardLayout>
   );
 };
+
 
 export default CustomerDetailsPage;

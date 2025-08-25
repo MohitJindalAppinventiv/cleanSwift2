@@ -325,7 +325,7 @@ const sidebarItems: SidebarItem[] = [
     subItems: [
       { title: "Services", icon: Server, href: "/config/services" },
       { title: "App Banner", icon: Flag, href: "/config/app-banner" },
-      { title: "FCM Config", icon: Cloud, href: "/config/fcm" },
+      // { title: "FCM Config", icon: Cloud, href: "/config/fcm" },
       { title: "Area Config", icon: MapPin, href: "/config/area" },
       { title: "Categories", icon: Tags, href: "/config/categories" },
       { title: "Products", icon: ShoppingBag, href: "/config/products" },

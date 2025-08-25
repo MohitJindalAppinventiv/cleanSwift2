@@ -69,22 +69,6 @@ interface FilterConfig {
   paymentMethod: string[];
   paymentStatus: string[];
 }
-// const paymentStatusStyles: Record<string, { label: string; classes: string }> =
-//   {
-//     pending: {
-//       label: "Pending",
-//       classes: "bg-yellow-100 text-yellow-800",
-//     },
-//     paid: {
-//       label: "Paid",
-//       classes: "bg-green-100 text-green-800",
-//     },
-//     refunded: {
-//       label: "Refunded",
-//       classes: "bg-blue-100 text-blue-800",
-//     },
-//   };
-
 const paymentStatusStyles: Record<string, { label: string; classes: string }> =
   {
     pending: {
@@ -181,6 +165,7 @@ export function OrdersTableView({
 
   // Check if the current route is the home URL
   const isHomePage = location.pathname === "/";
+
 
   const statusFlow = [
     "pending",
@@ -663,12 +648,12 @@ export function OrdersTableView({
                   }`}
                 >
                   <TableCell className="font-medium text-gray-900 hover:text-blue-800">
-                    <Link to={`../order-details/${order.id}`}>
+                    <Link to={`../order-details/${order.id}`} state={{from : isHomePage?"/":"orders"}}>
                       {order.orderId}
                     </Link>
                   </TableCell>
                   <TableCell className="text-gray-700 hover:text-blue-800">
-                    <Link to={`../customer-details/${order.userId}`}>
+                    <Link to={`../customer-details/${order.userId}` } state={{ from: isHomePage?"/":"orders" }}>
                       {order.customerName}
                     </Link>
                   </TableCell>

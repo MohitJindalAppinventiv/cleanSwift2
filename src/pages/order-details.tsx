@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +91,11 @@ interface AddressDetails {
   streetAddress: string;
 }
 
+const paymentMethods={
+  "cod":"Cash On Delivery",
+  "online":"Online",
+}
+
 function formatAddress(address: AddressDetails) {
   return `${address.apartmentSuite ? address.apartmentSuite : ""} ${
     address.streetAddress
@@ -102,6 +107,10 @@ const OrderDetailsPage = () => {
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const location=useLocation();
+
+    const from = location.state?.from;
+
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -139,9 +148,10 @@ const OrderDetailsPage = () => {
       <DashboardLayout>
         <div className="space-y-6">
           <div className="flex items-center">
+
             <Button
               variant="ghost"
-              onClick={() => navigate("/orders")}
+              onClick={() => handleBack()}
               className="mr-4"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
@@ -160,6 +170,14 @@ const OrderDetailsPage = () => {
   const items = order.items || [];
   const subtotal = items.reduce((acc, item) => acc + item.qty * item.price, 0);
 
+  const handleBack=()=>{
+        if (from === "orders") {
+      navigate("/orders"); // 👈 go back to orders if that's where we came from
+    } else {
+      navigate("/"); // 👈 default
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -167,7 +185,7 @@ const OrderDetailsPage = () => {
           <div className="flex items-center">
             <Button
               variant="ghost"
-              onClick={() => navigate("/orders")}
+              onClick={() => handleBack()}
               className="mr-4"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
@@ -274,7 +292,7 @@ const OrderDetailsPage = () => {
                 <dl className="grid grid-cols-2 gap-y-2 text-sm">
                   <dt className="text-muted-foreground">Method</dt>
                   <dd className="font-medium capitalize">
-                    {order.paymentMethod}
+                    {paymentMethods[order.paymentMethod]}
                   </dd>
 
                   <dt className="text-muted-foreground">Status</dt>
