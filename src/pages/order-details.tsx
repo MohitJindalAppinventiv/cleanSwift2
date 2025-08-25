@@ -110,6 +110,7 @@ const OrderDetailsPage = () => {
   const location=useLocation();
 
     const from = location.state?.from;
+    console.log(from);
 
 
 
@@ -197,7 +198,7 @@ const OrderDetailsPage = () => {
               className="mr-4 capitalize"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to {from?"Orders":from==="/"?"Home":from}
+              Back to {!from?"Orders":from==="/"?"Home":from}
             </Button>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">
