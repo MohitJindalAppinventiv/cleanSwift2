@@ -110,6 +110,9 @@ const OrderDetailsPage = () => {
   const location=useLocation();
 
     const from = location.state?.from;
+    console.log("from",from)
+    console.log(location.state.from);
+    console.log("hello")
 
 
   useEffect(() => {
@@ -154,8 +157,8 @@ const OrderDetailsPage = () => {
               onClick={() => handleBack()}
               className="mr-4"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Orders
+              <ChevronLeft className="mr-2 h-4 w-4 uppercase" />
+              Back to {from==="/"?"Home":from}
             </Button>
             <h2 className="text-3xl font-bold tracking-tight">
               Order Not Found
@@ -171,9 +174,13 @@ const OrderDetailsPage = () => {
   const subtotal = items.reduce((acc, item) => acc + item.qty * item.price, 0);
 
   const handleBack=()=>{
+    console.log("from",from);
         if (from === "orders") {
       navigate("/orders"); // 👈 go back to orders if that's where we came from
-    } else {
+    } else if(from === "payments"){
+      navigate("/payments");
+    } 
+    else {
       navigate("/"); // 👈 default
     }
   }
@@ -186,10 +193,10 @@ const OrderDetailsPage = () => {
             <Button
               variant="ghost"
               onClick={() => handleBack()}
-              className="mr-4"
+              className="mr-4 capitalize"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Orders
+              Back to {from==="/"?"Home":from}
             </Button>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">
