@@ -438,7 +438,10 @@ useEffect(() => {
 >
       <div className="flex items-center justify-between h-[85px] px-4 border-b">
         {!collapsed && (
-          <span className="text-xl font-bold text-primary">CleanSwift</span>
+          // <span className="text-xl font-bold text-primary">CleanSwift</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-lg">CS</span>
+        </div>
         )}
         <Button
           variant="ghost"
