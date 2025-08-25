@@ -110,6 +110,8 @@ const OrderDetailsPage = () => {
   const location=useLocation();
 
     const from = location.state?.from;
+    console.log(from);
+
 
 
   useEffect(() => {
@@ -154,8 +156,8 @@ const OrderDetailsPage = () => {
               onClick={() => handleBack()}
               className="mr-4"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Orders
+              <ChevronLeft className="mr-2 h-4 w-4 uppercase" />
+              Back to {from==="/"?"Home":from}
             </Button>
             <h2 className="text-3xl font-bold tracking-tight">
               Order Not Found
@@ -171,9 +173,16 @@ const OrderDetailsPage = () => {
   const subtotal = items.reduce((acc, item) => acc + item.qty * item.price, 0);
 
   const handleBack=()=>{
+    console.log("from",from);
         if (from === "orders") {
       navigate("/orders"); // 👈 go back to orders if that's where we came from
-    } else {
+    } else if(from === "payments"){
+      navigate("/payments");
+    } 
+    else if(from === "reviews"){
+      navigate("/reviews");
+    }
+    else {
       navigate("/"); // 👈 default
     }
   }
@@ -186,10 +195,10 @@ const OrderDetailsPage = () => {
             <Button
               variant="ghost"
               onClick={() => handleBack()}
-              className="mr-4"
+              className="mr-4 capitalize"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Orders
+              Back to {!from?"Orders":from==="/"?"Home":from}
             </Button>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">
@@ -270,13 +279,13 @@ const OrderDetailsPage = () => {
                     {convertTime(order.updatedAt)}
                   </dd>
 
-                  <dt className="text-muted-foreground">Pickup Slot</dt>
+                  <dt className="text-muted-foreground">Pickup Date</dt>
                   <dd className="font-medium flex items-center">
                     <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                     {order?.pickupSlotDetails?.date || "-"}
                   </dd>
 
-                  <dt className="text-muted-foreground">Delivery Slot</dt>
+                  <dt className="text-muted-foreground">Delivery Date</dt>
                   <dd className="font-medium flex items-center">
                     <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
                     {order?.deliverySlotDetails?.date || "-"}
@@ -315,7 +324,7 @@ const OrderDetailsPage = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+              <IndianRupee className="h-5 w-5" />
               Financial Breakdown
             </CardTitle>
           </CardHeader>

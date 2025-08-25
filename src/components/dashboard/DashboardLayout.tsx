@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
-
+ 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const isMobile = useIsMobile();
 

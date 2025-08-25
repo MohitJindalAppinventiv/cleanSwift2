@@ -131,6 +131,12 @@ const CustomerDetailsPage = () => {
     } else if (from==="/") {
       navigate("/"); // 👈 default
     }
+    else if(from==="payments"){
+      navigate("/payments")
+    }
+    else if(from === "reviews"){
+      navigate("/reviews");
+    }
     else{
       navigate("/customers");
     }
@@ -158,10 +164,10 @@ const CustomerDetailsPage = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => handleBack()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 capitalize bg-gray-100 rounded-md hover:bg-gray-200 transition-all duration-200"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Customers
+              Back to {!from?"Customers":from==="/"?"Home":from}
             </button>
             <h2 className="text-3xl font-bold text-gray-900">
               {customer.fullName}
