@@ -68,7 +68,7 @@ export const useServiceData = () => {
       );
   };
 
-  const handlePricingModelChange = (value: string) => {
+  const handlePricingModelChange = (value: "per_kg" | "per_item") => {
     if (!service) return;
     setService(prev => prev ? { ...prev, pricingmodel: value } : null);
   };

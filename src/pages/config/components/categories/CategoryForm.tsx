@@ -46,13 +46,15 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services, isSubm
   const categorySchema = services && services.length > 0 ? categorySchemaWithService : categorySchemaWithoutService;
 
   const form = useForm<z.infer<typeof categorySchema>>({
-    resolver: zodResolver(categorySchema),
-    defaultValues: {
-      name: initialData?.name || "",
-      description: "",
-      serviceId: initialData?.serviceId || (services && services.length > 0 ? services[0].id : ""),
-    },
-  });
+  resolver: zodResolver(categorySchema),
+  mode: "onChange",   // ✅ so isValid updates live
+  defaultValues: {
+    name: initialData?.name || "",
+    description: "",
+    serviceId: initialData?.serviceId || (services && services.length > 0 ? services[0].id : ""),
+  },
+});
+
 
   // Set initial form data when component mounts
   useEffect(() => {
@@ -67,16 +69,21 @@ export function CategoryForm({ onSubmit, onCancel, initialData, services, isSubm
   }, [initialData, initialFormData, services]);
 
   // Check for changes whenever form values change
-  useEffect(() => {
-    if (initialFormData) {
-      const currentValues = form.getValues();
-      const hasFormChanged = 
-        currentValues.name !== initialFormData.name ||
-        currentValues.serviceId !== initialFormData.serviceId;
-      
-      setHasChanges(hasFormChanged);
-    }
-  }, [form.watch(), initialFormData]);
+ const watchedValues = form.watch();
+
+useEffect(() => {
+  if (initialFormData) {
+    const hasFormChanged =
+      watchedValues.name !== initialFormData.name ||
+      watchedValues.serviceId !== initialFormData.serviceId;
+
+    setHasChanges(hasFormChanged);
+  } else {
+    // When adding new category (no initialData)
+    setHasChanges(!!watchedValues.name || !!watchedValues.serviceId);
+  }
+}, [watchedValues, initialFormData]);
+
 
   const handleSubmit = async (data: z.infer<typeof categorySchema>) => {
     await onSubmit({
