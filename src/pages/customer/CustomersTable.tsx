@@ -438,7 +438,7 @@ export const CustomersTable = ({
                   <TableCell className="font-medium text-gray-900">
                     <Link
                       to={`/customer-details/${customer.id}`}
-                      className="text-black hover:underline transition-colors text-blue-600"
+                      className="text-gray-900 hover:underline transition-colors hover:text-blue-800"
                     >
                       {customer.readableUserId}
                     </Link>

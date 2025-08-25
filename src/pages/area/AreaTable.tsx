@@ -489,7 +489,7 @@ export function AreaTable({
     <div className="border rounded-lg shadow-sm mt-4 overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-purple-50">
+          <TableRow >
             <SortableHeader
               field="name"
               currentSortField={sortField}

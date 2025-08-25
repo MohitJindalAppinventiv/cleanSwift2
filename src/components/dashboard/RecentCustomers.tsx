@@ -99,7 +99,7 @@ export function RecentCustomers() {
               key={customer.id}
               className="flex items-center justify-between space-x-4"
             >
-              <Link to={`/customer-details/${customer.id}`}>
+              <Link to={`/customer-details/${customer.id}`} state={{from: "/"}}>
               <div className="flex items-center space-x-3">
                 <Avatar>
                   <AvatarImage src={customer.avatarUrl} />

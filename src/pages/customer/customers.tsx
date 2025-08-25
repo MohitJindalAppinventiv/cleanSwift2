@@ -481,12 +481,12 @@ const CustomersPage = () => {
               )}
 
               {/* Search helper text */}
-              <p className="text-sm text-gray-500">
+              {/* <p className="text-sm text-gray-500">
                 You can search customers by{" "}
                 <span className="font-medium">User ID</span>,{" "}
                 <span className="font-medium">Number</span>, or{" "}
                 <span className="font-medium">Name</span>.
-              </p>
+              </p> */}
             </div>
           </CardContent>
         </Card>

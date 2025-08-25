@@ -195,8 +195,6 @@
 //   window.location.href = "/login"; // redirect to login
 // }
 
-
-
 // import axios from "axios";
 // const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -304,26 +302,26 @@
 //   localStorage.removeItem("authToken");
 //   localStorage.removeItem("refreshToken");
 //   localStorage.removeItem("sessionToken");
-//   window.location.href = "/login"; 
+//   window.location.href = "/login";
 // }
 
 
-import { navigate } from "@/utils/navigation";
+
 import axios from "axios";
 import { toast } from "sonner";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
-if(!apiUrl){
-  throw new Error("Backend Url not found")
+if (!apiUrl) {
+  throw new Error("Backend Url not found");
 }
+
 export const axiosInstance = axios.create({
   baseURL: `${apiUrl}`,
 });
 
-// -------------------------------
-// State for refresh handling
-// -------------------------------
 let isRefreshing = false;
+
 let failedQueue: {
   resolve: (token: string) => void;
   reject: (err: any) => void;
@@ -351,6 +349,7 @@ axiosInstance.interceptors.request.use(
     if (authToken) {
       config.headers.Authorization = `Bearer ${authToken}`;
     }
+
     if (sessionToken) {
       config.headers["x-session-token"] = sessionToken;
     }
@@ -365,27 +364,25 @@ axiosInstance.interceptors.request.use(
 // -------------------------------
 axiosInstance.interceptors.response.use(
   (response) => {
-    // Session token mismatch check (server forced logout)
     const currentSessionToken = localStorage.getItem("sessionToken");
     const serverSessionToken = response.headers["x-session-token"];
+
     if (serverSessionToken && serverSessionToken !== currentSessionToken) {
       handleLogout();
       return Promise.reject(new Error("Session invalidated"));
     }
+
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    // Only handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Prevent infinite retry loops
       if (originalRequest._retry) {
         handleLogout();
         return Promise.reject(error);
       }
 
-      // If another request is already refreshing, queue this one
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -403,20 +400,23 @@ axiosInstance.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
+
         if (!refreshToken) {
           handleLogout();
           return Promise.reject(error);
         }
 
         // Call refresh token API
-        const res = await axios.post(`${apiUrl}/refreshToken`, { refreshToken });
+        const res = await axios.post(`${apiUrl}/refreshToken`, {
+          refreshToken,
+        });
 
-        // Expect response { authToken, refreshToken, sessionToken? }
-        const { id_token : authToken, refresh_token: refreshToken2 } = res.data;
+        // Expect response { id_token, refresh_token, sessionToken? }
+        const { id_token: authToken, refresh_token: refreshToken2 } = res.data;
 
         // Save new tokens
         localStorage.setItem("authToken", authToken);
-        if (refreshToken) localStorage.setItem("refreshToken", refreshToken2);
+        if (refreshToken2) localStorage.setItem("refreshToken", refreshToken2);
 
         // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${authToken}`;
@@ -445,5 +445,5 @@ axiosInstance.interceptors.response.use(
 function handleLogout() {
   localStorage.clear();
   toast.error("Your session has expired. Please log in again.");
-  window.location.href="/login"
+  window.location.href = "/login";
 }
